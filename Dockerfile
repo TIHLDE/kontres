@@ -1,6 +1,6 @@
 FROM node:24-alpine AS base
 
-RUN apt-get update && apt install -y openssl
+RUN apk add --no-cache openssl
 
 FROM base AS deps
 

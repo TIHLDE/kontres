@@ -13,7 +13,6 @@ export const env = createEnv({
             .default('development'),
         LEPTON_API_URL: z.string().url(),
         NEXTAUTH_SECRET: z.string(),
-        AUTH_SECRET: z.string(),
         LEPTON_API_KEY: z.string(),
     },
 
@@ -35,7 +34,6 @@ export const env = createEnv({
         NODE_ENV: process.env.NODE_ENV,
         LEPTON_API_URL: process.env.LEPTON_API_URL,
         NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
-        AUTH_SECRET: process.env.AUTH_SECRET,
         LEPTON_API_KEY: process.env.LEPTON_API_KEY,
         // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
     },

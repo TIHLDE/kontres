@@ -1,5 +1,7 @@
 FROM node:24-alpine AS base
 
+RUN apt-get update && apt install -y openssl
+
 FROM base AS deps
 
 WORKDIR /build

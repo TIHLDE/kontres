@@ -4,6 +4,7 @@ setup:
 	docker compose up -d
 	pnpm prisma db push
 
+.PHONY: prod
 prod:
 	docker build -t dev-kontres.tihlde.org .
 	- docker rm -f dev-kontres.tihlde.org

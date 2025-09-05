@@ -32,7 +32,7 @@ jobs:
           cd ${{ secrets.WORKING_DIR }}
           chmod 0600 .env
           git fetch
-          git reset --hard origin/main
+          git reset --hard origin/dev
           echo "${{ secrets.ENV }}" > .env
           make prod
           ENDSSH

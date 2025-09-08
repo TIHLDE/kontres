@@ -34,6 +34,6 @@ jobs:
           git fetch
           git reset --hard origin/dev
           echo "${{ secrets.ENV }}" > .env
-          make prod
+          ./deploy.sh
           ENDSSH
 

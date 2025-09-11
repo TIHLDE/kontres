@@ -48,19 +48,27 @@ export default function ItemDialog({
 
     const onSubmit = (values: {
         name: string;
-        groupId: string;
+        groupSlug: string;
         description: string;
         allowsAlcohol: boolean;
     }) => {
-        mutate(values, {
-            onSuccess: () => {
-                // Invalidate existing items
-                utils.item.invalidate();
-
-                // Close the dialog
-                internalSetOpen(false);
+        mutate(
+            {
+                name: values.name,
+                description: values.description,
+                allowsAlcohol: values.allowsAlcohol,
+                groupSlug: values.groupSlug,
             },
-        });
+            {
+                onSuccess: () => {
+                    // Invalidate existing items
+                    utils.item.invalidate();
+
+                    // Close the dialog
+                    internalSetOpen(false);
+                },
+            },
+        );
     };
 
     const open = useMemo(() => {
@@ -105,13 +113,13 @@ export default function ItemDialog({
                     defaultValues={{
                         name: item?.name ?? '',
                         description: item?.description ?? '',
-                        group: item?.group.groupId ?? '',
+                        group: item?.groupSlug ?? '',
                     }}
                     formAction={action}
                     onSubmit={(values) =>
                         onSubmit({
                             ...values,
-                            groupId: values.group,
+                            groupSlug: values.group,
                             allowsAlcohol: false,
                         })
                     }

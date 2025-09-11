@@ -31,7 +31,7 @@ export const reservationRouter = createTRPCRouter({
                 filters: z.object({
                     state: z.nativeEnum(ReservationState).array().optional(),
                     query: z.string().optional(),
-                    group: z.string().array().optional(),
+                    groupSlugs: z.string().array().optional(),
                     fromDate: z.string().optional(),
                     toDate: z.string().optional(),
                     bookableItem: z.number().array().optional(),
@@ -72,8 +72,8 @@ export const reservationRouter = createTRPCRouter({
                     status: {
                         in: input.filters.state,
                     },
-                    groupId: {
-                        in: input.filters.group,
+                    groupSlug: {
+                        in: input.filters.groupSlugs,
                     },
 
                     ...(input.filters.fromDate ||
@@ -208,14 +208,14 @@ export const reservationRouter = createTRPCRouter({
                 startTime: z.date(),
                 endTime: z.date(),
                 itemId: z.number(),
-                groupId: z.string(),
+                groupSlug: z.string(),
             }),
         )
         .mutation(({ input, ctx }) => {
             return ctx.db.reservation.create({
                 data: {
                     authorId: ctx.session.user.id,
-                    groupId: input.groupId,
+                    groupSlug: input.groupSlug,
                     acceptedRules: false,
                     bookableItemId: input.itemId,
                     description: input.desciption,

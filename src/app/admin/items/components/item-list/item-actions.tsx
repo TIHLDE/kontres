@@ -49,7 +49,7 @@ const ItemActions = ({ item }: { item: GetItemsOutput }) => {
     const onDelete = () => {
         mutate(
             {
-                groupId: item.groupId, // Why do we need group id for deleting the item??
+                groupSlug: item.groupSlug,
                 itemId: item.itemId,
             },
             {

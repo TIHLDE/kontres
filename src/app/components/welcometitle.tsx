@@ -1,9 +1,6 @@
 'use client';
 
-import { useUser } from '@/utils/hooks/user';
-
 import styles from './welcometitle.module.css';
-import { useSession } from 'next-auth/react';
 
 const WelcomeTitle = () => {
     return (

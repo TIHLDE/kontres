@@ -1,23 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DataTable } from '@/components/ui/data-table';
-import {
-    Table,
-    TableBody,
-    TableCaption,
-    TableCell,
-    TableFooter,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
 
-import MyPageSkeleton from './components/my-page-skeleton';
-import MyPageWrapper from './components/my-page-wrapper';
 import { reservationColumns } from './components/reservation-columns';
 import { auth } from '@/auth';
 import { api } from '@/trpc/server';
 import { redirect } from 'next/navigation';
-import { Suspense } from 'react';
 
 const Page = async () => {
     const session = await auth();

@@ -16,9 +16,9 @@ export const itemColumns: ColumnDef<GetItemsOutput['items'][0], unknown>[] = [
         header: 'Beskrivelse',
     },
     {
-        accessorKey: 'group',
+        accessorKey: 'groupSlug',
         header: 'Gruppe',
-        accessorFn: ({ group }) => group.name,
+        accessorFn: ({ groupSlug }) => groupSlug,
     },
     {
         accessorKey: 'name',

@@ -1,7 +1,3 @@
-import { getItems } from '@/utils/apis/items';
-import { checkUserPermissions, getCurrentUserData } from '@/utils/apis/user';
-
-import BookableItems from '../../ui/bookable-items';
 import HeaderLink from '../../ui/header-link';
 import Logo from '../../ui/logo';
 import { UserArea } from '../user-area';

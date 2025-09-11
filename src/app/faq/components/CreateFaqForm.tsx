@@ -103,7 +103,8 @@ export default function CreateFaqForm({
             } else {
                 await createFaq({
                     ...faqData,
-                    groupId: '1', //må finne ut hva groupId skal være
+                    groupSlug:
+                        formData.group || session?.user.leaderOf[0] || '',
                 });
             }
 
@@ -185,8 +186,7 @@ export default function CreateFaqForm({
                         render={({ field }) => (
                             <FormItem className="flex flex-col mt-5">
                                 <FormLabel>
-                                    Gjelder spørsmålet noen
-                                    gjenstander?
+                                    Gjelder spørsmålet noen gjenstander?
                                 </FormLabel>
                                 <FormControl>
                                     <BookableItemsSelect
@@ -215,20 +215,37 @@ export default function CreateFaqForm({
                                             value={value}
                                             groups={
                                                 admin
-                                                    ? allGroups?.map((g) => ({
-                                                          label: g.name,
-                                                          value: g.groupId,
-                                                      }))
+                                                    ? allGroups?.map(
+                                                          (g: {
+                                                              groupSlug: string;
+                                                              groupName: string;
+                                                              type: string;
+                                                          }) => ({
+                                                              label: g.groupName,
+                                                              value: g.groupSlug,
+                                                          }),
+                                                      )
                                                     : allGroups
-                                                          ?.filter((g) =>
-                                                              groups?.includes(
-                                                                  g.groupId,
-                                                              ),
+                                                          ?.filter(
+                                                              (g: {
+                                                                  groupSlug: string;
+                                                                  groupName: string;
+                                                                  type: string;
+                                                              }) =>
+                                                                  groups?.includes(
+                                                                      g.groupSlug,
+                                                                  ),
                                                           )
-                                                          .map((g) => ({
-                                                              label: g.name,
-                                                              value: g.groupId,
-                                                          }))
+                                                          .map(
+                                                              (g: {
+                                                                  groupSlug: string;
+                                                                  groupName: string;
+                                                                  type: string;
+                                                              }) => ({
+                                                                  label: g.groupName,
+                                                                  value: g.groupSlug,
+                                                              }),
+                                                          )
                                             }
                                         />
                                     </FormControl>

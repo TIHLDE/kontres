@@ -27,7 +27,7 @@ export default function Page() {
         bookableItemIds: updateQuestion?.bookableItems?.map(
             (item) => item.itemId,
         ),
-        group: updateQuestion?.group,
+        group: updateQuestion?.groupSlug,
         imageUrl: updateQuestion?.imageUrl,
     } as FaqFormValueTypes;
 

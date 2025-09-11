@@ -36,7 +36,8 @@ export default function Page() {
     } = api.reservation.getReservations.useInfiniteQuery(
         {
             filters: {
-                group: filters.groups.length > 0 ? filters.groups : undefined,
+                groupSlugs:
+                    filters.groups.length > 0 ? filters.groups : undefined,
                 state:
                     filters.states && filters?.states?.length > 0
                         ? filters.states

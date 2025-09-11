@@ -1,7 +1,6 @@
 'use client';
 
-import { type User } from '@/types/User';
-
+// Temporary type
 import { Button } from '@/components/ui/button';
 import {
     Drawer,
@@ -12,10 +11,13 @@ import {
     DrawerTitle,
 } from '@/components/ui/drawer';
 
-import { signOutUser } from '@/utils/apis/user';
-
+// import { signOutUser } from '@/utils/apis/user'; // TODO: Fix this import
 import { useRouter } from 'next/navigation';
 import { type Dispatch, type SetStateAction } from 'react';
+
+// import { type User } from '@/types/User'; // TODO: Fix this import
+
+type User = any; // Temporary type
 
 interface ProfileProps {
     user?: User;
@@ -29,7 +31,7 @@ const Profile = ({ user, admin, open, setOpen }: ProfileProps) => {
 
     const signOut = () => {
         setOpen(false);
-        signOutUser();
+        // signOutUser(); // TODO: Fix this
         router.refresh();
     };
     const goToAdmin = () => {

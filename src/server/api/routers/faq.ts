@@ -82,7 +82,7 @@ export const faqRouter = createTRPCRouter({
             z.object({
                 question: z.string(),
                 answer: z.string(),
-                group: z.string().optional(),
+                groupSlug: z.string().optional(),
                 author: z.string(),
                 bookableItemIds: z.array(z.number()).optional(),
                 imageUrl: z.string().optional(),
@@ -93,7 +93,7 @@ export const faqRouter = createTRPCRouter({
                 data: {
                     question: input.question,
                     answer: input.answer,
-                    group: input.group || '',
+                    groupSlug: input.groupSlug || '',
                     imageUrl: input.imageUrl || '',
                     ...(input.bookableItemIds?.length
                         ? {
@@ -116,7 +116,7 @@ export const faqRouter = createTRPCRouter({
                 questionId: z.number(),
                 question: z.string(),
                 answer: z.string(),
-                group: z.string().optional(),
+                groupSlug: z.string().optional(),
                 author: z.string(),
                 bookableItemIds: z.array(z.number()).optional(),
                 imageUrl: z.string().optional(),
@@ -126,7 +126,7 @@ export const faqRouter = createTRPCRouter({
             const updateData: any = {
                 question: input.question,
                 answer: input.answer,
-                group: input.group,
+                groupSlug: input.groupSlug,
                 ...(input.bookableItemIds?.length
                     ? {
                           bookableItems: {

@@ -6,11 +6,10 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover';
 
-import { cn } from '@/lib/utils';
-
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Button } from '../ui/button';
 import { ModeToggle } from '../ui/theme-mode-toggler';
+import { cn } from '@/lib/utils';
 import { UserRound } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';

@@ -9,11 +9,14 @@ import {
 } from '@/components/ui/drawer';
 import { Separator } from '@/components/ui/separator';
 
-import { type DetailedItem } from '@/utils/apis/types';
-
+// Temporary type
 import { Code } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { type Dispatch, type SetStateAction } from 'react';
+
+// import { type DetailedItem } from '@/utils/apis/types'; // TODO: Fix this import
+
+type DetailedItem = any; // Temporary type
 
 interface MoreProps {
     items?: DetailedItem[];

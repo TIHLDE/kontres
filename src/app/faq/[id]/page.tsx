@@ -35,20 +35,20 @@ export default async function Page({ params: { id } }: QuestionPageParams) {
                             <h3 className="scroll-m-20 text-3xl font-semibold tracking-tight flex flex-col">
                                 {data.question}
                                 <span className="text-xs text-muted-foreground ">
-                                    Postet av {data?.author}, {data?.group}
+                                    Postet av {data?.author}, {data?.groupSlug}
                                 </span>
                             </h3>
                             <div className="flex gap-1 mt-1">
-                                    {data?.bookableItems.map(
-                                        (bookableItem, index) => (
-                                            <Link href={`./${''}`}>
-                                                <Badge key={index}>
-                                                    {bookableItem.name}
-                                                </Badge>
-                                            </Link>
-                                        ),
-                                    )}
-                                </div>
+                                {data?.bookableItems.map(
+                                    (bookableItem, index) => (
+                                        <Link href={`./${''}`}>
+                                            <Badge key={index}>
+                                                {bookableItem.name}
+                                            </Badge>
+                                        </Link>
+                                    ),
+                                )}
+                            </div>
                             <p className="mt-3">{data?.answer}</p>
                         </div>
                     </CardContent>

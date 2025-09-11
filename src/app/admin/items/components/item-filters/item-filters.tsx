@@ -42,8 +42,13 @@ export default function AdminItemFilters() {
                         parentValue: FilterGroups.GROUP,
                         filter: {
                             name:
-                                existingGroups?.find((g) => g.groupId === group)
-                                    ?.name ?? 'Ukjent gruppe',
+                                existingGroups?.find(
+                                    (g: {
+                                        groupSlug: string;
+                                        groupName: string;
+                                        type: string;
+                                    }) => g.groupSlug === group,
+                                )?.groupName ?? 'Ukjent gruppe',
                             value: group,
                         },
                     }) as FilterCallbackType,

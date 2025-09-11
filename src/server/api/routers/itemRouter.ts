@@ -46,7 +46,7 @@ export const itemRouter = createTRPCRouter({
                     name: {
                         contains: input.filters?.query,
                     },
-                    groupId: {
+                    groupSlug: {
                         in: input.filters?.groupIds,
                     },
                     itemId: {
@@ -55,9 +55,6 @@ export const itemRouter = createTRPCRouter({
                 },
                 orderBy: {
                     name: 'asc',
-                },
-                include: {
-                    group: true,
                 },
             });
 
@@ -79,7 +76,7 @@ export const itemRouter = createTRPCRouter({
                 name: z.string(),
                 description: z.string(),
                 allowsAlcohol: z.boolean(),
-                groupId: z.string(),
+                groupSlug: z.string(),
             }),
         )
         .mutation(({ ctx, input }) => {
@@ -88,7 +85,7 @@ export const itemRouter = createTRPCRouter({
                     name: input.name,
                     description: input.description,
                     allowsAlcohol: input.allowsAlcohol,
-                    groupId: input.groupId,
+                    groupSlug: input.groupSlug,
                 },
             });
         }),
@@ -113,7 +110,7 @@ export const itemRouter = createTRPCRouter({
         }),
 
     deleteItem: groupLeaderProcedure
-        .input(z.object({ itemId: z.number() }))
+        .input(z.object({ itemId: z.number(), groupSlug: z.string() }))
         .mutation(({ ctx, input: { itemId } }) => {
             return ctx.db.bookableItem.delete({
                 where: { itemId },

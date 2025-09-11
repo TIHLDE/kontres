@@ -1,7 +1,9 @@
+import type { GroupInfo } from '@/server/api/routers/groupRouter';
+
 import { FilterGroup } from '@/components/ui/filters/filters';
 
 import { FilterGroups } from '@/app/admin/reservations/components/booking-filters/value-maps';
-import { BookableItem, Group } from '@prisma/client';
+import { BookableItem } from '@prisma/client';
 import {
     AlertCircleIcon,
     ClockIcon,
@@ -14,7 +16,7 @@ export default function itemFilterGroups({
     groups,
     items,
 }: {
-    groups: Group[];
+    groups: GroupInfo[];
     items: BookableItem[];
 }): FilterGroup[] {
     return [
@@ -22,8 +24,8 @@ export default function itemFilterGroups({
             header: 'Gruppe',
             value: FilterGroups.GROUP,
             filters: groups.map((group) => ({
-                name: group.name,
-                value: group.groupId,
+                name: group.groupName,
+                value: group.groupSlug,
             })),
         },
         {

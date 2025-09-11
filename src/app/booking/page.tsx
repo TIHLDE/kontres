@@ -4,7 +4,8 @@ import { api } from '@/trpc/server';
 
 export default async function Page() {
     const groups = (await api.group.getAll()).map(
-        (g) => [g.groupId, g.name] as [string, string],
+        (g: { groupSlug: string; groupName: string; type: string }) =>
+            [g.groupSlug, g.groupName] as [string, string],
     );
 
     return (

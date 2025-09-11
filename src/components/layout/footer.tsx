@@ -1,4 +1,3 @@
-import BookableItems from '../ui/bookable-items';
 import HeaderLink from '../ui/header-link';
 import Logo from '../ui/logo';
 
@@ -9,7 +8,6 @@ export default function Footer() {
                 <HeaderLink href="/" className="mr-auto">
                     <Logo />
                 </HeaderLink>
-                <BookableItems className={'flex ml-auto gap-6'} />
                 <HeaderLink href="/reservation">Reservasjoner</HeaderLink>
                 <HeaderLink href="/booking">Booking</HeaderLink>
             </nav>

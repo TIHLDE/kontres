@@ -58,8 +58,14 @@ export default function ItemForm({
     const { data: allGroups } = api.group.getAll.useQuery();
     const pickableGroups = useMemo(() => {
         return allGroups
-            ?.filter((g) => membershipGroups?.includes(g.groupId))
-            .map((g) => g.name);
+            ?.filter(
+                (g: { groupSlug: string; groupName: string; type: string }) =>
+                    membershipGroups?.includes(g.groupSlug),
+            )
+            .map(
+                (g: { groupSlug: string; groupName: string; type: string }) =>
+                    g.groupName,
+            );
     }, [allGroups, membershipGroups]);
 
     return (
@@ -102,10 +108,16 @@ export default function ItemForm({
                                 <FormLabel>Gruppe</FormLabel>
                                 <FormControl>
                                     <GroupSelect
-                                        groups={allGroups?.map((g) => ({
-                                            label: g.name,
-                                            value: g.groupId,
-                                        }))}
+                                        groups={allGroups?.map(
+                                            (g: {
+                                                groupSlug: string;
+                                                groupName: string;
+                                                type: string;
+                                            }) => ({
+                                                label: g.groupName,
+                                                value: g.groupSlug,
+                                            }),
+                                        )}
                                         onChange={onChange}
                                         value={value}
                                     />

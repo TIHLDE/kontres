@@ -1,15 +1,17 @@
+import type { GroupInfo } from '@/server/api/routers/groupRouter';
+
 import { FilterGroup } from '@/components/ui/filters/filters';
 import StatusIndicator from '@/components/ui/filters/status-indicator';
 
 import { TimeDirection } from '../../../utils/enums';
 import { FilterGroups } from './value-maps';
-import { BookableItem, Group, ReservationState } from '@prisma/client';
+import { BookableItem, ReservationState } from '@prisma/client';
 
 export default function reservationFilterGroups({
     groups,
     items,
 }: {
-    groups: Group[];
+    groups: GroupInfo[];
     items: BookableItem[];
 }): FilterGroup[] {
     return [
@@ -66,8 +68,8 @@ export default function reservationFilterGroups({
             value: FilterGroups.GROUP,
             filters: groups.map((group) => {
                 return {
-                    name: group.name,
-                    value: group.groupId.toString(),
+                    name: group.groupName,
+                    value: group.groupSlug,
                 };
             }),
         },

@@ -1,8 +1,7 @@
 import { Card } from '@/components/ui/card';
 
-import { SessionProvider } from 'next-auth/react';
 import CreateFaqForm from '../components/CreateFaqForm';
-
+import { SessionProvider } from 'next-auth/react';
 
 export default async function page() {
     return (

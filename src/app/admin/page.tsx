@@ -2,7 +2,7 @@ import { SideBarNavigationButton } from './layout';
 import { CalendarIcon, ExternalLinkIcon, ShapesIcon } from 'lucide-react';
 import Link from 'next/link';
 
-const Admin = async () => {
+export default async function Admin() {
     // Get the user
 
     // Set default values for searchParams if none is defined

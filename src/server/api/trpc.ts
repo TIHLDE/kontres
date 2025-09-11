@@ -70,7 +70,7 @@ export const memberProcedure = t.procedure
     });
 
 const groupLeaderInputSchema = z.object({
-    groupId: z.string(),
+    groupSlug: z.string(),
 });
 
 export const groupLeaderProcedure = t.procedure
@@ -80,7 +80,7 @@ export const groupLeaderProcedure = t.procedure
         if (
             !ctx.session ||
             (ctx.session.user.role !== 'ADMIN' &&
-                !ctx.session.user.leaderOf.includes(input.groupId))
+                !ctx.session.user.leaderOf.includes(input.groupSlug))
         ) {
             throw new TRPCError({ code: 'UNAUTHORIZED' });
         }

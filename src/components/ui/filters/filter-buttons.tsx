@@ -17,11 +17,16 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 
-import { TimeDirection } from '../../../app/admin/reservations/components/booking-filters/booking-filters';
 import { cn } from '@/lib/utils';
 import { ReservationState } from '@prisma/client';
 import { CheckIcon, ChevronRight, Search } from 'lucide-react';
 import { Dispatch, useState } from 'react';
+
+export enum TimeDirection {
+    PRESENT = 'PRESENT',
+    FORWARD = 'FORWARD',
+    BACKWARD = 'BACKWARD',
+}
 
 interface FilterButtonsProps extends React.HTMLProps<HTMLDivElement> {
     state: ReservationState;

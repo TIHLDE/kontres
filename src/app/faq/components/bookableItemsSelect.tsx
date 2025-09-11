@@ -53,9 +53,12 @@ export default function BookableItemsSelect({
                     )}
                 >
                     {selectedItems.length > 0
-                        ? selectedItems.map((v) => v.name).slice(0,3).join(', ')
+                        ? selectedItems
+                              .map((v) => v.name)
+                              .slice(0, 3)
+                              .join(', ')
                         : 'Velg gjenstander'}
-                        {selectedItems.length > 3 && " ..."}
+                    {selectedItems.length > 3 && ' ...'}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>

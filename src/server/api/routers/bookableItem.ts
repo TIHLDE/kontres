@@ -49,7 +49,6 @@ export const bookableItemRouter = createTRPCRouter({
     getFilterableList: memberProcedure.query(async ({ ctx }) => {
         return await ctx.db.bookableItem.findMany({
             include: {
-                group: true,
                 reservations: {
                     select: {
                         startTime: true,
@@ -66,7 +65,7 @@ export const bookableItemRouter = createTRPCRouter({
             z.object({
                 name: z.string(),
                 description: z.string(),
-                groupId: z.string(),
+                groupSlug: z.string(),
                 allwosAlcohol: z.boolean(),
             }),
         )
@@ -75,8 +74,8 @@ export const bookableItemRouter = createTRPCRouter({
                 data: {
                     name: input.name,
                     description: input.description,
-                    groupId: input.groupId,
                     allowsAlcohol: input.allwosAlcohol,
+                    groupSlug: input.groupSlug,
                 },
             });
             return newBookableItem;

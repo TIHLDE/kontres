@@ -6,8 +6,8 @@ import { LoadingSpinner } from '@/components/ui/loadingspinner';
 import FaqCard from './faq-card';
 import FAQListSkeleton from './faq-list-skeleton';
 import { api } from '@/trpc/react';
-import Link from 'next/link';
 import { ArrowDown } from 'lucide-react';
+import Link from 'next/link';
 
 const FaqList = () => {
     const {
@@ -39,7 +39,7 @@ const FaqList = () => {
                                 title={object.question}
                                 bookableItems={object.bookableItems}
                                 author={object.author}
-                                group={object.group ?? ''}
+                                group={object.groupSlug ?? ''}
                             />
                         </Link>
                     )),
@@ -48,14 +48,14 @@ const FaqList = () => {
             {isLoading && !error && <FAQListSkeleton />}
             <div className="max-w-page mx-auto flex gap-5">
                 {hasNextPage && (
-                    <Button onClick={() => fetchNextPage()} className='gap-2.5'>
+                    <Button onClick={() => fetchNextPage()} className="gap-2.5">
                         {isFetchingNextPage && <LoadingSpinner />}
                         {!isFetchingNextPage && (
                             <>
-                                <ArrowDown size={16} strokeWidth={2.5}/>
+                                <ArrowDown size={16} strokeWidth={2.5} />
                                 Last inn mer
                             </>
-                            )}
+                        )}
                     </Button>
                 )}
                 {error && <text>Noe gikk galt</text>}

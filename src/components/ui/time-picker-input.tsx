@@ -1,13 +1,15 @@
 'use client';
 
 import { Input } from '@/components/ui/input';
-import { type TimePickerType, getArrowByType, getDateByType, setDateByType } from '@/components/utils/time-picker-utils';
-
-
+import {
+    type TimePickerType,
+    getArrowByType,
+    getDateByType,
+    setDateByType,
+} from '@/components/utils/time-picker-utils';
 
 import { cn } from '@/lib/utils';
 import React from 'react';
-
 
 export interface TimePickerInputProps
     extends React.InputHTMLAttributes<HTMLInputElement> {

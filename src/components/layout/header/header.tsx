@@ -1,5 +1,3 @@
-import { type User } from '@/types/User';
-
 import Logo from '@/components/ui/logo';
 
 import HeaderButtonsWrapper from './header-buttons-wrapper';
@@ -8,9 +6,7 @@ import HeaderWrapper from './header-wrapper';
 import Link from 'next/link';
 import { Suspense } from 'react';
 
-interface HeaderProps extends React.HTMLProps<HTMLHeadElement> {
-    userData?: User;
-}
+type HeaderProps = React.HTMLProps<HTMLHeadElement>;
 
 export default async function Header({ className, ...props }: HeaderProps) {
     return (

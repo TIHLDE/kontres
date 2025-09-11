@@ -46,7 +46,7 @@ export default function BookableItemsView({
 
         if (filters.groups.length > 0) {
             filtered = filtered.filter((v) =>
-                filters.groups.includes(v.groupId),
+                filters.groups.includes(v.groupSlug),
             );
         }
 
@@ -81,7 +81,7 @@ export default function BookableItemsView({
                     />
                     <CardTitle className="p-3">{item.name}</CardTitle>
                     <CardDescription className="pl-3 mb-2">
-                        <Badge className="select-none">{item.group.name}</Badge>
+                        <Badge className="select-none">{item.groupSlug}</Badge>
                     </CardDescription>
                     <CardContent>{item.description}</CardContent>
                     <CardFooter className="flex justify-end">

@@ -1,6 +1,5 @@
 import { env } from '../../../env';
 
-
 /**
  * Return basic user info from a given TIHLDE user
  * @param token TIHLDE token

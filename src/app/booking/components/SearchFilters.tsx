@@ -3,13 +3,23 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import { DateTimeRangePicker } from '@/components/ui/date-time-range-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Sheet, SheetClose, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-
-
+import {
+    Sheet,
+    SheetClose,
+    SheetContent,
+    SheetFooter,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from '@/components/ui/sheet';
 
 import { cn } from '@/lib/utils';
 import { ChevronRight, Search, Users, X } from 'lucide-react';
@@ -17,8 +27,6 @@ import { createParser, parseAsBoolean, useQueryState } from 'nuqs';
 import * as React from 'react';
 import { useState } from 'react';
 import type { DateRange } from 'react-day-picker';
-
-
 
 export const groupParser = createParser<string[]>({
     parse(value) {
@@ -67,6 +75,7 @@ export default function SearchFilters({
         'alcohol',
         parseAsBoolean.withDefault(false),
     );
+
     const [from, setFrom] = useQueryState('from', datetimeParser);
     const [to, setTo] = useQueryState('to', datetimeParser);
 

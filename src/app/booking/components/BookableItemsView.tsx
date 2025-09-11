@@ -2,10 +2,14 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardTitle,
+} from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/ui/loadingspinner';
-
-
 
 import { datetimeParser, groupParser } from './SearchFilters';
 import { cn } from '@/lib/utils';
@@ -13,7 +17,6 @@ import { api } from '@/trpc/react';
 import Link from 'next/link';
 import { parseAsBoolean, parseAsString, useQueryStates } from 'nuqs';
 import { useEffect, useState } from 'react';
-
 
 type BookableItemsViewProps = {
     className?: string;

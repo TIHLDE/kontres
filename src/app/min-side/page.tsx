@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { DataTable } from '@/components/ui/data-table';
 import {
     Table,
     TableBody,
@@ -10,7 +11,6 @@ import {
     TableRow,
 } from '@/components/ui/table';
 
-import { DataTable } from '../admin/components/data-table';
 import MyPageSkeleton from './components/my-page-skeleton';
 import MyPageWrapper from './components/my-page-wrapper';
 import { reservationColumns } from './components/reservation-columns';

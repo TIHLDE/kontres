@@ -1,5 +1,6 @@
 import { db } from '@/server/db';
 
+import Lepton from '../lepton';
 import { auth } from '@/auth';
 import { TRPCError, initTRPC } from '@trpc/server';
 import superjson from 'superjson';
@@ -10,6 +11,7 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
 
     return {
         session,
+        Lepton,
         db,
         ...opts,
     };

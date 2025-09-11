@@ -32,15 +32,13 @@ export default async function Page({ params: { id } }: QuestionPageParams) {
                             />
                         )}
                         <div className="h-full">
-                            <h3 className="scroll-m-20 text-3xl font-semibold tracking-tight">
+                            <h3 className="scroll-m-20 text-3xl font-semibold tracking-tight flex flex-col">
                                 {data.question}
-                            </h3>
-                            <p className="mt-5">{data?.answer}</p>
-                            <div className="h-auto flex flex-col justify-end mt-5">
-                                <span className="text-xs text-muted-foreground mb-3">
-                                    {data?.author}, {data?.group}
+                                <span className="text-xs text-muted-foreground ">
+                                    Postet av {data?.author}, {data?.group}
                                 </span>
-                                <div className="flex gap-1">
+                            </h3>
+                            <div className="flex gap-1 mt-1">
                                     {data?.bookableItems.map(
                                         (bookableItem, index) => (
                                             <Link href={`./${''}`}>
@@ -51,7 +49,7 @@ export default async function Page({ params: { id } }: QuestionPageParams) {
                                         ),
                                     )}
                                 </div>
-                            </div>
+                            <p className="mt-3">{data?.answer}</p>
                         </div>
                     </CardContent>
                 </Card>

@@ -1,8 +1,13 @@
+import { type ReservationWithAuthor } from '@/server/dtos/reservations';
+import { User } from '@/server/dtos/user';
+
 import {
     createTRPCRouter,
     groupLeaderProcedure,
     memberProcedure,
 } from '../trpc';
+import { TimeDirection } from '@/app/admin/utils/enums';
+import { ReservationState } from '@prisma/client';
 import { z } from 'zod';
 
 export const reservationRouter = createTRPCRouter({
@@ -14,9 +19,134 @@ export const reservationRouter = createTRPCRouter({
             });
         }),
 
-    getReservations: memberProcedure.query(({ ctx }) => {
-        return ctx.db.reservation.findMany();
-    }),
+    getReservations: memberProcedure
+        .input(
+            z.object({
+                limit: z.number().min(1).max(100).optional(),
+                cursor: z.number().nullish().optional(),
+                direction: z
+                    .enum(['forward', 'backward'])
+                    .default('forward')
+                    .optional(),
+                filters: z.object({
+                    state: z.nativeEnum(ReservationState).array().optional(),
+                    query: z.string().optional(),
+                    group: z.string().array().optional(),
+                    fromDate: z.string().optional(),
+                    toDate: z.string().optional(),
+                    bookableItem: z.number().array().optional(),
+                    timeDirection: z
+                        .nativeEnum(TimeDirection)
+                        .array()
+                        .optional(),
+                }),
+            }),
+        )
+        .query(async ({ ctx, input }) => {
+            const limit = input.limit ?? 20;
+            const { cursor } = input;
+
+            try {
+                if (input.filters.fromDate)
+                    input.filters.fromDate = new Date(
+                        input.filters.fromDate,
+                    ).toISOString();
+
+                if (input.filters.toDate)
+                    input.filters.toDate = new Date(
+                        input.filters.toDate,
+                    ).toISOString();
+            } catch (error) {
+                console.error('Could not parse date', error);
+                // Handle error?
+                return {
+                    reservations: [],
+                    nextCursor: undefined,
+                };
+            }
+
+            const reservations = (await ctx.db.reservation.findMany({
+                take: limit + 1,
+                cursor: cursor ? { reservationId: cursor } : undefined,
+                where: {
+                    status: {
+                        in: input.filters.state,
+                    },
+                    groupId: {
+                        in: input.filters.group,
+                    },
+
+                    ...(input.filters.fromDate ||
+                    input.filters.toDate ||
+                    (input.filters.timeDirection &&
+                        input.filters.timeDirection?.length > 0)
+                        ? {
+                              OR: [
+                                  {
+                                      startTime: {
+                                          gte:
+                                              (input.filters.fromDate ??
+                                              input.filters.timeDirection?.includes(
+                                                  TimeDirection.FORWARD,
+                                              ))
+                                                  ? new Date()
+                                                  : undefined,
+                                      },
+                                      endTime: {
+                                          lte:
+                                              (input.filters.toDate ??
+                                              input.filters.timeDirection?.includes(
+                                                  TimeDirection.BACKWARD,
+                                              ))
+                                                  ? new Date()
+                                                  : undefined,
+                                      },
+                                  },
+                              ],
+                          }
+                        : {}),
+
+                    bookableItem: {
+                        itemId: {
+                            in: input.filters.bookableItem,
+                        },
+                    },
+                },
+                orderBy: {
+                    reservationId: 'asc',
+                },
+            })) as ReservationWithAuthor[];
+
+            let nextCursor: typeof cursor | undefined = undefined;
+            if (reservations.length > limit) {
+                const nextItem = reservations.pop();
+                nextCursor = nextItem!.reservationId;
+            }
+
+            await Promise.all(
+                reservations.map(async (reservation) => {
+                    // Fetch the proper author object from Lepton for each author
+                    try {
+                        const user = (await ctx.Lepton.getUserById(
+                            reservation.authorId,
+                            ctx.session.user.TIHLDE_Token,
+                        ).then((user) => user.json())) as User;
+
+                        reservation.author = user;
+                    } catch (error) {
+                        console.error(
+                            "Could not fetch user's data from Lepton",
+                            error,
+                        );
+                    }
+                }),
+            );
+
+            return {
+                reservations,
+                nextCursor,
+            };
+        }),
 
     getReservationsByBookableItemId: memberProcedure
         .input(

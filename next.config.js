@@ -27,6 +27,16 @@ const config = {
                 protocol: 'http',
                 hostname: '*',
             },
+            {
+                protocol: 'https',
+                hostname: 'leptonstoragedev.blob.core.windows.net',
+                pathname: '/**', // Restrict to the path `/imagejpeg/*`
+            },
+            {
+                protocol: 'https',
+                hostname: 'leptonstoragepro.blob.core.windows.net',
+                pathname: '/**', // Restrict to the path `/imagejpeg/*`
+            },
         ],
     },
 };

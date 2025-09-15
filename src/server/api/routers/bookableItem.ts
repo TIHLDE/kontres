@@ -34,8 +34,17 @@ export const bookableItemRouter = createTRPCRouter({
                     itemId: input.itemId,
                 },
                 include: {
-                    //reservations: true,
-                    //FAQs: true
+                    reservations: {
+                        where: {
+                            status: 'APPROVED',
+                        },
+                        select: {
+                            startTime: true,
+                            endTime: true,
+                            status: true,
+                        },
+                    },
+                    FAQs: true,
                 },
             });
 

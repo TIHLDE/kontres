@@ -1,211 +1,216 @@
-// 'use client';
+'use client';
 
-// import { type User } from '@/types/User';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { DateTimeRangePicker } from '@/components/ui/date-time-range-picker';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import { api } from '@/trpc/react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { CalendarIcon, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { type DateRange } from 'react-day-picker';
+import { z } from 'zod';
+import { toast } from '@/components/ui/use-toast';
 
-// import {
-//     AlertDialogAction,
-//     AlertDialogCancel,
-//     AutoAlertDialog,
-// } from '@/components/ui/alert-dialog';
-// import { useToast } from '@/components/ui/use-toast';
+const reservationSchema = z.object({
+    startTime: z.date({
+        required_error: 'Start time is required',
+    }),
+    endTime: z.date({
+        required_error: 'End time is required',
+    }),
+    description: z.string().min(10, {
+        message: 'Description must be at least 10 characters',
+    }),
+    servesAlcohol: z.boolean(),
+    soberWatch: z.string().optional(),
+    acceptedRules: z.boolean().refine((val) => val === true, {
+        message: 'You must accept the rules',
+    }),
+});
 
-// import { type ErrorType } from '@/utils/apis/fetch';
-// import {
-//     createReservation,
-//     invalidateReservations,
-// } from '@/utils/apis/reservations';
-// import { type DetailedItem, type Membership } from '@/utils/apis/types';
+type ReservationFormData = z.infer<typeof reservationSchema>;
 
-// import {
-//     ReservationFormFields,
-//     type ReservationFormValueTypes,
-// } from '@/app/booking/components/ReservationFormFields';
-// import { parse } from 'date-fns';
-// import { useRouter, useSearchParams } from 'next/navigation';
-// import { useRef, useState } from 'react';
+interface ReservationFormProps {
+    itemId: number;
+    groupSlug: string;
+    allowsAlcohol: boolean;
+}
 
-// type EventFormType = {
-//     items: DetailedItem[];
-//     groups: Membership[];
-//     user: User;
-// };
+export default function ReservationForm({
+    itemId,
+    groupSlug,
+    allowsAlcohol,
+}: ReservationFormProps) {
+    const [dateRange, setDateRange] = useState<DateRange | undefined>();
+    const router = useRouter();
 
-// /**
-//  * Parent wrapper for the entire reservation form
-//  */
-// const ReservationForm = ({ items, groups, user }: EventFormType) => {
-//     const [alertOpen, setAlertOpen] = useState(false);
-//     const [errorAlertOpen, setErrorAlertOpen] = useState(false);
-//     const [errorAlertMessage, setErrorAlertMessage] = useState<string>();
-//     const [selectedGroup, setSelectedGroup] = useState('0');
+    const {
+        register,
+        handleSubmit,
+        setValue,
+        watch,
+        formState: { errors, isSubmitting },
+    } = useForm<ReservationFormData>({
+        resolver: zodResolver(reservationSchema),
+        defaultValues: {
+            servesAlcohol: false,
+            acceptedRules: false,
+        },
+    });
 
-//     const { toast } = useToast();
+    const createReservation = api.reservation.create.useMutation({
+        onSuccess: () => {
+            toast({
+                title: 'Reservation created',
+                description: 'Your reservation has been submitted for approval.',
+            });
+            router.push('/booking');
+        },
+        onError: (error) => {
+            toast({
+                title: 'Error',
+                description: error.message,
+                variant: 'destructive',
+            });
+        },
+    });
 
-//     const formValues = useRef<ReservationFormValueTypes>();
+    const onSubmit = (data: ReservationFormData) => {
+        if (!dateRange?.from || !dateRange?.to) {
+            toast({
+                title: 'Error',
+                description: 'Please select a date range',
+                variant: 'destructive',
+            });
+            return;
+        }
 
-//     const router = useRouter();
+        createReservation.mutate({
+            itemId,
+            groupSlug,
+            description: data.description,
+            servesAlcohol: data.servesAlcohol,
+            soberWatch: data.soberWatch || '',
+            startTime: dateRange.from,
+            endTime: dateRange.to,
+        });
+    };
 
-//     const parseDate = (date: string) => {
-//         if (!date) return new Date();
+    const servesAlcohol = watch('servesAlcohol');
 
-//         try {
-//             return parse(date, 'PPP HH:mm:ss', new Date());
-//         } catch (error) {
-//             // do nothing
-//         }
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                    <CalendarIcon className="h-5 w-5" />
+                    Create Reservation
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                    <div className="space-y-2">
+                        <Label htmlFor="dateRange">Date and Time</Label>
+                        <DateTimeRangePicker
+                            range={dateRange}
+                            setRange={setDateRange}
+                            placeholder="Select date and time range"
+                        />
+                        {errors.startTime && (
+                            <p className="text-sm text-destructive">
+                                {errors.startTime.message}
+                            </p>
+                        )}
+                        {errors.endTime && (
+                            <p className="text-sm text-destructive">
+                                {errors.endTime.message}
+                            </p>
+                        )}
+                    </div>
 
-//         return new Date();
-//     };
+                    <div className="space-y-2">
+                        <Label htmlFor="description">Description</Label>
+                        <Textarea
+                            id="description"
+                            placeholder="Describe the purpose of your reservation..."
+                            {...register('description')}
+                        />
+                        {errors.description && (
+                            <p className="text-sm text-destructive">
+                                {errors.description.message}
+                            </p>
+                        )}
+                    </div>
 
-//     const searchParams = useSearchParams();
-//     const from = searchParams.get('from');
-//     const to = searchParams.get('to');
-//     const itemUUID = searchParams.get('itemUUID');
+                    {allowsAlcohol && (
+                        <div className="space-y-4">
+                            <div className="flex items-center space-x-2">
+                                <Switch
+                                    id="servesAlcohol"
+                                    checked={servesAlcohol}
+                                    onCheckedChange={(checked) =>
+                                        setValue('servesAlcohol', checked)
+                                    }
+                                />
+                                <Label htmlFor="servesAlcohol">
+                                    Will serve alcohol
+                                </Label>
+                            </div>
 
-//     if (items.length == 0) return;
+                            {servesAlcohol && (
+                                <div className="space-y-2">
+                                    <Label htmlFor="soberWatch">
+                                        Sober Watch Person
+                                    </Label>
+                                    <Input
+                                        id="soberWatch"
+                                        placeholder="Name of sober watch person"
+                                        {...register('soberWatch')}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    )}
 
-//     const defaultItem =
-//         items.filter((a) => a.id == itemUUID).length > 0
-//             ? itemUUID
-//             : items[0].id;
+                    <div className="flex items-center space-x-2">
+                        <Switch
+                            id="acceptedRules"
+                            checked={watch('acceptedRules')}
+                            onCheckedChange={(checked) =>
+                                setValue('acceptedRules', checked)
+                            }
+                        />
+                        <Label htmlFor="acceptedRules">
+                            I accept the booking rules and regulations
+                        </Label>
+                    </div>
+                    {errors.acceptedRules && (
+                        <p className="text-sm text-destructive">
+                            {errors.acceptedRules.message}
+                        </p>
+                    )}
 
-//     const onSubmit = async (values: ReservationFormValueTypes) => {
-//         formValues.current = values;
-//         setAlertOpen(true);
-//     };
-
-//     // Shows an error dialog if the form submit process went wrong
-//     const showError = (message: string) => {
-//         setErrorAlertMessage(message);
-//         setErrorAlertOpen(true);
-//     };
-
-//     const showSuccess = () => {
-//         toast({
-//             title: 'Gratulerer!',
-//             description: 'Reservasjonen er blitt lagt inn 🥳',
-//         });
-//         invalidateReservations();
-
-//         redirect();
-//     };
-
-//     const redirect = () => {
-//         router.push('/min-side');
-//     };
-
-//     const submitReservation = () => {
-//         const values = formValues.current;
-//         const group =
-//             values?.application_on_behalf === '0'
-//                 ? undefined
-//                 : values?.application_on_behalf;
-//         // Use the values stored in the state hook
-//         createReservation({
-//             bookable_item: values?.item!,
-//             description: values?.description!,
-//             start_time: values?.from.toISOString()!,
-//             end_time: values?.to.toISOString()!,
-//             group: group!,
-//             serves_alcohol: values?.serves_alcohol,
-//             sober_watch: values?.sober_watch_id,
-//         })
-//             .then((res) => {
-//                 showSuccess();
-//             })
-//             .catch((err) => {
-//                 const error = err as Error;
-//                 const response = JSON.parse(error.message) as ErrorType;
-//                 if (!response.response)
-//                     throw new Error('Could not parse a proper form error');
-//                 const body = response.response[
-//                     Object.keys(response.response)[0]
-//                 ] as string;
-//                 showError(body);
-//             });
-//     };
-
-//     const formGroups = [
-//         {
-//             label: 'Meg selv',
-//             value: '0',
-//         },
-//     ];
-
-//     groups.forEach((group) => {
-//         formGroups.push({
-//             label: group.group.name,
-//             value: group.group.slug,
-//         });
-//     });
-
-//     return (
-//         <>
-//             <AutoAlertDialog
-//                 open={alertOpen}
-//                 title={'Er du sikker på at du vil legge inn reservasjonen?'}
-//                 footerButtons={
-//                     <>
-//                         <AlertDialogCancel onClick={() => setAlertOpen(false)}>
-//                             Avbryt
-//                         </AlertDialogCancel>
-//                         <AlertDialogAction
-//                             onClick={() => {
-//                                 setAlertOpen(false);
-//                                 submitReservation();
-//                             }}
-//                         >
-//                             Send inn
-//                         </AlertDialogAction>
-//                     </>
-//                 }
-//                 description="Når søknaden er sendt inn, kan den ikke fjernes. Vennligst kontroller at alle feltene oppgir riktig informasjon."
-//             />
-//             <AutoAlertDialog
-//                 open={errorAlertOpen}
-//                 title={'Kunne ikke legge inn reservasjonen.'}
-//                 description={errorAlertMessage}
-//                 footerButtons={
-//                     <>
-//                         <AlertDialogAction
-//                             onClick={() => {
-//                                 setErrorAlertOpen(false);
-//                             }}
-//                         >
-//                             Prøv på nytt
-//                         </AlertDialogAction>
-//                     </>
-//                 }
-//             />
-
-//             <ReservationFormFields
-//                 initialData={{
-//                     item: defaultItem ?? '',
-//                     from: parseDate(from ?? ''),
-//                     to: parseDate(to ?? ''),
-//                     sober_watch_id: user.user_id,
-//                 }}
-//                 items={items}
-//                 groups={formGroups}
-//                 onSubmit={onSubmit}
-//                 groupChangeCallback={setSelectedGroup}
-//                 applicant={{
-//                     image:
-//                         selectedGroup != '0'
-//                             ? (groups.find(
-//                                   (group) => group.group.slug === selectedGroup,
-//                               )?.group.image ?? '')
-//                             : user.image,
-//                     label:
-//                         selectedGroup != '0'
-//                             ? (groups.find(
-//                                   (group) => group.group.slug === selectedGroup,
-//                               )?.group.name ?? '')
-//                             : user.first_name,
-//                 }}
-//             />
-//         </>
-//     );
-// };
-
-// export default ReservationForm;
+                    <Button
+                        type="submit"
+                        className="w-full"
+                        disabled={isSubmitting || createReservation.isPending}
+                    >
+                        {isSubmitting || createReservation.isPending ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Creating...
+                            </>
+                        ) : (
+                            'Create Reservation'
+                        )}
+                    </Button>
+                </form>
+            </CardContent>
+        </Card>
+    );
+}

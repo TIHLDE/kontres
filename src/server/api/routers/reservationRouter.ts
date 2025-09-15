@@ -203,7 +203,7 @@ export const reservationRouter = createTRPCRouter({
         .input(
             z.object({
                 servesAlcohol: z.boolean(),
-                desciption: z.string(),
+                description: z.string(),
                 soberWatch: z.string(),
                 startTime: z.date(),
                 endTime: z.date(),
@@ -218,7 +218,7 @@ export const reservationRouter = createTRPCRouter({
                     groupSlug: input.groupSlug,
                     acceptedRules: false,
                     bookableItemId: input.itemId,
-                    description: input.desciption,
+                    description: input.description,
                     endTime: input.endTime,
                     startTime: input.startTime,
                     soberWatch: input.soberWatch,

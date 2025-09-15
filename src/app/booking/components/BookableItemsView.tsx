@@ -17,8 +17,10 @@ import { api } from '@/trpc/react';
 import Link from 'next/link';
 import { parseAsBoolean, parseAsString, useQueryStates } from 'nuqs';
 import { useEffect, useState } from 'react';
+import { GroupInfo } from '@/server/api/routers/groupRouter';
 
 type BookableItemsViewProps = {
+    groups: GroupInfo[];
     className?: string;
 };
 
@@ -65,6 +67,8 @@ export default function BookableItemsView({
 
         setFilteredData(filtered);
     }, [filters, setFilteredData, data]);
+
+    
     return (
         <Card
             className={cn(
@@ -72,25 +76,23 @@ export default function BookableItemsView({
                 className,
             )}
         >
-            {filteredData.map((item) => (
-                <Card key={item.itemId} className="overflow-hidden">
-                    <img
-                        className="aspect-video object-cover"
-                        src="https://images.unsplash.com/photo-1737251043885-1fa62cb12933?q=80&w=2573&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                        alt="cover image"
-                    />
-                    <CardTitle className="p-3">{item.name}</CardTitle>
-                    <CardDescription className="pl-3 mb-2">
-                        <Badge className="select-none">{item.groupSlug}</Badge>
-                    </CardDescription>
-                    <CardContent>{item.description}</CardContent>
-                    <CardFooter className="flex justify-end">
-                        <Button asChild>
-                            <Link href={`/booking/${item.itemId}`}>Åpne</Link>
-                        </Button>
-                    </CardFooter>
-                </Card>
+            {[...filteredData,...filteredData,...filteredData,...filteredData,...filteredData].map((item) => (
+                <Link key={item.itemId} href={`/booking/${item.itemId}`}>
+                    <Card className="overflow-hidden">
+                        <img
+                            className="aspect-video object-cover"
+                            src="https://images.unsplash.com/photo-1737251043885-1fa62cb12933?q=80&w=2573&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                            alt="cover image"
+                        />
+                        <CardTitle className="p-3">{item.name}</CardTitle>
+                        <CardDescription className="pl-3 mb-2">
+                            <Badge className="select-none">{item.groupSlug}</Badge>
+                        </CardDescription>
+                        <CardContent>{item.description}</CardContent>
+                    </Card>
+                </Link>
             ))}
+
 
             {(isLoading || isFetching) && (
                 <div className="absolute inset-0 backdrop-blur-sm grid place-items-center">

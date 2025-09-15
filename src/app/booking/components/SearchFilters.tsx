@@ -1,5 +1,6 @@
 'use client';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -9,20 +10,15 @@ import {
     CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { DateTimeRangePicker } from '@/components/ui/date-time-range-picker';
+import Expandable from '@/components/ui/expandable';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-    Sheet,
-    SheetClose,
-    SheetContent,
-    SheetFooter,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
-} from '@/components/ui/sheet';
+import { Separator } from '@/components/ui/separator';
+
 
 import { cn } from '@/lib/utils';
-import { ChevronRight, Search, Users, X } from 'lucide-react';
+import { GroupInfo } from '@/server/api/routers/groupRouter';
+import { ChevronRight, Search, SlidersHorizontal, Users, X } from 'lucide-react';
 import { createParser, parseAsBoolean, useQueryState } from 'nuqs';
 import * as React from 'react';
 import { useState } from 'react';
@@ -60,11 +56,13 @@ export const datetimeParser = createParser<Date | null>({
 });
 
 type SearchFiltersProps = {
-    groups: [string, string][];
+    groups: GroupInfo[];
+    className?: string;
 };
 
 export default function SearchFilters({
     groups: groupsDict,
+    className,
 }: SearchFiltersProps) {
     const [query, setQuery] = useQueryState('q');
     const [groups, setGroups] = useQueryState(
@@ -101,12 +99,15 @@ export default function SearchFilters({
         setDateRange(undefined);
     };
 
+    const [searchFormExpanded, setSearchFormExpanded] = useState(false);
+
+
     return (
         <>
             {/* Desktop */}
-            <Card className="w-full hidden md:block">
-                <CardHeader className="flex flex-row justify-between items-center">
-                    <h2>Filtrer</h2>
+            <Card className={cn("w-full h-fit hidden lg:block", className)}>
+                <CardHeader className="flex flex-row justify-between items-center px-6 py-4">
+                    <h2 className='font-semibold'>Filtrer</h2>
                     <Button
                         variant={'destructive'}
                         onClick={clearFilters}
@@ -119,7 +120,8 @@ export default function SearchFilters({
                         <X />
                     </Button>
                 </CardHeader>
-                <CardContent className="w-full flex gap-3 flex-col">
+                <Separator />
+                <CardContent className="w-full flex gap-3 flex-col mt-6">
                     <Filters
                         query={query}
                         setQuery={setQuery}
@@ -136,50 +138,42 @@ export default function SearchFilters({
                 </CardContent>
             </Card>
             {/* Mobile */}
-            <div className="md:hidden flex justify-end">
-                <Button
-                    variant={'destructive'}
-                    onClick={clearFilters}
-                    disabled={!isFiltering}
-                    className="disabled:hidden"
-                >
-                    <X />
-                </Button>
-                <Sheet>
-                    <SheetTrigger asChild>
-                        <Button>Filter</Button>
-                    </SheetTrigger>
-                    <SheetContent
-                        side={'left'}
-                        className="bg-card flex gap-3 flex-col"
-                    >
-                        <SheetHeader>
-                            <SheetTitle>Filter</SheetTitle>
-                        </SheetHeader>
-                        <Filters
-                            query={query}
-                            setQuery={setQuery}
-                            groups={groups}
-                            setGroups={setGroups}
-                            isAlcoholAllowed={isAlcoholAllowed}
-                            setIsAlcoholAllowed={setIsAlcoholAllowed}
-                            from={from}
-                            setFrom={setFrom}
-                            to={to}
-                            setTo={setTo}
-                            groupsDict={groupsDict}
-                        />
-                        <SheetFooter>
-                            <SheetClose asChild>
-                                <Button type="submit">Vis resultater</Button>
-                            </SheetClose>
-                        </SheetFooter>
-                    </SheetContent>
-                </Sheet>
-            </div>
+            <Expandable
+                description='Filtrer arrangementer'
+                icon={<SlidersHorizontal className='w-5 h-5 stroke-[1.5px]' />}
+                onOpenChange={setSearchFormExpanded}
+                open={searchFormExpanded}
+                className='lg:hidden'
+                title={
+                <div className='flex items-center gap-2'>
+                    <span>Filter</span>
+                    {isFiltering && (
+                        <Badge className='ml-1' variant='secondary'>
+                            Aktiv filter
+                        </Badge>
+                    )}
+                </div>
+                }>
+                <div className='flex gap-3 flex-col'>
+                    <Filters
+                        query={query}
+                        setQuery={setQuery}
+                        groups={groups}
+                        setGroups={setGroups}
+                        isAlcoholAllowed={isAlcoholAllowed}
+                        setIsAlcoholAllowed={setIsAlcoholAllowed}
+                        from={from}
+                        setFrom={setFrom}
+                        to={to}
+                        setTo={setTo}
+                        groupsDict={groupsDict}
+                    />
+                </div>
+            </Expandable>
         </>
     );
 }
+
 
 type FiltersProps = {
     query: string | null;
@@ -197,7 +191,7 @@ type FiltersProps = {
     to: Date | null;
     setTo: (value: Date | null) => unknown;
 
-    groupsDict: [string, string][];
+    groupsDict: GroupInfo[];
 };
 function Filters({
     query,
@@ -270,21 +264,21 @@ function Filters({
                     </Button>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="flex flex-col gap-1 border-l-2 ml-6 pl-3">
-                    {groupsDict.map(([key, label]) => (
-                        <Label key={key} className="flex gap-2 items-center">
+                    {groupsDict.map((group) => (
+                        <Label key={group.groupSlug} className="flex gap-2 items-center">
                             <Checkbox
-                                checked={groups.includes(key)}
+                                checked={groups.includes(group.groupSlug)}
                                 onCheckedChange={async (e) => {
                                     if (!!e) {
-                                        await setGroups([...groups, key]);
+                                        await setGroups([...groups, group.groupSlug]);
                                     } else {
                                         await setGroups(
-                                            groups.filter((g) => g !== key),
+                                            groups.filter((g) => g !== group.groupSlug),
                                         );
                                     }
                                 }}
                             />
-                            <span>{label}</span>
+                            <span>{group.groupName}</span>
                         </Label>
                     ))}
                 </CollapsibleContent>

@@ -7,15 +7,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { toast } from '@/components/ui/use-toast';
+
 import { api } from '@/trpc/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CalendarIcon, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
 import { type DateRange } from 'react-day-picker';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { toast } from '@/components/ui/use-toast';
 
 const reservationSchema = z.object({
     startTime: z.date({
@@ -68,7 +69,8 @@ export default function ReservationForm({
         onSuccess: () => {
             toast({
                 title: 'Reservation created',
-                description: 'Your reservation has been submitted for approval.',
+                description:
+                    'Your reservation has been submitted for approval.',
             });
             router.push('/booking');
         },

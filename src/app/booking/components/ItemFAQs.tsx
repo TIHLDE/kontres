@@ -1,8 +1,9 @@
 'use client';
 
 import { LoadingSpinner } from '@/components/ui/loadingspinner';
-import { api } from '@/trpc/react';
+
 import FaqCard from '@/app/faq/components/faq-card';
+import { api } from '@/trpc/react';
 import Link from 'next/link';
 
 interface ItemFAQsProps {
@@ -10,7 +11,11 @@ interface ItemFAQsProps {
 }
 
 export default function ItemFAQs({ itemId }: ItemFAQsProps) {
-    const { data: faqs, isLoading, error } = api.faq.getAll.useInfiniteQuery(
+    const {
+        data: faqs,
+        isLoading,
+        error,
+    } = api.faq.getAll.useInfiniteQuery(
         {
             limit: 6,
         },
@@ -20,11 +25,12 @@ export default function ItemFAQs({ itemId }: ItemFAQsProps) {
     );
 
     // Filter FAQs that are related to this item
-    const relatedFAQs = faqs?.pages
-        .flatMap((page) => page.faqs)
-        .filter((faq) =>
-            faq.bookableItems.some((item) => item.itemId === itemId)
-        ) || [];
+    const relatedFAQs =
+        faqs?.pages
+            .flatMap((page) => page.faqs)
+            .filter((faq) =>
+                faq.bookableItems.some((item) => item.itemId === itemId),
+            ) || [];
 
     if (isLoading) {
         return (
@@ -67,10 +73,7 @@ export default function ItemFAQs({ itemId }: ItemFAQsProps) {
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {relatedFAQs.map((faq) => (
-                    <Link
-                        href={`/faq/${faq.questionId}`}
-                        key={faq.questionId}
-                    >
+                    <Link href={`/faq/${faq.questionId}`} key={faq.questionId}>
                         <FaqCard
                             title={faq.question}
                             description={faq.answer}

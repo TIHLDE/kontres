@@ -1,12 +1,13 @@
-import { notFound } from 'next/navigation';
-import { api } from '@/trpc/server';
-import ItemDetails from '../components/ItemDetails';
-import ItemCalendar from '../components/ItemCalendar';
-import ReservationForm from '../components/ReservationForm';
-import ItemFAQs from '../components/ItemFAQs';
 import { Button } from '@/components/ui/button';
+
+import ItemCalendar from '../components/ItemCalendar';
+import ItemDetails from '../components/ItemDetails';
+import ItemFAQs from '../components/ItemFAQs';
+import ReservationForm from '../components/ReservationForm';
+import { api } from '@/trpc/server';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 
 interface PageProps {
     params: { itemId: string };
@@ -14,7 +15,7 @@ interface PageProps {
 
 export default async function Page({ params }: PageProps) {
     const itemId = parseInt(params.itemId);
-    
+
     if (isNaN(itemId)) {
         notFound();
     }
@@ -54,7 +55,7 @@ export default async function Page({ params }: PageProps) {
                         allowsAlcohol={item.allowsAlcohol}
                         groupSlug={item.groupSlug}
                     />
-                    
+
                     <ItemCalendar itemId={item.itemId} />
                 </div>
 

@@ -1,5 +1,7 @@
 'use client';
 
+import { GroupInfo } from '@/server/api/routers/groupRouter';
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -15,10 +17,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 
-
 import { cn } from '@/lib/utils';
-import { GroupInfo } from '@/server/api/routers/groupRouter';
-import { ChevronRight, Search, SlidersHorizontal, Users, X } from 'lucide-react';
+import {
+    ChevronRight,
+    Search,
+    SlidersHorizontal,
+    Users,
+    X,
+} from 'lucide-react';
 import { createParser, parseAsBoolean, useQueryState } from 'nuqs';
 import * as React from 'react';
 import { useState } from 'react';
@@ -101,13 +107,12 @@ export default function SearchFilters({
 
     const [searchFormExpanded, setSearchFormExpanded] = useState(false);
 
-
     return (
         <>
             {/* Desktop */}
-            <Card className={cn("w-full h-fit hidden lg:block", className)}>
+            <Card className={cn('w-full h-fit hidden lg:block', className)}>
                 <CardHeader className="flex flex-row justify-between items-center px-6 py-4">
-                    <h2 className='font-semibold'>Filtrer</h2>
+                    <h2 className="font-semibold">Filtrer</h2>
                     <Button
                         variant={'destructive'}
                         onClick={clearFilters}
@@ -139,22 +144,23 @@ export default function SearchFilters({
             </Card>
             {/* Mobile */}
             <Expandable
-                description='Filtrer arrangementer'
-                icon={<SlidersHorizontal className='w-5 h-5 stroke-[1.5px]' />}
+                description="Filtrer arrangementer"
+                icon={<SlidersHorizontal className="w-5 h-5 stroke-[1.5px]" />}
                 onOpenChange={setSearchFormExpanded}
                 open={searchFormExpanded}
-                className='lg:hidden'
+                className="lg:hidden"
                 title={
-                <div className='flex items-center gap-2'>
-                    <span>Filter</span>
-                    {isFiltering && (
-                        <Badge className='ml-1' variant='secondary'>
-                            Aktiv filter
-                        </Badge>
-                    )}
-                </div>
-                }>
-                <div className='flex gap-3 flex-col'>
+                    <div className="flex items-center gap-2">
+                        <span>Filter</span>
+                        {isFiltering && (
+                            <Badge className="ml-1" variant="secondary">
+                                Aktiv filter
+                            </Badge>
+                        )}
+                    </div>
+                }
+            >
+                <div className="flex gap-3 flex-col">
                     <Filters
                         query={query}
                         setQuery={setQuery}
@@ -173,7 +179,6 @@ export default function SearchFilters({
         </>
     );
 }
-
 
 type FiltersProps = {
     query: string | null;
@@ -265,15 +270,23 @@ function Filters({
                 </CollapsibleTrigger>
                 <CollapsibleContent className="flex flex-col gap-1 border-l-2 ml-6 pl-3">
                     {groupsDict.map((group) => (
-                        <Label key={group.groupSlug} className="flex gap-2 items-center">
+                        <Label
+                            key={group.groupSlug}
+                            className="flex gap-2 items-center"
+                        >
                             <Checkbox
                                 checked={groups.includes(group.groupSlug)}
                                 onCheckedChange={async (e) => {
                                     if (!!e) {
-                                        await setGroups([...groups, group.groupSlug]);
+                                        await setGroups([
+                                            ...groups,
+                                            group.groupSlug,
+                                        ]);
                                     } else {
                                         await setGroups(
-                                            groups.filter((g) => g !== group.groupSlug),
+                                            groups.filter(
+                                                (g) => g !== group.groupSlug,
+                                            ),
                                         );
                                     }
                                 }}

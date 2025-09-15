@@ -3,6 +3,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+
 import { Wine, WineOff } from 'lucide-react';
 
 interface ItemDetailsProps {
@@ -56,14 +57,24 @@ export default function ItemDetails({
                             {description}
                         </p>
                     </div>
-                    
+
                     <div>
-                        <h3 className="font-semibold mb-2">Booking Information</h3>
+                        <h3 className="font-semibold mb-2">
+                            Booking Information
+                        </h3>
                         <ul className="text-sm text-muted-foreground space-y-1">
-                            <li>• Reservations must be approved by group leaders</li>
-                            <li>• Please provide detailed description of your event</li>
+                            <li>
+                                • Reservations must be approved by group leaders
+                            </li>
+                            <li>
+                                • Please provide detailed description of your
+                                event
+                            </li>
                             {allowsAlcohol && (
-                                <li>• If serving alcohol, a sober watch person is required</li>
+                                <li>
+                                    • If serving alcohol, a sober watch person
+                                    is required
+                                </li>
                             )}
                             <li>• Follow all TIHLDE rules and regulations</li>
                         </ul>

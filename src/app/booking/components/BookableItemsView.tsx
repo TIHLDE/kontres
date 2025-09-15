@@ -1,5 +1,7 @@
 'use client';
 
+import { GroupInfo } from '@/server/api/routers/groupRouter';
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,7 +19,6 @@ import { api } from '@/trpc/react';
 import Link from 'next/link';
 import { parseAsBoolean, parseAsString, useQueryStates } from 'nuqs';
 import { useEffect, useState } from 'react';
-import { GroupInfo } from '@/server/api/routers/groupRouter';
 
 type BookableItemsViewProps = {
     groups: GroupInfo[];
@@ -68,7 +69,6 @@ export default function BookableItemsView({
         setFilteredData(filtered);
     }, [filters, setFilteredData, data]);
 
-    
     return (
         <Card
             className={cn(
@@ -76,7 +76,13 @@ export default function BookableItemsView({
                 className,
             )}
         >
-            {[...filteredData,...filteredData,...filteredData,...filteredData,...filteredData].map((item) => (
+            {[
+                ...filteredData,
+                ...filteredData,
+                ...filteredData,
+                ...filteredData,
+                ...filteredData,
+            ].map((item) => (
                 <Link key={item.itemId} href={`/booking/${item.itemId}`}>
                     <Card className="overflow-hidden">
                         <img
@@ -86,13 +92,14 @@ export default function BookableItemsView({
                         />
                         <CardTitle className="p-3">{item.name}</CardTitle>
                         <CardDescription className="pl-3 mb-2">
-                            <Badge className="select-none">{item.groupSlug}</Badge>
+                            <Badge className="select-none">
+                                {item.groupSlug}
+                            </Badge>
                         </CardDescription>
                         <CardContent>{item.description}</CardContent>
                     </Card>
                 </Link>
             ))}
-
 
             {(isLoading || isFetching) && (
                 <div className="absolute inset-0 backdrop-blur-sm grid place-items-center">

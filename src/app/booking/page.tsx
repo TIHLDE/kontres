@@ -12,8 +12,11 @@ export default async function Page() {
                 Bla gjennom det TIHLDE har å tilby av kontor og utstyr
             </p>
             <div className="flex flex-col lg:flex-row gap-6 w-full min-h-full">
-                <SearchFilters groups={groups} className="max-w-[400px] w-full" />
-                <BookableItemsView groups={groups} className='w-full' />
+                <SearchFilters
+                    groups={groups}
+                    className="max-w-[400px] w-full"
+                />
+                <BookableItemsView groups={groups} className="w-full" />
             </div>
         </div>
     );

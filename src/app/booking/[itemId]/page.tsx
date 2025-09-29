@@ -10,10 +10,11 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 interface PageProps {
-    params: { itemId: string };
+    params: Promise<{ itemId: string }>;
 }
 
-export default async function Page({ params }: PageProps) {
+export default async function Page(props: PageProps) {
+    const params = await props.params;
     const itemId = parseInt(params.itemId);
 
     if (isNaN(itemId)) {

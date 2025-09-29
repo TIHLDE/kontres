@@ -9,10 +9,16 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 type QuestionPageParams = {
-    params: { id: string };
+    params: Promise<{ id: string }>;
 };
 
-export default async function Page({ params: { id } }: QuestionPageParams) {
+export default async function Page(props: QuestionPageParams) {
+    const params = await props.params;
+
+    const {
+        id
+    } = params;
+
     const data = await api.faq.getById({ questionId: +id });
     const session = await auth();
     const isAdmin = session?.user.role === 'ADMIN';

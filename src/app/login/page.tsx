@@ -4,11 +4,12 @@ import { LoginForm } from './components/LoginForm';
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 
-export default async function Page({
-    searchParams,
-}: {
-    searchParams?: { redirect?: string };
-}) {
+export default async function Page(
+    props: {
+        searchParams?: Promise<{ redirect?: string }>;
+    }
+) {
+    const searchParams = await props.searchParams;
     const redirectUrl = searchParams?.redirect ?? '/';
 
     const session = await auth();

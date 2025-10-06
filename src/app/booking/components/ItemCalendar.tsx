@@ -1,11 +1,13 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
-import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import CalendarBody from '@/components/ui/full-calendar/body/calendar-body';
+import CalendarProvider from '@/components/ui/full-calendar/calendar-provider';
+import { CalendarEvent } from '@/components/ui/full-calendar/calendar-types';
 
 import { api } from '@/trpc/react';
-import { isSameDay, isWithinInterval } from 'date-fns';
+import { useMediaQuery } from '@uidotdev/usehooks';
 import { CalendarIcon } from 'lucide-react';
 import { useMemo } from 'react';
 
@@ -19,45 +21,24 @@ export default function ItemCalendar({ itemId }: ItemCalendarProps) {
             bookableItemId: itemId,
         });
 
-    // Create disabled dates based on reservations
-    const disabledDates = useMemo(() => {
-        if (!reservations?.reservations) return [];
+    const today = useMemo(() => {
+        return new Date();
+    }, []);
 
-        return reservations.reservations.map((reservation) => ({
-            from: new Date(reservation.startTime),
-            to: new Date(reservation.endTime),
-        }));
+    const events = useMemo<CalendarEvent[]>(() => {
+        return (
+            reservations?.reservations.map((res) => ({
+                id: res.reservationId.toString(),
+                title: res.authorId,
+                start: new Date(res.startTime),
+                end: new Date(res.endTime),
+                color: 'red',
+            })) ?? []
+        );
     }, [reservations]);
 
-    // Custom day renderer to show reservation status
-    const modifiers = useMemo(() => {
-        if (!reservations?.reservations) return {};
-
-        const reservedDates: Date[] = [];
-        const today = new Date();
-
-        reservations.reservations.forEach((reservation) => {
-            const start = new Date(reservation.startTime);
-            const end = new Date(reservation.endTime);
-
-            // Add all dates in the reservation range
-            const current = new Date(start);
-            while (current <= end) {
-                if (current >= today) {
-                    reservedDates.push(new Date(current));
-                }
-                current.setDate(current.getDate() + 1);
-            }
-        });
-
-        return {
-            reserved: reservedDates,
-        };
-    }, [reservations]);
-
-    const modifiersClassNames = {
-        reserved: 'bg-red-100 text-red-800 hover:bg-red-200',
-    };
+    const isMobile = useMediaQuery('(max-width: 768px)');
+    const mode = isMobile ? 'day' : 'week';
 
     return (
         <Card>
@@ -69,32 +50,18 @@ export default function ItemCalendar({ itemId }: ItemCalendarProps) {
             </CardHeader>
             <CardContent>
                 <div className="space-y-4">
-                    <Calendar
-                        mode="single"
-                        className="rounded-md border"
-                        modifiers={modifiers}
-                        modifiersClassNames={modifiersClassNames}
-                        disabled={(date) => {
-                            // Disable past dates
-                            const today = new Date();
-                            today.setHours(0, 0, 0, 0);
-                            if (date < today) return true;
-
-                            // Disable dates with reservations
-                            return disabledDates.some((range) =>
-                                isWithinInterval(date, range),
-                            );
-                        }}
-                    />
-
+                    <CalendarProvider
+                        events={events}
+                        mode={mode}
+                        date={today}
+                        calendarIconIsToday
+                    >
+                        <CalendarBody />
+                    </CalendarProvider>
                     <div className="flex items-center gap-4 text-sm">
                         <div className="flex items-center gap-2">
                             <div className="w-3 h-3 bg-red-100 border border-red-300 rounded"></div>
                             <span>Reserved</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 bg-green-100 border border-green-300 rounded"></div>
-                            <span>Available</span>
                         </div>
                     </div>
 

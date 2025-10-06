@@ -76,18 +76,16 @@ export default function BookableItemsView({
                 className,
             )}
         >
-            {[
-                ...filteredData,
-                ...filteredData,
-                ...filteredData,
-                ...filteredData,
-                ...filteredData,
-            ].map((item) => (
-                <Link key={item.itemId} href={`/booking/${item.itemId}`}>
+            {filteredData.map((item) => (
+                <Link
+                    key={item.itemId}
+                    href={`/booking/${item.itemId}`}
+                    className="h-fit"
+                >
                     <Card className="overflow-hidden">
                         <img
-                            className="aspect-video object-cover"
-                            src="https://images.unsplash.com/photo-1737251043885-1fa62cb12933?q=80&w=2573&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                            className="aspect-video object-cover opacity-30"
+                            src="/placeholder.svg"
                             alt="cover image"
                         />
                         <CardTitle className="p-3">{item.name}</CardTitle>

@@ -9,7 +9,6 @@ import {
     Mode,
 } from '@/components/ui/full-calendar/calendar-types';
 
-import Filter from './_components/filter';
 import {
     addDays,
     addWeeks,
@@ -20,9 +19,9 @@ import {
     subWeeks,
 } from 'date-fns';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
-const initialDate = new Date('2025-09-15T12:00:00Z');
+const initialDate = new Date(Date.now());
 
 export default function CalendarPage() {
     const [date, setDate] = useState(new Date());
@@ -36,6 +35,10 @@ export default function CalendarPage() {
         },
     ]);
     const [mode, setMode] = useState<Mode>('week');
+
+    useEffect(() => {
+        console.log(events);
+    }, [events]);
 
     function handleBackward() {
         if (mode === 'day') {
@@ -57,7 +60,7 @@ export default function CalendarPage() {
     }
 
     function addRandomEvent() {
-        const randomTime = Math.floor(Math.random() * 1000 * 60 * 60 * 24);
+        const randomTime = Math.floor(Math.random() * 1000 * 60 * 60 * 24 * 3);
 
         setEvents([
             ...events,
@@ -66,7 +69,7 @@ export default function CalendarPage() {
                 title: 'Random Event',
                 color: 'random',
                 start: new Date(Date.now() + randomTime),
-                end: new Date(Date.now() + randomTime + 1000 * 60 * 60 * 1),
+                end: new Date(Date.now() + randomTime + 1000 * 60 * 60 * 4),
             },
         ]);
     }

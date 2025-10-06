@@ -31,7 +31,7 @@ export default async function Page(props: PageProps) {
     return (
         <div className="container max-w-page space-y-8">
             {/* Header */}
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col gap-4">
                 <Link href="/booking">
                     <Button variant="outline" size="sm">
                         <ArrowLeft className="h-4 w-4 mr-2" />

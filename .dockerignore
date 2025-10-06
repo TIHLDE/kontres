@@ -9,8 +9,6 @@ node_modules
 .prettierrc
 .gitignore
 .prettierrc
-database.env
-database.env.example
 docker-compose.yml
 Dockerfile
 Makefile

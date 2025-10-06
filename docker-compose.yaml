@@ -1,9 +1,21 @@
 services:
   postgres:
     env_file:
-      - database.env
+      - .env
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
     image: postgres:16.4
     ports:
       - 5432:5432
+
     volumes:
-      - ./docker-volumes/postgres:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+volumes:
+  db_data:

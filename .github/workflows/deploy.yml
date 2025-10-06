@@ -1,4 +1,4 @@
-name: Deploy
+name: Deploy to Drift
 
 on:
   push:
@@ -17,23 +17,33 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up SSH key
+        env:
+          PROXY_HOST: ${{ vars.PROXY_HOST }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/key
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/key
           chmod 600 ~/.ssh/key
-          ssh-keyscan -H "${{ secrets.PROXY_HOST }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -H $PROXY_HOST >> ~/.ssh/known_hosts
 
       - name: Deploy to OpenStack server
+        env:
+          PROXY_HOST: ${{ vars.PROXY_HOST }}
+          HOST: ${{ vars.HOST }}
+          USER: ${{ vars.USER }}
+          WORKING_DIRECTORY: ${{ vars.WORKING_DIRECTORY }}
+          VAULTWARDEN_ITEM_ID: ${{ secrets.VAULTWARDEN_ITEM_ID }}
+          ENV_RELATIVE_PATH: ${{ vars.ENV_RELATIVE_PATH }}
         run: |
           eval $(ssh-agent -s)
           ssh-add ~/.ssh/key
-          ssh -v -o StrictHostKeyChecking=no -J ${{ secrets.USER }}@${{ secrets.PROXY_HOST }} ${{ secrets.USER }}@${{ secrets.HOST }} << ENDSSH
+          ssh -o StrictHostKeyChecking=no -J $USER@$PROXY_HOST $USER@$HOST << ENDSSH
+          set -euo pipefail
           sudo -i
-          cd ${{ secrets.WORKING_DIR }}
-          chmod 0600 .env
+          ./get-env.sh $VAULTWARDEN_ITEM_ID $WORKING_DIRECTORY/$ENV_RELATIVE_PATH
+          chmod 0600 $WORKING_DIRECTORY/$ENV_RELATIVE_PATH
+          cd $WORKING_DIRECTORY
           git fetch
           git reset --hard origin/dev
-          echo "${{ secrets.ENV }}" > .env
           ./deploy.sh
           ENDSSH
-

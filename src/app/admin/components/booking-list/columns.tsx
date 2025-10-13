@@ -62,7 +62,86 @@ export const columns: ColumnDef<ReservationWithAuthor>[] = [
     },
     {
         id: 'actions',
-        header: 'Handlinger',
+
+                header: 'Behandle',
+        cell: ({row}) => {
+             const reservation = row.original;
+            const utils = api.useUtils();
+
+            const handleReservation = api.reservation.updateStatus.useMutation({
+                onSuccess: () => {
+                    toast({
+                        title: 'Status oppdatert',
+                        description: 'Reservasjonsstatusen er oppdatert.',
+                    });
+                    utils.reservation.getReservations.invalidate();
+                },
+                onError: () => {
+                    toast({
+                        title: 'Feil',
+                        description: 'Kunne ikke oppdatere statusen.',
+                        variant: 'destructive',
+                    });
+                },
+                
+            });
+            return (
+                <div className="flex">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                            handleReservation.mutate({
+                                groupSlug: reservation.groupSlug,
+                                reservationId: reservation.reservationId,
+                                status:
+                                    reservation.status === ReservationState.APPROVED
+                                        ? ReservationState.REJECTED
+                                        : ReservationState.APPROVED,
+                            })
+                        }
+                        disabled={handleReservation.isPending}
+                        className="mr-2"
+                    >
+                        ✓
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                            handleReservation.mutate({
+                                groupSlug: reservation.groupSlug,
+                                reservationId: reservation.reservationId,
+                                status: ReservationState.PENDING,
+                            })
+                        }
+                        disabled={handleReservation.isPending}
+                        className="mr-2"
+                    >
+                        ?
+                    </Button>
+                    <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() =>
+                            handleReservation.mutate({
+                                groupSlug: reservation.groupSlug,
+                                reservationId: reservation.reservationId,
+                                status: ReservationState.REJECTED,
+                            })
+                        }
+                        disabled={handleReservation.isPending}
+                    >
+                        X
+                    </Button>
+                </div>
+            );
+        },
+    },
+    {
+        id: 'delete',
+
+        header: 'Slett',
         cell: ({ row }) => {
             const reservation = row.original;
             const utils = api.useUtils();

@@ -88,13 +88,15 @@ export default function BookableItemsView({
                             src="/placeholder.svg"
                             alt="cover image"
                         />
-                        <CardTitle className="p-3">{item.name}</CardTitle>
-                        <CardDescription className="pl-3 mb-2">
-                            <Badge className="select-none">
+                        <div className="p-3 space-y-2">
+                            <CardTitle className="m-0">{item.name}</CardTitle>
+                            <Badge className="w-fit">
                                 {item.groupSlug}
                             </Badge>
-                        </CardDescription>
-                        <CardContent>{item.description}</CardContent>
+                            <CardDescription className="m-0">
+                                {item.description}
+                            </CardDescription>
+                        </div>
                     </Card>
                 </Link>
             ))}

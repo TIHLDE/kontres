@@ -1,12 +1,15 @@
 'use client';
 
 import { type ReservationWithAuthor } from '@/server/dtos/reservations';
-
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ReservationState } from '@prisma/client';
 import { type ColumnDef } from '@tanstack/react-table';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale/nb';
+import { Trash2 } from 'lucide-react';
+import { api } from '@/trpc/react';
+import { toast } from '@/components/ui/use-toast';
 
 const StatusMap = {
     [ReservationState.APPROVED]: 'Godkjent',
@@ -56,5 +59,49 @@ export const columns: ColumnDef<ReservationWithAuthor>[] = [
     {
         accessorKey: 'bookableItemId',
         header: 'Gjenstand',
+    },
+    {
+        id: 'actions',
+        header: 'Handlinger',
+        cell: ({ row }) => {
+            const reservation = row.original;
+            const utils = api.useUtils();
+            
+            const deleteReservation = api.reservation.delete.useMutation({
+                onSuccess: () => {
+                    toast({
+                        title: 'Reservasjon slettet',
+                        description: 'Reservasjonen har blitt slettet.',
+                    });
+                    // Invalidate and refetch reservations
+                    utils.reservation.getReservations.invalidate();
+                },
+                onError: (error) => {
+                    toast({
+                        title: 'Feil',
+                        description: 'Kunne ikke slette reservasjonen.',
+                        variant: 'destructive',
+                    });
+                },
+            });
+
+            const handleDelete = () => {
+                if (confirm('Er du sikker på at du vil slette denne reservasjonen?')) {
+                    deleteReservation.mutate({ groupSlug: reservation.groupSlug, reservationId: reservation.reservationId });
+                }
+            };
+
+            return (
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleDelete}
+                    disabled={deleteReservation.isPending}
+                    className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                    <Trash2 className="h-4 w-4" />
+                </Button>
+            );
+        },
     },
 ];

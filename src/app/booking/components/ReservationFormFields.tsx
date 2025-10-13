@@ -296,7 +296,7 @@ const ReservationFormFields = ({
                             <FormLabel className="!my-0">
                                 Jeg godtar{' '}
                                 <Link
-                                    href="https://tihlde.org/wiki/tihlde/lover-og-regler/"
+                                    href="https://wiki.tihlde.org/retningslinjer/kontoret"
                                     className="font-bold underline"
                                     target="_blank"
                                 >

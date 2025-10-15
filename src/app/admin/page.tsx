@@ -45,7 +45,7 @@ export default async function Admin() {
                     className="flex gap-2 hover:underline"
                 >
                     <span className="opacity-50 flex items-center gap-2">
-                        Trøbbel? Bugs? Ikke gidd å si ifra til Index, vi gjør nok ikke noe med det
+                        Trøbbel? Bugs? Gi beskjed til Index så løser vi det!
                         <ExternalLinkIcon size={16} />
                     </span>
                 </Link>

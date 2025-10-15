@@ -1,4 +1,4 @@
-import { type ReservationWithAuthor } from '@/server/dtos/reservations';
+import { type ReservationWithAuthor, type ReservationWithAuthorAndItem } from '@/server/dtos/reservations';
 import { User } from '@/server/dtos/user';
 
 import {
@@ -68,6 +68,9 @@ export const reservationRouter = createTRPCRouter({
             const reservations = (await ctx.db.reservation.findMany({
                 take: limit + 1,
                 cursor: cursor ? { reservationId: cursor } : undefined,
+                include: {
+                    bookableItem: true,
+                },
                 where: {
                     status: {
                         in: input.filters.state,
@@ -115,7 +118,7 @@ export const reservationRouter = createTRPCRouter({
                 orderBy: {
                     reservationId: 'asc',
                 },
-            })) as ReservationWithAuthor[];
+            })) as ReservationWithAuthorAndItem[];
 
             let nextCursor: typeof cursor | undefined = undefined;
             if (reservations.length > limit) {

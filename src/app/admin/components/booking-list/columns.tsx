@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReservationWithAuthor } from '@/server/dtos/reservations';
+import { type ReservationWithAuthorAndItem } from '@/server/dtos/reservations';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ReservationState } from '@prisma/client';
@@ -10,6 +10,8 @@ import { nb } from 'date-fns/locale/nb';
 import { Trash2 } from 'lucide-react';
 import { api } from '@/trpc/react';
 import { toast } from '@/components/ui/use-toast';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+
 
 const StatusMap = {
     [ReservationState.APPROVED]: 'Godkjent',
@@ -17,7 +19,7 @@ const StatusMap = {
     [ReservationState.REJECTED]: 'Avvist',
 };
 
-export const columns: ColumnDef<ReservationWithAuthor>[] = [
+export const columns: ColumnDef<ReservationWithAuthorAndItem>[] = [
     {
         accessorKey: 'status',
         header: 'Status',
@@ -59,6 +61,10 @@ export const columns: ColumnDef<ReservationWithAuthor>[] = [
     {
         accessorKey: 'bookableItemId',
         header: 'Gjenstand',
+        accessorFn: (row) => {
+            if (!row.bookableItem?.name) return 'Ukjent gjenstand';
+            return row.bookableItem.name;
+        },
     },
     {
         id: 'actions',
@@ -86,54 +92,45 @@ export const columns: ColumnDef<ReservationWithAuthor>[] = [
                 
             });
             return (
-                <div className="flex">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                            handleReservation.mutate({
-                                groupSlug: reservation.groupSlug,
-                                reservationId: reservation.reservationId,
-                                status:
-                                    reservation.status === ReservationState.APPROVED
-                                        ? ReservationState.REJECTED
-                                        : ReservationState.APPROVED,
-                            })
-                        }
-                        disabled={handleReservation.isPending}
-                        className="mr-2"
-                    >
-                        ✓
-                    </Button>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                            handleReservation.mutate({
-                                groupSlug: reservation.groupSlug,
-                                reservationId: reservation.reservationId,
-                                status: ReservationState.PENDING,
-                            })
-                        }
-                        disabled={handleReservation.isPending}
-                        className="mr-2"
-                    >
-                        ?
-                    </Button>
-                    <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() =>
-                            handleReservation.mutate({
-                                groupSlug: reservation.groupSlug,
-                                reservationId: reservation.reservationId,
-                                status: ReservationState.REJECTED,
-                            })
-                        }
-                        disabled={handleReservation.isPending}
-                    >
-                        X
-                    </Button>
+                <div>
+                    <RadioGroup className="flex flex-row items-center">
+                        <RadioGroupItem
+                            value={ReservationState.APPROVED}
+                            onClick={() =>
+                                handleReservation.mutate({
+                                    groupSlug: reservation.groupSlug,
+                                    reservationId: reservation.reservationId,
+                                    status: ReservationState.APPROVED,
+                                })
+                            }
+                            disabled={handleReservation.isPending}
+                            className="mr-1 border-green-400"
+                        />
+                        <RadioGroupItem
+                            value={ReservationState.PENDING}
+                            onClick={() =>
+                                handleReservation.mutate({
+                                    groupSlug: reservation.groupSlug,
+                                    reservationId: reservation.reservationId,
+                                    status: ReservationState.PENDING,
+                                })
+                            }
+                            disabled={handleReservation.isPending}
+                            className="mr-1 border-yellow-400"
+                        />
+                        <RadioGroupItem
+                            value={ReservationState.REJECTED}
+                            onClick={() =>
+                                handleReservation.mutate({
+                                    groupSlug: reservation.groupSlug,
+                                    reservationId: reservation.reservationId,
+                                    status: ReservationState.REJECTED,
+                                })
+                            }
+                            disabled={handleReservation.isPending}
+                            className="border-red-400"
+                        />
+                    </RadioGroup>
                 </div>
             );
         },

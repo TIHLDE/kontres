@@ -1,12 +1,17 @@
 'use client';
 
-import { type ReservationWithAuthor } from '@/server/dtos/reservations';
-
+import { type ReservationWithAuthorAndItem } from '@/server/dtos/reservations';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ReservationState } from '@prisma/client';
 import { type ColumnDef } from '@tanstack/react-table';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale/nb';
+import { Trash2 } from 'lucide-react';
+import { api } from '@/trpc/react';
+import { toast } from '@/components/ui/use-toast';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+
 
 const StatusMap = {
     [ReservationState.APPROVED]: 'Godkjent',
@@ -14,7 +19,7 @@ const StatusMap = {
     [ReservationState.REJECTED]: 'Avvist',
 };
 
-export const columns: ColumnDef<ReservationWithAuthor>[] = [
+export const columns: ColumnDef<ReservationWithAuthorAndItem>[] = [
     {
         accessorKey: 'status',
         header: 'Status',
@@ -56,5 +61,123 @@ export const columns: ColumnDef<ReservationWithAuthor>[] = [
     {
         accessorKey: 'bookableItemId',
         header: 'Gjenstand',
+        accessorFn: (row) => {
+            if (!row.bookableItem?.name) return 'Ukjent gjenstand';
+            return row.bookableItem.name;
+        },
+    },
+    {
+        id: 'actions',
+
+                header: 'Behandle',
+        cell: ({row}) => {
+             const reservation = row.original;
+            const utils = api.useUtils();
+
+            const handleReservation = api.reservation.updateStatus.useMutation({
+                onSuccess: () => {
+                    toast({
+                        title: 'Status oppdatert',
+                        description: 'Reservasjonsstatusen er oppdatert.',
+                    });
+                    utils.reservation.getReservations.invalidate();
+                },
+                onError: () => {
+                    toast({
+                        title: 'Feil',
+                        description: 'Kunne ikke oppdatere statusen.',
+                        variant: 'destructive',
+                    });
+                },
+                
+            });
+            return (
+                <div>
+                    <RadioGroup className="flex flex-row items-center">
+                        <RadioGroupItem
+                            value={ReservationState.APPROVED}
+                            onClick={() =>
+                                handleReservation.mutate({
+                                    groupSlug: reservation.groupSlug,
+                                    reservationId: reservation.reservationId,
+                                    status: ReservationState.APPROVED,
+                                })
+                            }
+                            disabled={handleReservation.isPending}
+                            className="mr-1 border-green-400"
+                        />
+                        <RadioGroupItem
+                            value={ReservationState.PENDING}
+                            onClick={() =>
+                                handleReservation.mutate({
+                                    groupSlug: reservation.groupSlug,
+                                    reservationId: reservation.reservationId,
+                                    status: ReservationState.PENDING,
+                                })
+                            }
+                            disabled={handleReservation.isPending}
+                            className="mr-1 border-yellow-400"
+                        />
+                        <RadioGroupItem
+                            value={ReservationState.REJECTED}
+                            onClick={() =>
+                                handleReservation.mutate({
+                                    groupSlug: reservation.groupSlug,
+                                    reservationId: reservation.reservationId,
+                                    status: ReservationState.REJECTED,
+                                })
+                            }
+                            disabled={handleReservation.isPending}
+                            className="border-red-400"
+                        />
+                    </RadioGroup>
+                </div>
+            );
+        },
+    },
+    {
+        id: 'delete',
+
+        header: 'Slett',
+        cell: ({ row }) => {
+            const reservation = row.original;
+            const utils = api.useUtils();
+            
+            const deleteReservation = api.reservation.delete.useMutation({
+                onSuccess: () => {
+                    toast({
+                        title: 'Reservasjon slettet',
+                        description: 'Reservasjonen har blitt slettet.',
+                    });
+                    // Invalidate and refetch reservations
+                    utils.reservation.getReservations.invalidate();
+                },
+                onError: (error) => {
+                    toast({
+                        title: 'Feil',
+                        description: 'Kunne ikke slette reservasjonen.',
+                        variant: 'destructive',
+                    });
+                },
+            });
+
+            const handleDelete = () => {
+                if (confirm('Er du sikker på at du vil slette denne reservasjonen?')) {
+                    deleteReservation.mutate({ groupSlug: reservation.groupSlug, reservationId: reservation.reservationId });
+                }
+            };
+
+            return (
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleDelete}
+                    disabled={deleteReservation.isPending}
+                    className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                    <Trash2 className="h-4 w-4" />
+                </Button>
+            );
+        },
     },
 ];

@@ -7,10 +7,19 @@ import { ReservationState } from '@prisma/client';
 import { type ColumnDef } from '@tanstack/react-table';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale/nb';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Eye } from 'lucide-react';
 import { api } from '@/trpc/react';
 import { toast } from '@/components/ui/use-toast';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
+import ReservationCard from '@/app/admin/reservations/components/reservation-card';
+import { useState } from 'react';
 
 
 const StatusMap = {
@@ -132,6 +141,37 @@ export const columns: ColumnDef<ReservationWithAuthorAndItem>[] = [
                         />
                     </RadioGroup>
                 </div>
+            );
+        },
+    },
+    {
+        id: 'view',
+        header: 'Detaljer',
+        cell: ({ row }) => {
+            const reservation = row.original;
+            const [open, setOpen] = useState(false);
+
+            return (
+                <Dialog open={open} onOpenChange={setOpen}>
+                    <DialogTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        >
+                            <Eye className="h-4 w-4" />
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                            <DialogTitle>Reservasjonsdetaljer</DialogTitle>
+                        </DialogHeader>
+                        <ReservationCard
+                            reservation={reservation}
+                            onUpdate={() => setOpen(false)}
+                        />
+                    </DialogContent>
+                </Dialog>
             );
         },
     },

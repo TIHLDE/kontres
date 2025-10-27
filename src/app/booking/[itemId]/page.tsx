@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import ItemCalendar from '../components/ItemCalendar';
 import ItemDetails from '../components/ItemDetails';
 import ItemFAQs from '../components/ItemFAQs';
-import ReservationForm from '../components/ReservationForm';
 import { api } from '@/trpc/server';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -46,30 +45,18 @@ export default async function Page(props: PageProps) {
                 </div>
             </div>
 
-            {/* Main Content Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Left Column - Item Details and Calendar */}
-                <div className="lg:col-span-2 space-y-6">
-                    <ItemDetails
-                        name={item.name}
-                        description={item.description}
-                        allowsAlcohol={item.allowsAlcohol}
-                        groupSlug={item.groupSlug}
-                    />
+            {/* Item Details and Calendar */}
+            <div className="lg:col-span-2 space-y-6">
+                <ItemDetails
+                    itemId={item.itemId}
+                    name={item.name}
+                    description={item.description}
+                    allowsAlcohol={item.allowsAlcohol}
+                    groupSlug={item.groupSlug}
+                />
 
-                    <ItemCalendar itemId={item.itemId} />
-                </div>
-
-                {/* Right Column - Reservation Form */}
-                <div className="space-y-6">
-                    <ReservationForm
-                        itemId={item.itemId}
-                        groupSlug={item.groupSlug}
-                        allowsAlcohol={item.allowsAlcohol}
-                    />
-                </div>
+                <ItemCalendar itemId={item.itemId} />
             </div>
-
             {/* FAQ Section */}
             <div className="space-y-6">
                 <ItemFAQs itemId={item.itemId} />

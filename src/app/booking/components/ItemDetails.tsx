@@ -1,12 +1,15 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 
 import { Wine, WineOff } from 'lucide-react';
+import Link from 'next/link';
 
 interface ItemDetailsProps {
+    itemId: number;
     name: string;
     description: string;
     allowsAlcohol: boolean;
@@ -18,6 +21,7 @@ export default function ItemDetails({
     description,
     allowsAlcohol,
     groupSlug,
+    itemId,
 }: ItemDetailsProps) {
     return (
         <Card>
@@ -45,6 +49,13 @@ export default function ItemDetails({
                                 )}
                             </div>
                         </div>
+                    </div>
+                    <div>
+                        <Button asChild>
+                            <Link href={`/booking/${itemId}/new`}>
+                                Send inn reservasjon
+                            </Link>
+                        </Button>
                     </div>
                 </div>
             </CardHeader>

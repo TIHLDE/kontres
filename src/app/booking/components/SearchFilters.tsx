@@ -11,7 +11,7 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { DateTimeRangePicker } from '@/components/ui/date-time-range-picker';
+import { DateTimePicker } from '@/components/ui/date-time-picker';
 import Expandable from '@/components/ui/expandable';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -309,15 +309,16 @@ function Filters({
                 <Label>
                     <span>Tilgengelig mellom</span>
                 </Label>
-                <DateTimeRangePicker
-                    className="w-full"
-                    placeholder="Velg dato"
-                    range={{
-                        from: from ?? undefined,
-                        to: to ?? undefined,
-                    }}
-                    setRange={(e) => setDateRange(e)}
-                />
+                <div>
+                    <DateTimePicker
+                        value={from?.toISOString()}
+                        onChange={(e) => setFrom(new Date(e.target.value))}
+                    />
+                    <DateTimePicker
+                        value={to?.toISOString()}
+                        onChange={(e) => setTo(new Date(e.target.value))}
+                    />
+                </div>
             </div>
         </>
     );

@@ -65,6 +65,16 @@ export default function ReservationForm({
         },
     });
 
+    const handleDateRangeChange = (range: DateRange | undefined) => {
+        setDateRange(range);
+        if (range?.from) {
+            setValue('startTime', range.from, { shouldValidate: true });
+        }
+        if (range?.to) {
+            setValue('endTime', range.to, { shouldValidate: true });
+        }
+    };
+
     const createReservation = api.reservation.create.useMutation({
         onSuccess: () => {
             toast({
@@ -120,7 +130,7 @@ export default function ReservationForm({
                         <Label htmlFor="dateRange">Date and Time</Label>
                         <DateTimeRangePicker
                             range={dateRange}
-                            setRange={setDateRange}
+                            setRange={handleDateRangeChange}
                             placeholder="Select date and time range"
                         />
                         {errors.startTime && (

@@ -10,13 +10,13 @@ export default function AdminSidebar() {
     const pathname = usePathname();
 
     return (
-        <Card className="h-fit min-w-72 md:sticky top-24 z-50">
+        <Card className="h-fit min-w-72 md:sticky z-50">
             <CardContent className="pt-6">
-                <div className="flex flex-col">
+                <div className="flex flex-col gap-2">
                     <SideBarNavigationButton
                         icon={<CalendarIcon size={16} />}
-                        route="/admin/reservations"
-                        highlighted={pathname === '/admin/reservations'}
+                        route="/admin"
+                        highlighted={pathname === '/admin'}
                     >
                         Reservasjoner
                     </SideBarNavigationButton>

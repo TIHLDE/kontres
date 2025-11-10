@@ -2,7 +2,7 @@ import type { GroupInfo } from '@/server/api/routers/groupRouter';
 
 import { FilterGroup } from '@/components/ui/filters/filters';
 
-import { FilterGroups } from '@/app/admin/reservations/components/booking-filters/value-maps';
+import { FilterGroups } from '@/app/admin/components/booking-filters/value-maps';
 import { BookableItem } from '@prisma/client';
 import {
     AlertCircleIcon,

@@ -1,55 +1,97 @@
-import { SideBarNavigationButton } from './layout';
-import { CalendarIcon, ExternalLinkIcon, ShapesIcon } from 'lucide-react';
-import Link from 'next/link';
+'use client';
 
-export default async function Admin() {
-    // Get the user
+import { Button } from '@/components/ui/button';
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { LoadingSpinner } from '@/components/ui/loadingspinner';
 
-    // Set default values for searchParams if none is defined
+import BookingList from './components/booking-list/booking-list';
+import AdminBookingFilters, {
+    reservationStateParser,
+    timeDirectionParser,
+} from './components/booking-filters/booking-filters';
+import { groupParser } from '@/app/booking/components/SearchFilters';
+import { cn } from '@/lib/utils';
+import { api } from '@/trpc/react';
+import { parseAsArrayOf, parseAsString, useQueryStates } from 'nuqs';
+
+export default function Page() {
+    const [filters] = useQueryStates({
+        q: parseAsString,
+        groups: groupParser.withDefault([]),
+        fromDate: parseAsString,
+        toDate: parseAsString,
+        time: timeDirectionParser.withDefault([]),
+        states: reservationStateParser.withDefault([]),
+        items: parseAsArrayOf<string>(parseAsString).withDefault([]),
+    });
+
+    // Fetch the reservations based on filter params
+    const {
+        data,
+        isLoading,
+        hasNextPage,
+        hasPreviousPage,
+        fetchNextPage,
+        isFetchingNextPage,
+    } = api.reservation.getReservations.useInfiniteQuery(
+        {
+            filters: {
+                groupSlugs:
+                    filters.groups.length > 0 ? filters.groups : undefined,
+                state:
+                    filters.states && filters?.states?.length > 0
+                        ? filters.states
+                        : undefined,
+                bookableItem:
+                    filters.items && filters.items.length > 0
+                        ? filters.items.map(Number)
+                        : undefined,
+                timeDirection: filters.time,
+            },
+            limit: 5,
+        },
+        { getNextPageParam: (lastPage) => lastPage.nextCursor },
+    );
 
     return (
-        <div className="flex p-20 flex-col gap-5 h-full">
-            <div className="flex flex-col">
-                <h1 className="scroll-m-20 text-4xl font-normal tracking-tight lg:text-5xl">
-                    Admin
-                </h1>
-                <h2 className="scroll-m-20 text-2xl font-normal tracking-tight opacity-50">
-                    Hva ønsker du å se?
-                </h2>
-            </div>
-            <div className="w-full flex flex-col">
-                <SideBarNavigationButton
-                    route="/admin/reservations"
-                    className="w-full justify-start gap-5"
-                    link={{
-                        className: 'w-full',
-                    }}
-                >
-                    <CalendarIcon size={20} />
-                    Reservasjoner
-                </SideBarNavigationButton>
-                <SideBarNavigationButton
-                    link={{
-                        className: 'w-full',
-                    }}
-                    route="/admin/items"
-                    className="w-full justify-start gap-5"
-                >
-                    <ShapesIcon size={20} />
-                    Gjenstander
-                </SideBarNavigationButton>
-            </div>
-            <div className="h-full flex items-end">
-                <Link
-                    href="https://tihlde.org/tilbakemelding/"
-                    className="flex gap-2 hover:underline"
-                >
-                    <span className="opacity-50 flex items-center gap-2">
-                        Trøbbel? Bugs? Gi beskjed til Index så løser vi det!
-                        <ExternalLinkIcon size={16} />
-                    </span>
-                </Link>
-            </div>
-        </div>
+        <>
+            <CardHeader>
+                <CardTitle>Reservasjoner</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="gap-5 flex flex-col">
+                    <AdminBookingFilters />
+                    <div
+                        className={cn(
+                            'w-full h-full transition-all gap-5 flex flex-col',
+                            isLoading ? 'blur-sm' : '',
+                        )}
+                    >
+                        <BookingList
+                            items={
+                                data?.pages.flatMap(
+                                    (page) => page.reservations,
+                                ) ?? []
+                            }
+                        />
+                        {hasNextPage && (
+                            <Button
+                                className="ml-auto gap-2.5 items-center"
+                                onClick={() => fetchNextPage()}
+                                disabled={isFetchingNextPage}
+                            >
+                                {isFetchingNextPage ? (
+                                    <>
+                                        <LoadingSpinner /> Henter mer
+                                    </>
+                                ) : (
+                                    'Last inn mer'
+                                )}
+                            </Button>
+                        )}
+                    </div>
+                </div>
+            </CardContent>
+        </>
     );
 }

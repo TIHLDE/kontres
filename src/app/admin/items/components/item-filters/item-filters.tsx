@@ -4,7 +4,7 @@ import FilterSkeleton from '@/components/ui/filters/filter-skeleton';
 import Filters, { FilterCallbackType } from '@/components/ui/filters/filters';
 
 import itemFilterGroups, { GroupIcons } from './filter-list';
-import { FilterGroups } from '@/app/admin/reservations/components/booking-filters/value-maps';
+import { FilterGroups } from '@/app/admin/components/booking-filters/value-maps';
 import { TimeDirection } from '@/app/admin/utils/enums';
 import { groupParser } from '@/app/booking/components/SearchFilters';
 import { api } from '@/trpc/react';

@@ -37,6 +37,7 @@ export const createCallerFactory = t.createCallerFactory;
 
 export const createTRPCRouter = t.router;
 
+/*
 const timingMiddleware = t.middleware(async ({ next, path }) => {
     const start = Date.now();
 
@@ -51,14 +52,14 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
     const end = Date.now();
 
     return result;
-});
+});*/
 
 /**
  * If a user doesnt have a membership, authorize will fail.
  * @see auth.ts
  */
 export const memberProcedure = t.procedure
-    .use(timingMiddleware)
+    //.use(timingMiddleware)
     .use(({ ctx, next }) => {
         if (!ctx.session) throw new TRPCError({ code: 'UNAUTHORIZED' });
 
@@ -75,7 +76,7 @@ const groupLeaderInputSchema = z.object({
 
 export const groupLeaderProcedure = t.procedure
     .input(groupLeaderInputSchema)
-    .use(timingMiddleware)
+    //.use(timingMiddleware)
     .use(({ ctx, input, next }) => {
         if (
             !ctx.session ||
@@ -93,7 +94,7 @@ export const groupLeaderProcedure = t.procedure
     });
 
 export const adminProcedure = t.procedure
-    .use(timingMiddleware)
+    //.use(timingMiddleware)
     .use(({ ctx, next }) => {
         if (!ctx.session || ctx.session.user.role !== 'ADMIN') {
             throw new TRPCError({ code: 'UNAUTHORIZED' });

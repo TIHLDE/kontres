@@ -89,6 +89,49 @@ export const UserArea = ({
                         >
                             Min side
                         </Button>
+                    
+    return (
+        <div
+            {...props}
+            className={cn(
+                'flex items-center justify-center w-fit gap-3',
+                className,
+            )}
+        >
+            <Popover onOpenChange={(open) => setOpen(open)} open={open}>
+                <PopoverTrigger>
+                    <Avatar>
+                        <AvatarImage src={image} alt={'profilbilde'} />
+                        <AvatarFallback>
+                            <UserRound className="text-foreground" />
+                        </AvatarFallback>
+                    </Avatar>
+                </PopoverTrigger>
+                <PopoverContent>
+                    <div className="w-full flex flex-col items-center content-center">
+                        <Avatar className="h-20 w-20">
+                            <AvatarImage src={image} alt={'profilbilde'} />
+                            <AvatarFallback>
+                                <UserRound className="text-foreground" />
+                            </AvatarFallback>
+                        </Avatar>
+                        <span className="scroll-m-20 text-2xl font-semibold tracking-tight">
+                            Hei, {name}
+                        </span>
+                        <Button
+                            variant={'destructive'}
+                            className="mt-2 w-full"
+                            onClick={signOutButton}
+                        >
+                            Logg ut
+                        </Button>
+                        <Button
+                            variant={'outline'}
+                            className="w-full mt-1"
+                            onClick={goToMyPage}
+                        >
+                            Min side
+                        </Button>
                         {admin ? (
                             <Button
                                 variant={'outline'}
@@ -99,6 +142,12 @@ export const UserArea = ({
                             </Button>
                         ) : undefined}
                     </div>
+                </PopoverContent>
+            </Popover>
+            <ModeToggle />
+        </div>
+    );
+};</div>
                 </PopoverContent>
             </Popover>
             <ModeToggle />

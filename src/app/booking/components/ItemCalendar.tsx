@@ -10,6 +10,12 @@ import { api } from '@/trpc/react';
 import { useMediaQuery } from '@uidotdev/usehooks';
 import { CalendarIcon } from 'lucide-react';
 import { useMemo } from 'react';
+import {
+    eachDayOfInterval,
+    endOfDay,
+    isSameDay,
+    startOfDay,
+} from 'date-fns';
 
 interface ItemCalendarProps {
     itemId: number;
@@ -26,15 +32,36 @@ export default function ItemCalendar({ itemId }: ItemCalendarProps) {
     }, []);
 
     const events = useMemo<CalendarEvent[]>(() => {
-        return (
-            reservations?.reservations.map((res) => ({
-                id: res.reservationId.toString(),
-                title: res.authorId,
-                start: new Date(res.startTime),
-                end: new Date(res.endTime),
-                color: 'red',
-            })) ?? []
-        );
+        if (!reservations?.reservations) return [];
+
+        return reservations.reservations.flatMap((res) => {
+            const reservationStart = new Date(res.startTime);
+            const reservationEnd = new Date(res.endTime);
+
+            const days = eachDayOfInterval({
+                start: startOfDay(reservationStart),
+                end: startOfDay(reservationEnd),
+            });
+
+            return days.map((day) => {
+                const segmentStart = isSameDay(day, reservationStart)
+                    ? reservationStart
+                    : startOfDay(day);
+                const segmentEnd = isSameDay(day, reservationEnd)
+                    ? reservationEnd
+                    : endOfDay(day);
+
+                return {
+                    id: `${res.reservationId}-${day.toISOString()}`,
+                    title: res.authorId,
+                    start: segmentStart,
+                    end: segmentEnd,
+                    fullStart: reservationStart,
+                    fullEnd: reservationEnd,
+                    color: 'red',
+                } satisfies CalendarEvent;
+            });
+        });
     }, [reservations]);
 
     const isMobile = useMediaQuery('(max-width: 768px)');

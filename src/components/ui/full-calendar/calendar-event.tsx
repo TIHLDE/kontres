@@ -76,6 +76,9 @@ export default function CalendarEvent({
     const { events, date } = useCalendarContext();
     const style = month ? {} : calculateEventPosition(event, events);
 
+    const displayStart = event.fullStart ?? event.start;
+    const displayEnd = event.fullEnd ?? event.end;
+
     // Generate a unique key that includes the current month to prevent animation conflicts
     const isEventInCurrentMonth = isSameMonth(event.start, date);
     const animationKey = `${event.id}-${
@@ -144,12 +147,12 @@ export default function CalendarEvent({
                             {event.title}
                         </p>
                         <p className={cn('text-sm', month && 'text-xs')}>
-                            <span>{format(event.start, 'HH:mm')}</span>
+                            <span>{format(displayStart, 'HH:mm')}</span>
                             <span className={cn('mx-1', month && 'hidden')}>
                                 -
                             </span>
                             <span className={cn(month && 'hidden')}>
-                                {format(event.end, 'HH:mm')}
+                                {format(displayEnd, 'HH:mm')}
                             </span>
                         </p>
                     </motion.div>

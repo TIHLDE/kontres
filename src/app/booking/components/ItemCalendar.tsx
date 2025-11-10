@@ -1,6 +1,7 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import CalendarBody from '@/components/ui/full-calendar/body/calendar-body';
 import CalendarProvider from '@/components/ui/full-calendar/calendar-provider';
@@ -8,11 +9,13 @@ import { CalendarEvent } from '@/components/ui/full-calendar/calendar-types';
 
 import { api } from '@/trpc/react';
 import { useMediaQuery } from '@uidotdev/usehooks';
-import { CalendarIcon } from 'lucide-react';
-import { useMemo } from 'react';
+import { CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import {
+    addDays,
     eachDayOfInterval,
     endOfDay,
+    format,
     isSameDay,
     startOfDay,
 } from 'date-fns';
@@ -27,9 +30,7 @@ export default function ItemCalendar({ itemId }: ItemCalendarProps) {
             bookableItemId: itemId,
         });
 
-    const today = useMemo(() => {
-        return new Date();
-    }, []);
+    const [currentDate, setCurrentDate] = useState(() => new Date());
 
     const events = useMemo<CalendarEvent[]>(() => {
         if (!reservations?.reservations) return [];
@@ -53,7 +54,7 @@ export default function ItemCalendar({ itemId }: ItemCalendarProps) {
 
                 return {
                     id: `${res.reservationId}-${day.toISOString()}`,
-                    title: res.authorId,
+                    title: res.groupSlug.toUpperCase() ?? 'Enkelt person',
                     start: segmentStart,
                     end: segmentEnd,
                     fullStart: reservationStart,
@@ -66,6 +67,17 @@ export default function ItemCalendar({ itemId }: ItemCalendarProps) {
 
     const isMobile = useMediaQuery('(max-width: 768px)');
     const mode = isMobile ? 'day' : 'week';
+
+    const handleNavigate = (direction: 'previous' | 'next') => {
+        const delta = mode === 'day' ? 1 : 7;
+        setCurrentDate((prev) =>
+            addDays(prev, direction === 'next' ? delta : -delta),
+        );
+    };
+
+    const handleResetToday = () => {
+        setCurrentDate(new Date());
+    };
 
     return (
         <Card>
@@ -80,14 +92,64 @@ export default function ItemCalendar({ itemId }: ItemCalendarProps) {
                     <CalendarProvider
                         events={events}
                         mode={mode}
-                        date={today}
+                        date={currentDate}
                         calendarIconIsToday
                     >
+                        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <span>
+                                    {format(
+                                        currentDate,
+                                        mode === 'day'
+                                            ? 'PPP'
+                                            : "wo 'uke' yyyy",
+                                    )}
+                                </span>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={handleResetToday}
+                                >
+                                    I dag
+                                </Button>
+                                <div className="flex gap-2">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={() => handleNavigate('previous')}
+                                        aria-label={
+                                            mode === 'day'
+                                                ? 'Forrige dag'
+                                                : 'Forrige uke'
+                                        }
+                                    >
+                                        <ChevronLeft className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={() => handleNavigate('next')}
+                                        aria-label={
+                                            mode === 'day'
+                                                ? 'Neste dag'
+                                                : 'Neste uke'
+                                        }
+                                    >
+                                        <ChevronRight className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
                         <CalendarBody />
                     </CalendarProvider>
                     <div className="flex items-center gap-4 text-sm">
                         <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 bg-red-100 border border-red-300 rounded"></div>
+                            <div className="w-3 h-3 bg-red-100 border bg-red-200 border-red-300 rounded"></div>
                             <span>Reserved</span>
                         </div>
                     </div>

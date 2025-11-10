@@ -2,24 +2,17 @@
 
 import { GroupInfo } from '@/server/api/routers/groupRouter';
 
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Calendar } from '@/components/ui/calendar';
 import Expandable from '@/components/ui/expandable';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover';
+import { DateTimeField } from '@/components/ui/date-time-field';
 import { Separator } from '@/components/ui/separator';
 
 import { cn } from '@/lib/utils';
 import {
-    ChevronDown,
     ChevronRight,
     FunnelX,
     Search,
@@ -210,19 +203,6 @@ function Filters({
 }: FiltersProps) {
     const [isGroupSectionOpen, setIsGroupSectionOpen] = useState(false);
 
-    const handleFromChange = React.useCallback(
-        (value: Date | null) => {
-            void setFrom(value);
-        },
-        [setFrom],
-    );
-
-    const handleToChange = React.useCallback(
-        (value: Date | null) => {
-            void setTo(value);
-        },
-        [setTo],
-    );
     return (
         <>
             <Label className="space-y-3">
@@ -313,128 +293,32 @@ function Filters({
                     <span>Tilgengelig mellom</span>
                 </Label>
                 <div className="mt-3 flex flex-col gap-4">
-                    <DateTimeSelector
-                        label="Fra"
-                        value={from}
-                        onChange={handleFromChange}
-                    />
-                    <DateTimeSelector
-                        label="Til"
-                        value={to}
-                        onChange={handleToChange}
-                    />
+                    <div className="flex flex-col gap-2">
+                        <Label className="px-1 text-sm text-muted-foreground">
+                            Fra
+                        </Label>
+                        <DateTimeField
+                            value={from}
+                            onChange={(next) => {
+                                void setFrom(next);
+                            }}
+                            placeholder="Velg startdato"
+                        />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                        <Label className="px-1 text-sm text-muted-foreground">
+                            Til
+                        </Label>
+                        <DateTimeField
+                            value={to}
+                            onChange={(next) => {
+                                void setTo(next);
+                            }}
+                            placeholder="Velg sluttdato"
+                        />
+                    </div>
                 </div>
             </div>
         </>
-    );
-}
-
-type DateTimeSelectorProps = {
-    label: string;
-    value: Date | null;
-    onChange: (value: Date | null) => void;
-};
-
-function DateTimeSelector({ label, value, onChange }: DateTimeSelectorProps) {
-    const [open, setOpen] = useState(false);
-
-    const formattedDate = value
-        ? value.toLocaleDateString('nb-NO')
-        : 'Velg dato';
-
-    const timeValue = value
-        ? `${value.getHours().toString().padStart(2, '0')}:${value
-              .getMinutes()
-              .toString()
-              .padStart(2, '0')}`
-        : '';
-
-    const handleDateSelect = React.useCallback(
-        (selected: Date | undefined) => {
-            if (!selected) {
-                onChange(null);
-                setOpen(false);
-                return;
-            }
-
-            const nextDate = new Date(selected);
-            if (value) {
-                nextDate.setHours(
-                    value.getHours(),
-                    value.getMinutes(),
-                    value.getSeconds(),
-                    0,
-                );
-            }
-
-            onChange(nextDate);
-            setOpen(false);
-        },
-        [onChange, setOpen, value],
-    );
-
-    const handleTimeChange = React.useCallback(
-        (event: React.ChangeEvent<HTMLInputElement>) => {
-            const timeString = event.target.value;
-            if (!timeString) {
-                onChange(value);
-                return;
-            }
-
-            const [hoursString, minutesString, secondsString] =
-                timeString.split(':');
-            const hours = Number(hoursString ?? '0');
-            const minutes = Number(minutesString ?? '0');
-            const seconds = Number(secondsString ?? '0');
-
-            const baseDate = value ?? new Date();
-            const nextDate = new Date(baseDate);
-            nextDate.setHours(hours, minutes, seconds, 0);
-            onChange(nextDate);
-        },
-        [onChange, value],
-    );
-
-    return (
-        <div className="flex flex-col gap-2">
-            <Label className="px-1">{label}</Label>
-            <div className="flex flex-wrap gap-3">
-                <Popover open={open} onOpenChange={setOpen}>
-                    <PopoverTrigger asChild>
-                        <Button
-                            variant="outline"
-                            size="default"
-                            type="button"
-                            className="md:w-48 w-full justify-between font-normal h-10"
-                        >
-                            {formattedDate}
-                            <ChevronDown className="h-4 w-4" />
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                        className="w-auto overflow-hidden p-0"
-                        align="start"
-                    >
-                        <Calendar
-                            mode="single"
-                            selected={value ?? undefined}
-                            onSelect={handleDateSelect}
-                            initialFocus
-                            showOutsideDays
-                        />
-                    </PopoverContent>
-                </Popover>
-                <Input
-                    type="time"
-                    value={timeValue}
-                    onChange={handleTimeChange}
-                    disabled={!value}
-                    className={cn(
-                        'md:w-36 w-full h-10',
-                        'bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none',
-                    )}
-                />
-            </div>
-        </div>
     );
 }

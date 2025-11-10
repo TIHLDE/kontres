@@ -26,7 +26,7 @@ export default function ItemDetails({
     return (
         <Card>
             <CardHeader>
-                <div className="flex items-start justify-between">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <CardTitle className="text-2xl">{name}</CardTitle>
                         <div className="flex items-center gap-2 mt-2">

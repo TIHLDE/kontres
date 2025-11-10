@@ -28,7 +28,7 @@ export default async function Page(props: PageProps) {
     }
 
     return (
-        <div className="container max-w-page space-y-8">
+        <div className="container max-w-page space-y-8 px-0">
             {/* Header */}
             <div className="flex flex-col gap-4">
                 <Link href="/booking">

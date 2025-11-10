@@ -11,143 +11,218 @@ import {
     FormField,
     FormItem,
     FormLabel,
+    FormMessage,
 } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+import GroupSelect from '@/components/ui/group-select';
 import { LoadingSpinner } from '@/components/ui/loadingspinner';
+import { Textarea } from '@/components/ui/textarea';
+import { toast } from '@/components/ui/use-toast';
 
+import { api } from '@/trpc/react';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { CalendarIcon } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-const formSchema = z.object({
-    from: z.date(),
-    to: z.date(),
-    onBehalfOf: z.string().min(1, { message: 'Du må velge en gruppe' }),
-    description: z
-        .string()
-        .min(10, { message: 'Beskrivelse må være minst 10 tegn' }),
-    acceptedRules: z.boolean(),
-});
+const formSchema = z
+    .object({
+        from: z.date({
+            required_error: 'Du må velge startdato og tid',
+        }),
+        to: z.date({
+            required_error: 'Du må velge sluttdato og tid',
+        }),
+        onBehalfOf: z.string().min(1, { message: 'Du må velge en gruppe' }),
+        description: z
+            .string()
+            .min(10, { message: 'Beskrivelse må være minst 10 tegn' })
+            .max(500, { message: 'Beskrivelse kan ikke være mer enn 500 tegn' }),
+        servesAlcohol: z.boolean().default(false),
+        soberWatch: z.string().optional(),
+        acceptedRules: z.boolean().refine((val) => val === true, {
+            message: 'Du må godta vilkårene for å fortsette',
+        }),
+    })
+    .refine((data) => data.to > data.from, {
+        message: 'Sluttdato må være etter startdato',
+        path: ['to'],
+    });
 
-/**
- * Parent wrapper for the entire reservation form
- */
-const ReservationForm = () => {
+interface ReservationFormProps {
+    itemId: number;
+    itemName?: string;
+}
+
+const ReservationForm = ({ 
+    itemId, 
+    itemName, 
+}: ReservationFormProps) => {
+    const router = useRouter();
+    
+    // Fetch user's group slugs and all available groups
+    const { data: userGroupSlugs } = api.group.getUserGroups.useQuery();
+    const { data: allGroups, isLoading: groupsLoading } = api.group.getAll.useQuery();
+    
+    // Filter groups to only show ones the user is a member of
+    const availableGroups = useMemo(() => {
+        if (!userGroupSlugs || !allGroups) return [];
+        return allGroups
+            .filter((group) => userGroupSlugs.includes(group.groupSlug))
+            .map((group) => ({
+                value: group.groupSlug,
+                label: group.groupName,
+            }));
+    }, [userGroupSlugs, allGroups]);
+    
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         shouldUnregister: false,
         defaultValues: {
             from: new Date(),
-            to: new Date(Date.now() + 1000 * 60 * 60),
+            to: new Date(Date.now() + 1000 * 60 * 60), // Default: 1 hour from now
+            onBehalfOf: '',
+            description: '',
+            servesAlcohol: false,
+            soberWatch: '',
+            acceptedRules: false,
         },
     });
 
-    function onSubmit(data: z.infer<typeof formSchema>) {
-        console.log(data);
+    const createReservation = api.reservation.create.useMutation({
+        onSuccess: () => {
+            toast({
+                title: 'Reservasjon sendt',
+                description: 'Din reservasjon er sendt til godkjenning.',
+            });
+            router.push('/booking');
+        },
+        onError: (error) => {
+            toast({
+                title: 'Feil',
+                description: error.message || 'Noe gikk galt. Prøv igjen senere.',
+                variant: 'destructive',
+            });
+        },
+    });
+
+    async function onSubmit(data: z.infer<typeof formSchema>) {
+        createReservation.mutate({
+            itemId,
+            groupSlug: data.onBehalfOf,
+            description: data.description,
+            startTime: data.from,
+            endTime: data.to,
+            servesAlcohol: data.servesAlcohol,
+            soberWatch: data.soberWatch || '',
+        });
     }
 
     return (
         <div className="grid place-items-center pt-20">
-            <Card>
+            <Card className="w-full max-w-2xl">
                 <CardHeader>
-                    <CardTitle>
-                        Reserver {'{{'}item.name{'}}'}
+                    <CardTitle className="flex items-center gap-2">
+                        <CalendarIcon className="h-5 w-5" />
+                        {itemName ? `Reserver ${itemName}` : 'Ny reservasjon'}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)}>
-                            <FormField
-                                control={form.control}
-                                name="from"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Fra dato</FormLabel>
-                                        <FormControl>
-                                            <DateTimePicker
-                                                className="flex w-full"
-                                                {...field}
-                                                value={
-                                                    field.value
-                                                        ? field.value.toISOString()
-                                                        : undefined
-                                                }
-                                                onChange={(e) => {
-                                                    form.setValue(
-                                                        'from',
-                                                        new Date(
-                                                            e.target.value,
-                                                        ),
-                                                        {
-                                                            shouldDirty: true,
-                                                            shouldTouch: true,
-                                                        },
-                                                    );
-                                                }}
-                                            />
-                                        </FormControl>
-                                    </FormItem>
-                                )}
-                            />
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                <FormField
+                                    control={form.control}
+                                    name="from"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Fra dato og tid</FormLabel>
+                                            <FormControl>
+                                                <DateTimePicker
+                                                    className="w-full"
+                                                    {...field}
+                                                    value={
+                                                        field.value
+                                                            ? field.value.toISOString()
+                                                            : undefined
+                                                    }
+                                                    onChange={(e) => {
+                                                        form.setValue(
+                                                            'from',
+                                                            new Date(e.target.value),
+                                                            {
+                                                                shouldValidate: true,
+                                                                shouldDirty: true,
+                                                                shouldTouch: true,
+                                                            },
+                                                        );
+                                                    }}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
 
-                            <FormField
-                                control={form.control}
-                                name="to"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Til dato</FormLabel>
-                                        <FormControl>
-                                            <DateTimePicker
-                                                className="flex w-full"
-                                                {...field}
-                                                value={
-                                                    field.value
-                                                        ? field.value.toISOString()
-                                                        : undefined
-                                                }
-                                                onChange={(e) => {
-                                                    form.setValue(
-                                                        'to',
-                                                        new Date(
-                                                            e.target.value,
-                                                        ),
-                                                        {
-                                                            shouldDirty: true,
-                                                            shouldTouch: true,
-                                                        },
-                                                    );
-                                                }}
-                                            />
-                                        </FormControl>
-                                    </FormItem>
-                                )}
-                            />
+                                <FormField
+                                    control={form.control}
+                                    name="to"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Til dato og tid</FormLabel>
+                                            <FormControl>
+                                                <DateTimePicker
+                                                    className="w-full"
+                                                    {...field}
+                                                    value={
+                                                        field.value
+                                                            ? field.value.toISOString()
+                                                            : undefined
+                                                    }
+                                                    onChange={(e) => {
+                                                        form.setValue(
+                                                            'to',
+                                                            new Date(e.target.value),
+                                                            {
+                                                                shouldValidate: true,
+                                                                shouldDirty: true,
+                                                                shouldTouch: true,
+                                                            },
+                                                        );
+                                                    }}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
 
                             <FormField
                                 control={form.control}
                                 name="onBehalfOf"
                                 render={({ field }) => (
-                                    <FormItem className="my-2">
-                                        <FormLabel>
-                                            Send inn søknad på vegne av
-                                        </FormLabel>
+                                    <FormItem>
+                                        <FormLabel>På vegne av gruppe</FormLabel>
                                         <FormControl>
-                                            {/* <AutoSelect
-                                                options={groups ?? []}
-                                                placeholder="Velg et alternativ"
-                                                defaultValue="0"
-                                                onValueChange={(e) => {
-                                                    groupChangeCallback(e);
-                                                    field.onChange(e);
-                                                }}
-                                                {...field}
-                                            /> */}
+                                            <GroupSelect
+                                                groups={availableGroups}
+                                                value={field.value}
+                                                onChange={field.onChange}
+                                                disabled={groupsLoading}
+                                            />
                                         </FormControl>
                                         <FormDescription>
-                                            Du kan kun sende inn forespørsler på
-                                            vegne av grupper du er medlem av
+                                            {groupsLoading 
+                                                ? 'Laster grupper...'
+                                                : availableGroups.length === 0
+                                                ? 'Du er ikke medlem av noen grupper'
+                                                : 'Du kan kun sende inn forespørsler på vegne av grupper du er medlem av'
+                                            }
                                         </FormDescription>
+                                        <FormMessage />
                                     </FormItem>
                                 )}
                             />
@@ -159,97 +234,34 @@ const ReservationForm = () => {
                                     <FormItem>
                                         <FormLabel>Beskrivelse</FormLabel>
                                         <FormControl>
-                                            <Input {...field} />
+                                            <Textarea
+                                                {...field}
+                                                placeholder="Beskriv formålet med reservasjonen..."
+                                                rows={4}
+                                            />
                                         </FormControl>
+                                        <FormDescription>
+                                            Minst 10 tegn, maks 500 tegn
+                                        </FormDescription>
+                                        <FormMessage />
                                     </FormItem>
                                 )}
                             />
-                            {/* {selectedItem?.allows_alcohol && (
-                                <>
-                                    <FormField
-                                        control={form.control}
-                                        name="serves_alcohol"
-                                        render={({ field: { value, ...rest } }) => (
-                                            <FormItem className="flex items-center space-x-2">
-                                                <FormControl>
-                                                    <Checkbox
-                                                        {...rest}
-                                                        checked={value}
-                                                        onCheckedChange={(e) =>
-                                                            form.setValue(
-                                                                'serves_alcohol',
-                                                                Boolean(e.valueOf()),
-                                                                {
-                                                                    shouldDirty: true,
-                                                                    shouldTouch: true,
-                                                                },
-                                                            )
-                                                        }
-                                                    />
-                                                </FormControl>
-                                                <FormLabel className="!my-0">
-                                                    Vi skal servere alkohol på
-                                                    arrangementet og har fylt ut{' '}
-                                                    <Link
-                                                        href="https://hjelp.ntnu.no/tas/public/ssp/content/serviceflow?unid=8f090c9e58444762876750db1104178d&from=aef98c8c-3eb9-4e29-8439-e79834d88223&openedFromService=true"
-                                                        target="_blank"
-                                                        className="font-bold underline"
-                                                    >
-                                                        søknad hos NTNU
-                                                    </Link>
-                                                </FormLabel>
-                                            </FormItem>
-                                        )}
-                                    />
-                                    {form.watch('serves_alcohol') && (
-                                        <motion.div
-                                            initial={{
-                                                height: 0,
-                                                overflow: 'hidden',
-                                            }}
-                                            animate={{
-                                                height: 'fit-content',
-                                            }}
-                                            transition={{
-                                                duration: 0.5,
-                                                type: 'spring',
-                                                bounce: 0.25,
-                                            }}
-                                        >
-                                            <FormField
-                                                control={form.control}
-                                                name="sober_watch_id"
-                                                render={({ field }) => (
-                                                    <FormItem className="mb-4">
-                                                        <FormLabel>
-                                                            Edruvakt sitt navn
-                                                        </FormLabel>
-                                                        <FormControl>
-                                                            <UserAutocomplete
-                                                                {...field}
-                                                            />
-                                                        </FormControl>
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </motion.div>
-                                    )}
-                                </>
-                            )} */}
                             <FormField
                                 control={form.control}
-                                name="accepted_rules"
+                                name="acceptedRules"
                                 render={({ field: { value, ...rest } }) => (
-                                    <FormItem className="flex items-center space-x-2">
+                                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                                         <FormControl>
                                             <Checkbox
                                                 {...rest}
-                                                checked={value}
+                                                checked={!!value}
                                                 onCheckedChange={(e) => {
                                                     form.setValue(
-                                                        '',
+                                                        'acceptedRules',
                                                         Boolean(e.valueOf()),
                                                         {
+                                                            shouldValidate: true,
                                                             shouldDirty: true,
                                                             shouldTouch: true,
                                                         },
@@ -257,37 +269,45 @@ const ReservationForm = () => {
                                                 }}
                                             />
                                         </FormControl>
-                                        <FormLabel className="!my-0">
-                                            Jeg godtar{' '}
-                                            <Link
-                                                href="https://wiki.tihlde.org/retningslinjer/kontoret"
-                                                className="font-bold underline"
-                                                target="_blank"
-                                            >
-                                                vilkårene for bruk og utlån av
-                                                TIHLDEs eiendeler
-                                            </Link>
-                                        </FormLabel>
+                                        <div className="space-y-1 leading-none">
+                                            <FormLabel>
+                                                Jeg godtar{' '}
+                                                <Link
+                                                    href="https://wiki.tihlde.org/retningslinjer/kontoret"
+                                                    className="font-bold underline hover:text-primary"
+                                                    target="_blank"
+                                                >
+                                                    vilkårene for bruk og utlån av TIHLDEs eiendeler
+                                                </Link>
+                                            </FormLabel>
+                                            <FormMessage />
+                                        </div>
                                     </FormItem>
                                 )}
                             />
 
-                            {/* <ApplicantCard
-                                image={applicant?.image}
-                                label={applicant?.label}
-                                className="w-full"
-                            /> */}
-
-                            <div className="mt-5">
+                            <div className="flex gap-3">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    className="w-full"
+                                    onClick={() => router.back()}
+                                    disabled={form.formState.isSubmitting || createReservation.isPending}
+                                >
+                                    Avbryt
+                                </Button>
                                 <Button
                                     type="submit"
                                     className="w-full"
-                                    disabled={form.formState.isSubmitting}
+                                    disabled={form.formState.isSubmitting || createReservation.isPending}
                                 >
-                                    {form.formState.isSubmitting ? (
-                                        <LoadingSpinner />
+                                    {form.formState.isSubmitting || createReservation.isPending ? (
+                                        <>
+                                            <LoadingSpinner />
+                                            <span className="ml-2">Sender...</span>
+                                        </>
                                     ) : (
-                                        'Reserver'
+                                        'Send inn reservasjon'
                                     )}
                                 </Button>
                             </div>

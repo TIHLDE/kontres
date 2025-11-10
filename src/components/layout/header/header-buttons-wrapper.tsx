@@ -25,6 +25,9 @@ const HeaderButtonsWrapper = async ({
                 {/* <BookableItems className="flex gap-6" items={items} /> */}
                 <HeaderLink href="/booking">Booking</HeaderLink>
                 <HeaderLink href="/faq">FAQ</HeaderLink>
+                {session?.user?.role === 'ADMIN' && (
+                <HeaderLink href="/admin">Admin</HeaderLink>
+                )} 
             </nav>
 
             {session?.user ? (

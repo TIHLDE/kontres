@@ -16,7 +16,7 @@ export default function AdminSidebar() {
                     <SideBarNavigationButton
                         icon={<CalendarIcon size={16} />}
                         route="/admin"
-                        highlighted={pathname === '/admin/reservations'}
+                        highlighted={pathname === '/admin'}
                     >
                         Reservasjoner
                     </SideBarNavigationButton>

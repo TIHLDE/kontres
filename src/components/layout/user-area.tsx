@@ -33,7 +33,9 @@ export const UserArea = ({
 
     const signOutButton = async () => {
         setOpen(false);
-        await signOut();
+        // Prevent NextAuth from doing a full redirect so we can control navigation client-side
+        await signOut({ redirect: false });
+        router.push('/');
         router.refresh();
     };
 

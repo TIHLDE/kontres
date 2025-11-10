@@ -33,7 +33,8 @@ export const UserArea = ({
 
     const signOutButton = async () => {
         setOpen(false);
-        await signOut();
+        await signOut({ redirect: false });
+        router.push('/'); 
         router.refresh();
     };
 
@@ -89,6 +90,7 @@ export const UserArea = ({
                         >
                             Min side
                         </Button>
+<<<<<<< HEAD
                         {admin ? (
                             <Button
                                 variant={'outline'}
@@ -98,6 +100,8 @@ export const UserArea = ({
                                 Admin
                             </Button>
                         ) : undefined}
+=======
+>>>>>>> a215c02 (div)
                     </div>
                 </PopoverContent>
             </Popover>

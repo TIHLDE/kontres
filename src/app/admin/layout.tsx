@@ -29,7 +29,7 @@ export function SideBarNavigationButton({
             <Button
                 variant={highlighted ? 'default' : 'ghost'}
                 {...props}
-                className={cn('w-full gap-2.5 items-center', className)}
+                className={cn('w-full gap-2.5 items-center justify-start', className)}
             >
                 {icon}
                 {children}
@@ -44,7 +44,7 @@ export default function AdminLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className="max-w-page h-[80vh] mx-auto md:w-full grid md:grid-cols-[min-content_auto] grid-cols-1 gap-10">
+        <div className="px-2 sm:px-10 w-full container mx-auto grid md:grid-cols-[min-content_auto] grid-cols-1 gap-5">
             <AdminSidebar />
             <Card className="md:min-w-72 h-full">
                 <Suspense

@@ -3,7 +3,7 @@ import type { GroupInfo } from '@/server/api/routers/groupRouter';
 import { FilterGroup } from '@/components/ui/filters/filters';
 import StatusIndicator from '@/components/ui/filters/status-indicator';
 
-import { TimeDirection } from '../../../utils/enums';
+import { TimeDirection } from '@/app/admin/utils/enums';
 import { FilterGroups } from './value-maps';
 import { BookableItem, ReservationState } from '@prisma/client';
 

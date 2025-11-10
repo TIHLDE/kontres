@@ -194,7 +194,7 @@ export default function Filters({
                 onClick={() => setOpen?.(true)}
                 variant={'ghost'}
                 size={'sm'}
-                className="gap-2"
+                className="gap-2 -m-2"
             >
                 <ListFilterIcon size={16} />
                 Filtre

@@ -18,7 +18,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
-import ReservationCard from '@/app/admin/reservations/components/reservation-card';
+import ReservationCard from '@/app/admin/components/reservation-card';
 import { useState } from 'react';
 
 

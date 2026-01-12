@@ -114,13 +114,13 @@ export default function ItemDialog({
                         name: item?.name ?? '',
                         description: item?.description ?? '',
                         group: item?.groupSlug ?? '',
+                        allowsAlcohol: item?.allowsAlcohol ?? false,
                     }}
                     formAction={action}
                     onSubmit={(values) =>
                         onSubmit({
                             ...values,
                             groupSlug: values.group,
-                            allowsAlcohol: false,
                         })
                     }
                     isSubmitting={isPending}

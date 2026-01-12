@@ -1,10 +1,12 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import FileInput from '@/components/ui/file-input';
 import {
     Form,
     FormControl,
+    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -12,12 +14,13 @@ import {
 } from '@/components/ui/form';
 import GroupSelect from '@/components/ui/group-select';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { LoadingSpinner } from '@/components/ui/loadingspinner';
 
 import { api } from '@/trpc/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useSession } from 'next-auth/react';
-import { useMemo, useRef } from 'react';
+import { useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -31,6 +34,7 @@ const schema = z.object({
     group: z.string().min(1, {
         message: 'Gjenstanden må tilhøre en gruppe',
     }),
+    allowsAlcohol: z.boolean().default(false),
 });
 
 interface ItemFormProps {
@@ -50,8 +54,6 @@ export default function ItemForm({
         resolver: zodResolver(schema),
         defaultValues,
     });
-
-    const formSubmitRef = useRef<HTMLButtonElement>(null);
 
     const { data: session } = useSession();
     const membershipGroups = useMemo(() => session?.user.groups, [session]);
@@ -93,7 +95,11 @@ export default function ItemForm({
                             <FormItem>
                                 <FormLabel>Beskrivelse</FormLabel>
                                 <FormControl>
-                                    <Input {...field} />
+                                    <Textarea 
+                                        {...field} 
+                                        placeholder="Beskriv gjenstanden..."
+                                        className="min-h-[100px]"
+                                    />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -126,10 +132,28 @@ export default function ItemForm({
                             </FormItem>
                         )}
                     />
-                    <Button
-                        type="submit"
-                        className="hidden"
-                        ref={formSubmitRef}
+
+                    <FormField
+                        control={form.control}
+                        name="allowsAlcohol"
+                        render={({ field }) => (
+                            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                                <FormControl>
+                                    <Checkbox
+                                        checked={field.value}
+                                        onCheckedChange={field.onChange}
+                                    />
+                                </FormControl>
+                                <div className="space-y-1 leading-none">
+                                    <FormLabel>
+                                        Tillater alkohol
+                                    </FormLabel>
+                                    <FormDescription>
+                                        Tillat alkoholservering ved reservasjoner av denne gjenstanden
+                                    </FormDescription>
+                                </div>
+                            </FormItem>
+                        )}
                     />
                 </form>
             </Form>
@@ -142,11 +166,12 @@ export default function ItemForm({
                 maxSize={0}
             />
             <div className="mt-5 flex justify-end gap-5">
-                <Button variant="ghost">Avbryt</Button>
+                <Button variant="ghost" type="button">Avbryt</Button>
                 <Button
-                    onClick={() => formSubmitRef.current?.click()}
+                    onClick={form.handleSubmit(onSubmit)}
                     disabled={isSubmitting}
                     className="gap-2.5"
+                    type="button"
                 >
                     {isSubmitting ? (
                         <>

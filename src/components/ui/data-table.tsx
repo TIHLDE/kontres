@@ -48,7 +48,9 @@ export function DataTable<TData, TValue>({
     filterProperty,
     headerItem,
 }: DataTableProps<TData, TValue>) {
-    const [sorting, setSorting] = useState<SortingState>([]);
+    const [sorting, setSorting] = useState<SortingState>([
+        { id: 'status', desc: false } // Default sort by status ascending
+    ]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
     const table = useReactTable({

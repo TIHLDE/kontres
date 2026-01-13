@@ -25,12 +25,36 @@ interface ItemCalendarProps {
 }
 
 export default function ItemCalendar({ itemId }: ItemCalendarProps) {
-    const { data: reservations } =
-        api.reservation.getReservationsByBookableItemId.useQuery({
-            bookableItemId: itemId,
-        });
-
     const [currentDate, setCurrentDate] = useState(() => new Date());
+    
+    const isMobile = useMediaQuery('(max-width: 768px)');
+    const mode = isMobile ? 'day' : 'week';
+    
+    // Calculate date range based on current view (show 2 weeks before/after for context)
+    const viewStartDate = useMemo(() => {
+        const date = new Date(currentDate);
+        date.setDate(date.getDate() - (mode === 'day' ? 7 : 14));
+        return date;
+    }, [currentDate, mode]);
+    
+    const viewEndDate = useMemo(() => {
+        const date = new Date(currentDate);
+        date.setDate(date.getDate() + (mode === 'day' ? 7 : 14));
+        return date;
+    }, [currentDate, mode]);
+
+    const { data: reservations } =
+        api.reservation.getReservationsByBookableItemId.useQuery(
+            {
+                bookableItemId: itemId,
+                startDate: viewStartDate,
+                endDate: viewEndDate,
+            },
+            {
+                staleTime: 30000, // Cache for 30 seconds
+                refetchOnWindowFocus: false,
+            },
+        );
 
     const events = useMemo<CalendarEvent[]>(() => {
         if (!reservations?.reservations) return [];
@@ -64,9 +88,6 @@ export default function ItemCalendar({ itemId }: ItemCalendarProps) {
             });
         });
     }, [reservations]);
-
-    const isMobile = useMediaQuery('(max-width: 768px)');
-    const mode = isMobile ? 'day' : 'week';
 
     const handleNavigate = (direction: 'previous' | 'next') => {
         const delta = mode === 'day' ? 1 : 7;

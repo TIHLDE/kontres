@@ -16,6 +16,7 @@ import { loginUser } from '../actions';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
 import { z } from 'zod';
 
 type LoginFormSubmitEventType = z.infer<typeof formSchema>;
@@ -30,6 +31,7 @@ type LoginFormProps = {
 };
 
 export function LoginForm({ redirectUrl }: LoginFormProps) {
+    const router = useRouter();
     const form = useForm<LoginFormSubmitEventType>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -40,9 +42,18 @@ export function LoginForm({ redirectUrl }: LoginFormProps) {
 
     const handleSubmit = useCallback(
         async (data: LoginFormSubmitEventType) => {
-            await loginUser(data.username, data.password, redirectUrl);
+            const result = await loginUser(data.username, data.password, redirectUrl);
+            
+            if (result.success) {
+                router.push(redirectUrl);
+                router.refresh();
+            } else {
+                form.setError('root', {
+                    message: result.error || 'Noe gikk galt. Prøv igjen senere.',
+                });
+            }
         },
-        [redirectUrl],
+        [redirectUrl, form, router],
     );
 
     return (
@@ -77,9 +88,11 @@ export function LoginForm({ redirectUrl }: LoginFormProps) {
                     )}
                 />
                 {form.formState.errors.root && (
-                    <FormMessage className="my-2">
-                        {form.formState.errors.root.message}
-                    </FormMessage>
+                    <div className="my-2">
+                        <p className="text-sm font-medium text-destructive">
+                            {form.formState.errors.root.message}
+                        </p>
+                    </div>
                 )}
                 <Button
                     className="w-full"

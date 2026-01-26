@@ -114,7 +114,10 @@ export const columns: ColumnDef<ReservationWithAuthorAndItem>[] = [
             });
             return (
                 <div>
-                    <RadioGroup className="flex flex-row items-center">
+                    <RadioGroup 
+                        value={reservation.status}
+                        className="flex flex-row items-center"
+                    >
                         <RadioGroupItem
                             value={ReservationState.APPROVED}
                             onClick={() =>
@@ -125,7 +128,7 @@ export const columns: ColumnDef<ReservationWithAuthorAndItem>[] = [
                                 })
                             }
                             disabled={handleReservation.isPending}
-                            className="mr-1 border-green-400"
+                            className="mr-1 border-green-400 text-green-400 data-[state=checked]:bg-green-400 data-[state=checked]:border-green-400 data-[state=checked]:text-green-400"
                         />
                         <RadioGroupItem
                             value={ReservationState.PENDING}
@@ -137,7 +140,7 @@ export const columns: ColumnDef<ReservationWithAuthorAndItem>[] = [
                                 })
                             }
                             disabled={handleReservation.isPending}
-                            className="mr-1 border-yellow-400"
+                            className="mr-1 border-yellow-400 text-yellow-400 data-[state=checked]:bg-yellow-400 data-[state=checked]:border-yellow-400 data-[state=checked]:text-yellow-400"
                         />
                         <RadioGroupItem
                             value={ReservationState.REJECTED}
@@ -149,7 +152,7 @@ export const columns: ColumnDef<ReservationWithAuthorAndItem>[] = [
                                 })
                             }
                             disabled={handleReservation.isPending}
-                            className="border-red-400"
+                            className="border-red-400 text-red-400 data-[state=checked]:bg-red-400 data-[state=checked]:border-red-400 data-[state=checked]:text-red-400"
                         />
                     </RadioGroup>
                 </div>

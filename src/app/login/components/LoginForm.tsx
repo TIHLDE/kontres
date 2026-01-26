@@ -14,9 +14,9 @@ import { LoadingSpinner } from '@/components/ui/loadingspinner';
 
 import { loginUser } from '../actions';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
-import { useRouter } from 'next/navigation';
 import { z } from 'zod';
 
 type LoginFormSubmitEventType = z.infer<typeof formSchema>;
@@ -42,14 +42,19 @@ export function LoginForm({ redirectUrl }: LoginFormProps) {
 
     const handleSubmit = useCallback(
         async (data: LoginFormSubmitEventType) => {
-            const result = await loginUser(data.username, data.password, redirectUrl);
-            
+            const result = await loginUser(
+                data.username,
+                data.password,
+                redirectUrl,
+            );
+
             if (result.success) {
                 router.push(redirectUrl);
                 router.refresh();
             } else {
                 form.setError('root', {
-                    message: result.error || 'Noe gikk galt. Prøv igjen senere.',
+                    message:
+                        result.error || 'Noe gikk galt. Prøv igjen senere.',
                 });
             }
         },

@@ -3,7 +3,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 
 import { SideBarNavigationButton } from '../../layout';
-import { CalendarIcon, Shapes } from 'lucide-react';
+import { CalendarIcon, Link as LinkIcon, Shapes } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
 export default function AdminSidebar() {
@@ -26,6 +26,13 @@ export default function AdminSidebar() {
                         highlighted={pathname === '/admin/items'}
                     >
                         Gjenstander
+                    </SideBarNavigationButton>
+                    <SideBarNavigationButton
+                        route="/admin/links"
+                        icon={<LinkIcon size={16} />}
+                        highlighted={pathname === '/admin/links'}
+                    >
+                        Lenker
                     </SideBarNavigationButton>
                 </div>
             </CardContent>

@@ -14,8 +14,8 @@ import {
 } from '@/components/ui/form';
 import GroupSelect from '@/components/ui/group-select';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { LoadingSpinner } from '@/components/ui/loadingspinner';
+import { Textarea } from '@/components/ui/textarea';
 
 import { api } from '@/trpc/react';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -95,8 +95,8 @@ export default function ItemForm({
                             <FormItem>
                                 <FormLabel>Beskrivelse</FormLabel>
                                 <FormControl>
-                                    <Textarea 
-                                        {...field} 
+                                    <Textarea
+                                        {...field}
                                         placeholder="Beskriv gjenstanden..."
                                         className="min-h-[100px]"
                                     />
@@ -145,11 +145,10 @@ export default function ItemForm({
                                     />
                                 </FormControl>
                                 <div className="space-y-1 leading-none">
-                                    <FormLabel>
-                                        Tillater alkohol
-                                    </FormLabel>
+                                    <FormLabel>Tillater alkohol</FormLabel>
                                     <FormDescription>
-                                        Tillat alkoholservering ved reservasjoner av denne gjenstanden
+                                        Tillat alkoholservering ved
+                                        reservasjoner av denne gjenstanden
                                     </FormDescription>
                                 </div>
                             </FormItem>
@@ -166,7 +165,9 @@ export default function ItemForm({
                 maxSize={0}
             />
             <div className="mt-5 flex justify-end gap-5">
-                <Button variant="ghost" type="button">Avbryt</Button>
+                <Button variant="ghost" type="button">
+                    Avbryt
+                </Button>
                 <Button
                     onClick={form.handleSubmit(onSubmit)}
                     disabled={isSubmitting}

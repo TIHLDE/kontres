@@ -90,9 +90,7 @@ export default function BookableItemsView({
                         />
                         <div className="p-3 space-y-2">
                             <CardTitle className="m-0">{item.name}</CardTitle>
-                            <Badge className="w-fit">
-                                {item.groupSlug}
-                            </Badge>
+                            <Badge className="w-fit">{item.groupSlug}</Badge>
                             <CardDescription className="m-0">
                                 {item.description}
                             </CardDescription>

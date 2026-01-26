@@ -19,19 +19,19 @@ export async function loginUser(
     } catch (error) {
         if (error instanceof AuthError) {
             if (error.type === 'CredentialsSignin') {
-                return { 
-                    success: false, 
-                    error: 'Ugyldig brukernavn eller passord' 
+                return {
+                    success: false,
+                    error: 'Ugyldig brukernavn eller passord',
                 };
             }
-            return { 
-                success: false, 
-                error: 'Noe gikk galt. Prøv igjen senere.' 
+            return {
+                success: false,
+                error: 'Noe gikk galt. Prøv igjen senere.',
             };
         }
-        return { 
-            success: false, 
-            error: 'Noe gikk galt. Prøv igjen senere.' 
+        return {
+            success: false,
+            error: 'Noe gikk galt. Prøv igjen senere.',
         };
     }
 }

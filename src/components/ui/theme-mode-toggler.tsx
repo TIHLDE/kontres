@@ -70,7 +70,7 @@ export function MobileModeToggle({ ...props }: ButtonProps) {
 
 export function ModeToggle({ ...props }: ButtonProps) {
     const { theme, setTheme } = useTheme();
-    
+
     const toggleTheme = () => {
         if (theme === 'dark') {
             setTheme('light');
@@ -78,10 +78,8 @@ export function ModeToggle({ ...props }: ButtonProps) {
             setTheme('dark');
         }
     };
-    
-    return (
-        <ThemeToggleButton {...props} onClick={toggleTheme} />
-    );
+
+    return <ThemeToggleButton {...props} onClick={toggleTheme} />;
 }
 
 interface ThemeToggleButtonProps extends ButtonProps {

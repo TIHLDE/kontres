@@ -1,16 +1,8 @@
 'use client';
 
 import { type ReservationWithAuthorAndItem } from '@/server/dtos/reservations';
+
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { ReservationState } from '@prisma/client';
-import { type ColumnDef } from '@tanstack/react-table';
-import { format } from 'date-fns';
-import { nb } from 'date-fns/locale/nb';
-import { Trash2, Eye } from 'lucide-react';
-import { api } from '@/trpc/react';
-import { toast } from '@/components/ui/use-toast';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
     Dialog,
     DialogContent,
@@ -18,9 +10,18 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
-import ReservationCard from '@/app/admin/components/reservation-card';
-import { useState } from 'react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { toast } from '@/components/ui/use-toast';
 
+import ReservationCard from '@/app/admin/components/reservation-card';
+import { cn } from '@/lib/utils';
+import { api } from '@/trpc/react';
+import { ReservationState } from '@prisma/client';
+import { type ColumnDef } from '@tanstack/react-table';
+import { format } from 'date-fns';
+import { nb } from 'date-fns/locale/nb';
+import { Eye, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 
 const StatusMap = {
     [ReservationState.APPROVED]: 'Godkjent',
@@ -90,9 +91,9 @@ export const columns: ColumnDef<ReservationWithAuthorAndItem>[] = [
     {
         id: 'actions',
 
-                header: 'Behandle',
-        cell: ({row}) => {
-             const reservation = row.original;
+        header: 'Behandle',
+        cell: ({ row }) => {
+            const reservation = row.original;
             const utils = api.useUtils();
 
             const handleReservation = api.reservation.updateStatus.useMutation({
@@ -110,7 +111,6 @@ export const columns: ColumnDef<ReservationWithAuthorAndItem>[] = [
                         variant: 'destructive',
                     });
                 },
-                
             });
             return (
                 <div>
@@ -194,7 +194,7 @@ export const columns: ColumnDef<ReservationWithAuthorAndItem>[] = [
         cell: ({ row }) => {
             const reservation = row.original;
             const utils = api.useUtils();
-            
+
             const deleteReservation = api.reservation.delete.useMutation({
                 onSuccess: () => {
                     toast({
@@ -214,8 +214,15 @@ export const columns: ColumnDef<ReservationWithAuthorAndItem>[] = [
             });
 
             const handleDelete = () => {
-                if (confirm('Er du sikker på at du vil slette denne reservasjonen?')) {
-                    deleteReservation.mutate({ groupSlug: reservation.groupSlug, reservationId: reservation.reservationId });
+                if (
+                    confirm(
+                        'Er du sikker på at du vil slette denne reservasjonen?',
+                    )
+                ) {
+                    deleteReservation.mutate({
+                        groupSlug: reservation.groupSlug,
+                        reservationId: reservation.reservationId,
+                    });
                 }
             };
 

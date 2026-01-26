@@ -1,6 +1,8 @@
 'use client';
 
 import { type ReservationWithAuthorAndItem } from '@/server/dtos/reservations';
+
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -10,27 +12,27 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { toast } from '@/components/ui/use-toast';
+
 import { cn } from '@/lib/utils';
+import { api } from '@/trpc/react';
 import { ReservationState } from '@prisma/client';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale/nb';
 import {
-    Calendar,
-    Clock,
-    User,
-    Package,
-    FileText,
-    CheckCircle2,
-    XCircle,
     AlertCircle,
-    Wine,
+    Calendar,
+    CheckCircle2,
+    Clock,
+    FileText,
+    Package,
     Shield,
     Trash2,
+    User,
+    Wine,
+    XCircle,
 } from 'lucide-react';
-import { api } from '@/trpc/react';
-import { toast } from '@/components/ui/use-toast';
 
 const StatusConfig = {
     [ReservationState.APPROVED]: {
@@ -96,7 +98,8 @@ export default function ReservationCard({
         onError: (error) => {
             toast({
                 title: 'Feil',
-                description: error.message || 'Kunne ikke slette reservasjonen.',
+                description:
+                    error.message || 'Kunne ikke slette reservasjonen.',
                 variant: 'destructive',
             });
         },
@@ -111,9 +114,7 @@ export default function ReservationCard({
     };
 
     const handleDelete = () => {
-        if (
-            confirm('Er du sikker på at du vil slette denne reservasjonen?')
-        ) {
+        if (confirm('Er du sikker på at du vil slette denne reservasjonen?')) {
             deleteReservation.mutate({
                 groupSlug: reservation.groupSlug,
                 reservationId: reservation.reservationId,
@@ -128,7 +129,8 @@ export default function ReservationCard({
                     <div className="space-y-1">
                         <CardTitle className="text-2xl flex items-center gap-2">
                             <Package className="h-6 w-6" />
-                            {reservation.bookableItem?.name || 'Ukjent gjenstand'}
+                            {reservation.bookableItem?.name ||
+                                'Ukjent gjenstand'}
                         </CardTitle>
                         <CardDescription>
                             Reservasjons-ID: #{reservation.reservationId}

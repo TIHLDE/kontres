@@ -21,13 +21,9 @@ export const itemColumns: ColumnDef<GetItemsOutput['items'][0], unknown>[] = [
         accessorFn: ({ groupSlug }) => groupSlug,
     },
     {
-        accessorKey: 'name',
+        id: 'actions',
         header: '',
+        enableHiding: false,
         cell: ({ row }) => <ItemActions item={row.original} />,
     },
-    // {
-    //     id: 'actions',
-    //     enableHiding: false,
-    //     cell: ({ row }) => <ItemActions item={row.original} />,
-    // },
 ];

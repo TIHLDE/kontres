@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { DateTimePicker } from '@/components/ui/date-time-picker';
+import { DateTimeField } from '@/components/ui/date-time-field';
 import {
     Form,
     FormControl,
@@ -121,7 +121,7 @@ const ReservationForm = ({
     }
 
     return (
-        <div className="grid place-items-center pt-20">
+        <div className="grid min-h-[calc(100vh-5rem)] place-items-center px-4 py-10">
             <Card className="w-full max-w-2xl">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -140,24 +140,14 @@ const ReservationForm = ({
                                         <FormItem>
                                             <FormLabel>Fra dato og tid</FormLabel>
                                             <FormControl>
-                                                <DateTimePicker
-                                                    className="w-full"
-                                                    {...field}
-                                                    value={
-                                                        field.value
-                                                            ? field.value.toISOString()
-                                                            : undefined
-                                                    }
-                                                    onChange={(e) => {
-                                                        form.setValue(
-                                                            'from',
-                                                            new Date(e.target.value),
-                                                            {
-                                                                shouldValidate: true,
-                                                                shouldDirty: true,
-                                                                shouldTouch: true,
-                                                            },
-                                                        );
+                                                <DateTimeField
+                                                    value={field.value ?? null}
+                                                    onChange={(next) => {
+                                                        form.setValue('from', next, {
+                                                            shouldValidate: true,
+                                                            shouldDirty: true,
+                                                            shouldTouch: true,
+                                                        });
                                                     }}
                                                 />
                                             </FormControl>
@@ -173,24 +163,14 @@ const ReservationForm = ({
                                         <FormItem>
                                             <FormLabel>Til dato og tid</FormLabel>
                                             <FormControl>
-                                                <DateTimePicker
-                                                    className="w-full"
-                                                    {...field}
-                                                    value={
-                                                        field.value
-                                                            ? field.value.toISOString()
-                                                            : undefined
-                                                    }
-                                                    onChange={(e) => {
-                                                        form.setValue(
-                                                            'to',
-                                                            new Date(e.target.value),
-                                                            {
-                                                                shouldValidate: true,
-                                                                shouldDirty: true,
-                                                                shouldTouch: true,
-                                                            },
-                                                        );
+                                                <DateTimeField
+                                                    value={field.value ?? null}
+                                                    onChange={(next) => {
+                                                        form.setValue('to', next, {
+                                                            shouldValidate: true,
+                                                            shouldDirty: true,
+                                                            shouldTouch: true,
+                                                        });
                                                     }}
                                                 />
                                             </FormControl>
@@ -286,7 +266,7 @@ const ReservationForm = ({
                                 )}
                             />
 
-                            <div className="flex gap-3">
+                            <div className="flex flex-col gap-3 sm:flex-row">
                                 <Button
                                     type="button"
                                     variant="outline"

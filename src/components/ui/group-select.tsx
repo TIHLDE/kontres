@@ -40,8 +40,8 @@ export default function GroupSelect({
             </SelectTrigger>
             <SelectContent>
                 <SelectGroup>
-                    {groups?.map((item, index) => (
-                        <SelectItem value={item.value} key={index}>
+                    {groups?.map((item) => (
+                        <SelectItem value={item.value} key={item.value}>
                             {item.label}
                         </SelectItem>
                     ))}

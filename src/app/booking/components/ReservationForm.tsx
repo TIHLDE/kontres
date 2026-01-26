@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { DateTimePicker } from '@/components/ui/date-time-picker';
+import { DateTimeField } from '@/components/ui/date-time-field';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -162,13 +162,13 @@ export default function ReservationForm({
                     {/* Permutable Fields Section */}
                     <div className="space-y-2">
                         <Label htmlFor="startTime">Start Date and Time</Label>
-                        <DateTimePicker
-                            className="w-full"
-                            value={watch('startTime')?.toISOString()}
-                            onChange={(e) => {
-                                const value = e.target.value as unknown as Date;
-                                setValue('startTime', value, {
+                        <DateTimeField
+                            value={watch('startTime') ?? null}
+                            onChange={(next) => {
+                                setValue('startTime', next, {
                                     shouldValidate: true,
+                                    shouldDirty: true,
+                                    shouldTouch: true,
                                 });
                             }}
                         />
@@ -181,13 +181,13 @@ export default function ReservationForm({
 
                     <div className="space-y-2">
                         <Label htmlFor="endTime">End Date and Time</Label>
-                        <DateTimePicker
-                            className="w-full"
-                            value={watch('endTime')?.toISOString()}
-                            onChange={(e) => {
-                                const value = e.target.value as unknown as Date;
-                                setValue('endTime', value, {
+                        <DateTimeField
+                            value={watch('endTime') ?? null}
+                            onChange={(next) => {
+                                setValue('endTime', next, {
                                     shouldValidate: true,
+                                    shouldDirty: true,
+                                    shouldTouch: true,
                                 });
                             }}
                         />

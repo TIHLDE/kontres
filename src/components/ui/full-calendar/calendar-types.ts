@@ -13,6 +13,8 @@ export type CalendarEvent = {
     color: string;
     start: Date;
     end: Date;
+    fullStart?: Date;
+    fullEnd?: Date;
 };
 
 export const calendarModes = ['day', 'week'] as const;

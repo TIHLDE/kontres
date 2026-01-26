@@ -8,7 +8,6 @@ import {
 
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Button } from '../ui/button';
-import { ModeToggle } from '../ui/theme-mode-toggler';
 import { cn } from '@/lib/utils';
 import { UserRound } from 'lucide-react';
 import { signOut } from 'next-auth/react';
@@ -33,8 +32,9 @@ export const UserArea = ({
 
     const signOutButton = async () => {
         setOpen(false);
+        // Prevent NextAuth from doing a full redirect so we can control navigation client-side
         await signOut({ redirect: false });
-        router.push('/'); 
+        router.push('/');
         router.refresh();
     };
 
@@ -52,7 +52,7 @@ export const UserArea = ({
         <div
             {...props}
             className={cn(
-                'flex items-center justify-center w-fit gap-3',
+                'flex items-center justify-center w-fit',
                 className,
             )}
         >
@@ -90,7 +90,6 @@ export const UserArea = ({
                         >
                             Min side
                         </Button>
-<<<<<<< HEAD
                         {admin ? (
                             <Button
                                 variant={'outline'}
@@ -100,12 +99,9 @@ export const UserArea = ({
                                 Admin
                             </Button>
                         ) : undefined}
-=======
->>>>>>> a215c02 (div)
                     </div>
                 </PopoverContent>
             </Popover>
-            <ModeToggle />
         </div>
     );
 };

@@ -48,9 +48,13 @@ export default function Page() {
                         : undefined,
                 timeDirection: filters.time,
             },
-            limit: 5,
+            limit: 30,
         },
-        { getNextPageParam: (lastPage) => lastPage.nextCursor },
+        {
+            getNextPageParam: (lastPage) => lastPage.nextCursor,
+            staleTime: 10000, // Cache for 10 seconds
+            refetchOnWindowFocus: false, // Don't refetch when window regains focus
+        },
     );
 
     return (

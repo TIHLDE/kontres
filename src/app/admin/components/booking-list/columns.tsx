@@ -28,6 +28,13 @@ const StatusMap = {
     [ReservationState.REJECTED]: 'Avvist',
 };
 
+// Define the sort order
+const StatusSortOrder = {
+    [ReservationState.PENDING]: 1,
+    [ReservationState.APPROVED]: 2,
+    [ReservationState.REJECTED]: 3,
+};
+
 export const columns: ColumnDef<ReservationWithAuthorAndItem>[] = [
     {
         accessorKey: 'status',
@@ -48,6 +55,11 @@ export const columns: ColumnDef<ReservationWithAuthorAndItem>[] = [
                 {StatusMap[status]}
             </div>
         ),
+        sortingFn: (rowA, rowB) => {
+            const statusA = rowA.original.status;
+            const statusB = rowB.original.status;
+            return StatusSortOrder[statusA] - StatusSortOrder[statusB];
+        },
     },
     {
         accessorKey: 'author',

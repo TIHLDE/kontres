@@ -10,26 +10,23 @@ export default function HeaderWrapper({
     className,
     ...props
 }: HeaderWrapperProps) {
-    const [isScrolled, setIsScrolled] = useState(false);
+    const [isOnTop, setIsOnTop] = useState(true);
+    
     useEffect(() => {
-        const handleScroll = () => {
-            if (window.scrollY > 0) {
-                setIsScrolled(true);
-            } else {
-                setIsScrolled(false);
-            }
-        };
+        function handleScroll() {
+            setIsOnTop(window.scrollY < 20);
+        }
         window.addEventListener('scroll', handleScroll);
-        return () => {
-            window.removeEventListener('scroll', handleScroll);
-        };
-    });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     return (
         <header
             className={cn(
-                'p-4 py-1 min-h-[80px] top-0 transition-all duration-300 sticky w-full flex items-center z-50',
-                isScrolled ? 'border-b backdrop-blur-sm bg-background/80' : '',
+                'fixed left-0 right-0 z-30 w-full top-0 transition-all duration-150 max-md:flex max-md:items-center max-md:justify-between',
+                !isOnTop &&
+                    'border-b border-border/40 backdrop-blur-sm supports-backdrop-filter:bg-card/60 dark:supports-backdrop-filter:bg-background/60 bg-background/60',
+                isOnTop && 'bg-transparent',
                 className,
             )}
             {...props}

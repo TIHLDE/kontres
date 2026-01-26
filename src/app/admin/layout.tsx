@@ -44,7 +44,7 @@ export default function AdminLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className="px-2 sm:px-10 w-full container mx-auto grid md:grid-cols-[min-content_auto] grid-cols-1 gap-5">
+        <div className="px-12 w-full container mx-auto grid md:grid-cols-[min-content_auto] grid-cols-1 gap-5">
             <AdminSidebar />
             <Card className="md:min-w-72 h-full">
                 <Suspense

@@ -16,15 +16,17 @@ const HeaderButtonsWrapper = async ({
         <nav
             {...props}
             className={cn(
-                'flex items-center justify-between py-3 px-12 w-full',
+                'relative flex items-center py-3 px-12 w-full',
                 className,
             )}
         >
+            <div className="flex-1">
             <Link href="/" className="text-primary" aria-label="Til forsiden">
                 <Logo />
             </Link>
+            </div>
             
-            <div className="flex gap-6 items-center max-md:hidden">
+            <div className="absolute left-1/2 -translate-x-1/2 flex gap-6 items-center max-md:hidden">
                 <HeaderLink href="/booking">Booking</HeaderLink>
                 <HeaderLink href="/faq">FAQ</HeaderLink>
                 {session?.user?.role === 'ADMIN' && (
@@ -32,7 +34,7 @@ const HeaderButtonsWrapper = async ({
                 )}
             </div>
 
-            <div className="flex items-center gap-3 justify-end">
+            <div className="flex-1 flex items-center gap-3 justify-end">
                 <ModeToggle />
                 {session?.user ? (
                     <UserArea

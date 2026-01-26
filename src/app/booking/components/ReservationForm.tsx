@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DateTimeField } from '@/components/ui/date-time-field';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
 
@@ -91,13 +91,14 @@ export default function ReservationForm({
         }
 
         createReservation.mutate({
-            itemId,
+            itemIds: [itemId],
             groupSlug,
             description: data.description,
             servesAlcohol: data.servesAlcohol,
             soberWatch: data.soberWatch || '',
             startTime: data.startTime,
             endTime: data.endTime,
+            acceptedRules: data.acceptedRules,
         });
     };
 
@@ -143,7 +144,7 @@ export default function ReservationForm({
                             </div>
                             <div className="flex items-end">
                                 <div className="flex items-center space-x-2">
-                                    <Switch
+                                    <Checkbox
                                         id="allowsAlcohol"
                                         checked={allowsAlcohol}
                                         disabled
@@ -214,17 +215,23 @@ export default function ReservationForm({
 
                     {allowsAlcohol && (
                         <div className="space-y-4">
-                            <div className="flex items-center space-x-2">
-                                <Switch
+                            <div className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                                <Checkbox
                                     id="servesAlcohol"
                                     checked={servesAlcohol}
                                     onCheckedChange={(checked) =>
-                                        setValue('servesAlcohol', checked)
+                                        setValue('servesAlcohol', Boolean(checked), {
+                                            shouldValidate: true,
+                                            shouldDirty: true,
+                                            shouldTouch: true,
+                                        })
                                     }
                                 />
-                                <Label htmlFor="servesAlcohol">
-                                    Will serve alcohol
-                                </Label>
+                                <div className="space-y-1 leading-none">
+                                    <Label htmlFor="servesAlcohol" className="cursor-pointer">
+                                        Will serve alcohol
+                                    </Label>
+                                </div>
                             </div>
 
                             {servesAlcohol && (
@@ -242,23 +249,37 @@ export default function ReservationForm({
                         </div>
                     )}
 
-                    <div className="flex items-center space-x-2">
-                        <Switch
+                    <div className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                        <Checkbox
                             id="acceptedRules"
                             checked={watch('acceptedRules')}
                             onCheckedChange={(checked) =>
-                                setValue('acceptedRules', checked)
+                                setValue('acceptedRules', Boolean(checked), {
+                                    shouldValidate: true,
+                                    shouldDirty: true,
+                                    shouldTouch: true,
+                                })
                             }
                         />
-                        <Label htmlFor="acceptedRules">
-                            I accept the booking rules and regulations
-                        </Label>
+                        <div className="space-y-1 leading-none">
+                            <Label htmlFor="acceptedRules" className="cursor-pointer">
+                                I accept the{' '}
+                                <a
+                                    href="https://wiki.tihlde.org/retningslinjer/kontoret"
+                                    className="font-bold underline hover:text-primary"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    booking rules and regulations
+                                </a>
+                            </Label>
+                            {errors.acceptedRules && (
+                                <p className="text-sm text-destructive">
+                                    {errors.acceptedRules.message}
+                                </p>
+                            )}
+                        </div>
                     </div>
-                    {errors.acceptedRules && (
-                        <p className="text-sm text-destructive">
-                            {errors.acceptedRules.message}
-                        </p>
-                    )}
 
                     <Button
                         type="submit"

@@ -16,6 +16,8 @@ import {
 import GroupSelect from '@/components/ui/group-select';
 import { LoadingSpinner } from '@/components/ui/loadingspinner';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
 
 import { api } from '@/trpc/react';
@@ -54,11 +56,13 @@ const formSchema = z
 interface ReservationFormProps {
     itemId: number;
     itemName?: string;
+    allowsAlcohol?: boolean;
 }
 
 const ReservationForm = ({ 
     itemId, 
-    itemName, 
+    itemName,
+    allowsAlcohol = false,
 }: ReservationFormProps) => {
     const router = useRouter();
     
@@ -80,6 +84,8 @@ const ReservationForm = ({
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         shouldUnregister: false,
+        mode: 'onSubmit',
+        reValidateMode: 'onSubmit',
         defaultValues: {
             from: new Date(),
             to: new Date(Date.now() + 1000 * 60 * 60), // Default: 1 hour from now
@@ -90,6 +96,8 @@ const ReservationForm = ({
             acceptedRules: false,
         },
     });
+
+    const servesAlcohol = form.watch('servesAlcohol');
 
     const createReservation = api.reservation.create.useMutation({
         onSuccess: () => {
@@ -110,13 +118,14 @@ const ReservationForm = ({
 
     async function onSubmit(data: z.infer<typeof formSchema>) {
         createReservation.mutate({
-            itemId,
+            itemIds: [itemId],
             groupSlug: data.onBehalfOf,
             description: data.description,
             startTime: data.from,
             endTime: data.to,
             servesAlcohol: data.servesAlcohol,
             soberWatch: data.soberWatch || '',
+            acceptedRules: data.acceptedRules,
         });
     }
 
@@ -227,6 +236,62 @@ const ReservationForm = ({
                                     </FormItem>
                                 )}
                             />
+
+                            {/* Alcohol Section */}
+                            {allowsAlcohol && (
+                                <div className="space-y-4">
+                                    <FormField
+                                        control={form.control}
+                                        name="servesAlcohol"
+                                        render={({ field: { value, ...rest } }) => (
+                                            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                                                <FormControl>
+                                                    <Checkbox
+                                                        {...rest}
+                                                        checked={!!value}
+                                                        onCheckedChange={(e) => {
+                                                            form.setValue(
+                                                                'servesAlcohol',
+                                                                Boolean(e.valueOf()),
+                                                                {
+                                                                    shouldValidate: true,
+                                                                    shouldDirty: true,
+                                                                    shouldTouch: true,
+                                                                },
+                                                            );
+                                                        }}
+                                                    />
+                                                </FormControl>
+                                                <div className="space-y-1 leading-none">
+                                                    <FormLabel className="cursor-pointer">
+                                                        Vil servere alkohol
+                                                    </FormLabel>
+                                                </div>
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    {servesAlcohol && (
+                                        <FormField
+                                            control={form.control}
+                                            name="soberWatch"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Ansvarlig for edruoppsyn</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            {...field}
+                                                            placeholder="Navn på person med edruoppsyn"
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    )}
+                                </div>
+                            )}
+
                             <FormField
                                 control={form.control}
                                 name="acceptedRules"

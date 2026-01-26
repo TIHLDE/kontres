@@ -318,24 +318,134 @@ export const reservationRouter = createTRPCRouter({
                 soberWatch: z.string(),
                 startTime: z.date(),
                 endTime: z.date(),
-                itemId: z.number(),
+                itemIds: z.array(z.number()).min(1, {
+                    message: 'At least one item must be selected',
+                }),
                 groupSlug: z.string(),
+                acceptedRules: z.boolean(),
             }),
         )
-        .mutation(({ input, ctx }) => {
-            return ctx.db.reservation.create({
-                data: {
-                    authorId: ctx.session.user.id,
-                    groupSlug: input.groupSlug,
-                    acceptedRules: false,
-                    bookableItemId: input.itemId,
-                    description: input.description,
-                    endTime: input.endTime,
-                    startTime: input.startTime,
-                    soberWatch: input.soberWatch,
-                    servesAlcohol: input.servesAlcohol,
+        .mutation(async ({ input, ctx }) => {
+            // Validate that if serving alcohol, all items must allow alcohol
+            if (input.servesAlcohol) {
+                const items = await ctx.db.bookableItem.findMany({
+                    where: {
+                        itemId: {
+                            in: input.itemIds,
+                        },
+                    },
+                    select: {
+                        itemId: true,
+                        name: true,
+                        allowsAlcohol: true,
+                    },
+                });
+
+                const itemsNotAllowingAlcohol = items.filter(
+                    (item) => !item.allowsAlcohol,
+                );
+
+                if (itemsNotAllowingAlcohol.length > 0) {
+                    const names = itemsNotAllowingAlcohol
+                        .map((item) => item.name)
+                        .join(', ');
+                    throw new Error(
+                        `Cannot serve alcohol. The following items do not allow alcohol: ${names}`,
+                    );
+                }
+            }
+
+            // Check availability for all items before creating
+            const conflictingReservations = await ctx.db.reservation.findMany({
+                where: {
+                    bookableItemId: {
+                        in: input.itemIds,
+                    },
+                    status: {
+                        in: ['PENDING', 'APPROVED'], // Only check active reservations
+                    },
+                    OR: [
+                        {
+                            // Reservation starts during our time
+                            startTime: {
+                                gte: input.startTime,
+                                lt: input.endTime,
+                            },
+                        },
+                        {
+                            // Reservation ends during our time
+                            endTime: {
+                                gt: input.startTime,
+                                lte: input.endTime,
+                            },
+                        },
+                        {
+                            // Reservation spans our entire time
+                            AND: [
+                                { startTime: { lte: input.startTime } },
+                                { endTime: { gte: input.endTime } },
+                            ],
+                        },
+                    ],
+                },
+                include: {
+                    bookableItem: true,
                 },
             });
+
+            // Group conflicts by item
+            const conflictsByItem = new Map<number, typeof conflictingReservations>();
+            conflictingReservations.forEach((res) => {
+                if (!conflictsByItem.has(res.bookableItemId)) {
+                    conflictsByItem.set(res.bookableItemId, []);
+                }
+                conflictsByItem.get(res.bookableItemId)!.push(res);
+            });
+
+            // Check which items have conflicts
+            const itemsWithConflicts = Array.from(conflictsByItem.keys());
+            if (itemsWithConflicts.length > 0) {
+                const itemNames = await ctx.db.bookableItem.findMany({
+                    where: {
+                        itemId: {
+                            in: itemsWithConflicts,
+                        },
+                    },
+                    select: {
+                        name: true,
+                        itemId: true,
+                    },
+                });
+                
+                const names = itemNames.map((item) => item.name).join(', ');
+                throw new Error(
+                    `The following items are not available during this time: ${names}`,
+                );
+            }
+
+            // Create all reservations in a transaction
+            const reservations = await ctx.db.$transaction(
+                input.itemIds.map((itemId) =>
+                    ctx.db.reservation.create({
+                        data: {
+                            authorId: ctx.session.user.id,
+                            groupSlug: input.groupSlug,
+                            acceptedRules: input.acceptedRules,
+                            bookableItemId: itemId,
+                            description: input.description,
+                            endTime: input.endTime,
+                            startTime: input.startTime,
+                            soberWatch: input.soberWatch,
+                            servesAlcohol: input.servesAlcohol,
+                        },
+                    }),
+                ),
+            );
+
+            return {
+                reservations,
+                count: reservations.length,
+            };
         }),
     updateStatus: groupLeaderProcedure
         .input(

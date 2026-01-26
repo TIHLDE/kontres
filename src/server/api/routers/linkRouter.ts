@@ -1,5 +1,18 @@
 import { adminProcedure, createTRPCRouter, memberProcedure } from '../trpc';
+import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
+
+// URL validation to prevent XSS and ensure safe URLs
+const safeUrlSchema = z
+    .string()
+    .url('Must be a valid URL')
+    .refine(
+        (url) => {
+            const parsed = new URL(url);
+            return ['http:', 'https:'].includes(parsed.protocol);
+        },
+        { message: 'Only HTTP and HTTPS URLs are allowed' },
+    );
 
 export const linkRouter = createTRPCRouter({
     getLinks: memberProcedure.query(({ ctx }) => {
@@ -20,7 +33,7 @@ export const linkRouter = createTRPCRouter({
         .input(
             z.object({
                 title: z.string().min(1, 'Title is required'),
-                url: z.string().url('Must be a valid URL'),
+                url: safeUrlSchema,
                 description: z.string().optional(),
             }),
         )
@@ -40,12 +53,25 @@ export const linkRouter = createTRPCRouter({
             z.object({
                 linkId: z.number(),
                 title: z.string().min(1, 'Title is required').optional(),
-                url: z.string().url('Must be a valid URL').optional(),
+                url: safeUrlSchema.optional(),
                 description: z.string().optional(),
             }),
         )
-        .mutation(({ ctx, input }) => {
+        .mutation(async ({ ctx, input }) => {
             const { linkId, ...data } = input;
+
+            // Check if link exists
+            const existingLink = await ctx.db.resourceLink.findUnique({
+                where: { linkId },
+            });
+
+            if (!existingLink) {
+                throw new TRPCError({
+                    code: 'NOT_FOUND',
+                    message: 'Link not found',
+                });
+            }
+
             return ctx.db.resourceLink.update({
                 where: { linkId },
                 data,
@@ -54,7 +80,19 @@ export const linkRouter = createTRPCRouter({
 
     deleteLink: adminProcedure
         .input(z.object({ linkId: z.number() }))
-        .mutation(({ ctx, input: { linkId } }) => {
+        .mutation(async ({ ctx, input: { linkId } }) => {
+            // Check if link exists
+            const existingLink = await ctx.db.resourceLink.findUnique({
+                where: { linkId },
+            });
+
+            if (!existingLink) {
+                throw new TRPCError({
+                    code: 'NOT_FOUND',
+                    message: 'Link not found',
+                });
+            }
+
             return ctx.db.resourceLink.delete({
                 where: { linkId },
             });

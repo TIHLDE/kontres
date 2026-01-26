@@ -20,6 +20,7 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/ui/loadingspinner';
+import { useToast } from '@/components/ui/use-toast';
 
 import LinkDialog from './components/link-dialog';
 import { api } from '@/trpc/react';
@@ -31,6 +32,7 @@ export default function LinksPage() {
     const deleteMutation = api.link.deleteLink.useMutation();
     const utils = api.useUtils();
     const [editingLink, setEditingLink] = useState<number | null>(null);
+    const { toast } = useToast();
 
     const handleDelete = (linkId: number) => {
         deleteMutation.mutate(
@@ -38,6 +40,17 @@ export default function LinksPage() {
             {
                 onSuccess: () => {
                     utils.link.invalidate();
+                    toast({
+                        title: 'Lenke slettet',
+                        description: 'Lenken ble slettet',
+                    });
+                },
+                onError: (error) => {
+                    toast({
+                        title: 'Feil',
+                        description: error.message || 'Kunne ikke slette lenken',
+                        variant: 'destructive',
+                    });
                 },
             },
         );

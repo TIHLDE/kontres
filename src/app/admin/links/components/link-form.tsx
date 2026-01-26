@@ -21,9 +21,22 @@ const schema = z.object({
     title: z.string().min(1, {
         message: 'Tittelen er påkrevd',
     }),
-    url: z.string().url({
-        message: 'URL må være gyldig',
-    }),
+    url: z
+        .string()
+        .url({
+            message: 'URL må være gyldig',
+        })
+        .refine(
+            (url) => {
+                try {
+                    const parsed = new URL(url);
+                    return ['http:', 'https:'].includes(parsed.protocol);
+                } catch {
+                    return false;
+                }
+            },
+            { message: 'Kun HTTP og HTTPS URLer er tillatt' },
+        ),
     description: z.string().optional(),
 });
 

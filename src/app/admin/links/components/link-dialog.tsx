@@ -9,6 +9,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
+import { useToast } from '@/components/ui/use-toast';
 
 import LinkForm from './link-form';
 import { api } from '@/trpc/react';
@@ -41,6 +42,7 @@ export default function LinkDialog({
     const updateMutation = api.link.updateLink.useMutation();
     const [internalOpen, internalSetOpen] = useState(false);
     const utils = api.useUtils();
+    const { toast } = useToast();
 
     const action = !!link ? 'edit' : 'create';
     const isPending = createMutation.isPending || updateMutation.isPending;
@@ -60,6 +62,18 @@ export default function LinkDialog({
                     onSuccess: () => {
                         utils.link.invalidate();
                         internalSetOpen(false);
+                        toast({
+                            title: 'Lenke oppdatert',
+                            description: 'Lenken ble oppdatert',
+                        });
+                    },
+                    onError: (error) => {
+                        toast({
+                            title: 'Feil',
+                            description:
+                                error.message || 'Kunne ikke oppdatere lenken',
+                            variant: 'destructive',
+                        });
                     },
                 },
             );
@@ -68,6 +82,18 @@ export default function LinkDialog({
                 onSuccess: () => {
                     utils.link.invalidate();
                     internalSetOpen(false);
+                    toast({
+                        title: 'Lenke opprettet',
+                        description: 'Lenken ble opprettet',
+                    });
+                },
+                onError: (error) => {
+                    toast({
+                        title: 'Feil',
+                        description:
+                            error.message || 'Kunne ikke opprette lenken',
+                        variant: 'destructive',
+                    });
                 },
             });
         }

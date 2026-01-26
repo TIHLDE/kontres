@@ -38,7 +38,9 @@ export default async function RootLayout({
                                 disableTransitionOnChange
                             >
                                 <Header className="lg:flex hidden" />
-                                {children}
+                                <div className="pt-20 md:pt-28">
+                                    {children}
+                                </div>
                                 <Toaster />
                             </ThemeProvider>
                         </TRPCReactProvider>

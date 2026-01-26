@@ -11,16 +11,9 @@ type HeaderProps = React.HTMLProps<HTMLHeadElement>;
 export default async function Header({ className, ...props }: HeaderProps) {
     return (
         <HeaderWrapper {...props}>
-            <div className="w-full h-full hidden md:block">
-                <Suspense fallback={<HeaderSkeleton />}>
-                    <HeaderButtonsWrapper />
-                </Suspense>
-            </div>
-            <div className="md:hidden flex place-content-center w-full">
-                <Link href={'/'}>
-                    <Logo />
-                </Link>
-            </div>
+            <Suspense fallback={<HeaderSkeleton />}>
+                <HeaderButtonsWrapper />
+            </Suspense>
         </HeaderWrapper>
     );
 }

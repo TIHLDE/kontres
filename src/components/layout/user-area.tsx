@@ -8,7 +8,6 @@ import {
 
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Button } from '../ui/button';
-import { ModeToggle } from '../ui/theme-mode-toggler';
 import { cn } from '@/lib/utils';
 import { UserRound } from 'lucide-react';
 import { signOut } from 'next-auth/react';
@@ -53,7 +52,7 @@ export const UserArea = ({
         <div
             {...props}
             className={cn(
-                'flex items-center justify-center w-fit gap-3',
+                'flex items-center justify-center w-fit',
                 className,
             )}
         >
@@ -103,7 +102,6 @@ export const UserArea = ({
                     </div>
                 </PopoverContent>
             </Popover>
-            <ModeToggle />
         </div>
     );
 };

@@ -206,8 +206,8 @@ export default function Filters({
                     <CommandGroup
                         heading={
                             <div>
-                                <p className="flex items-center">
-                                    <kbd className="me-2 inline-flex h-5 max-h-full items-center rounded border border-border bg-background px-1 font-[inherit] text-[0.625rem] font-medium text-muted-foreground/70">
+                                <p className="flex items-center text-foreground">
+                                    <kbd className="me-2 inline-flex h-5 max-h-full items-center rounded border border-border bg-background px-1 font-[inherit] text-[0.625rem] font-medium text-foreground">
                                         Ctrl+K
                                     </kbd>
                                     Åpner også denne menyen!
@@ -218,7 +218,7 @@ export default function Filters({
                     {filterGroups.map((group, index) => (
                         <CommandGroup
                             heading={
-                                <span className="flex items-center gap-2">
+                                <span className="flex items-center gap-2 text-foreground">
                                     {displayGroupIcons &&
                                         groupIcons?.[group.value]}
                                     {group.header}
@@ -243,7 +243,7 @@ export default function Filters({
                                         filter: filter,
                                         parentValue: group.value,
                                     }) ? (
-                                        <span className="opacity-50">
+                                        <span className="text-foreground">
                                             (valgt)
                                         </span>
                                     ) : (

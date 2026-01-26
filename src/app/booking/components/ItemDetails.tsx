@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import Image from 'next/image';
 
 import { Wine, WineOff } from 'lucide-react';
 import Link from 'next/link';
@@ -61,34 +62,44 @@ export default function ItemDetails({
             </CardHeader>
             <CardContent>
                 <Separator className="mb-4" />
-                <div className="space-y-4">
-                    <div>
-                        <h3 className="font-semibold mb-2">Description</h3>
-                        <p className="text-muted-foreground leading-relaxed">
-                            {description}
-                        </p>
+                <div className="flex flex-col md:flex-row gap-6">
+                    <div className="relative w-full md:w-64 h-48 md:h-auto flex-shrink-0">
+                        <Image
+                            src="/placeholder.svg"
+                            alt={name}
+                            fill
+                            className="object-cover rounded-lg"
+                        />
                     </div>
+                    <div className="flex-1 space-y-4">
+                        <div>
+                            <h3 className="font-semibold mb-2">Description</h3>
+                            <p className="text-muted-foreground leading-relaxed">
+                                {description}
+                            </p>
+                        </div>
 
-                    <div>
-                        <h3 className="font-semibold mb-2">
-                            Booking Information
-                        </h3>
-                        <ul className="text-sm text-muted-foreground space-y-1">
-                            <li>
-                                • Reservations must be approved by group leaders
-                            </li>
-                            <li>
-                                • Please provide detailed description of your
-                                event
-                            </li>
-                            {allowsAlcohol && (
+                        <div>
+                            <h3 className="font-semibold mb-2">
+                                Booking Information
+                            </h3>
+                            <ul className="text-sm text-muted-foreground space-y-1">
                                 <li>
-                                    • If serving alcohol, a sober watch person
-                                    is required
+                                    • Reservations must be approved by group leaders
                                 </li>
-                            )}
-                            <li>• Follow all TIHLDE rules and regulations</li>
-                        </ul>
+                                <li>
+                                    • Please provide detailed description of your
+                                    event
+                                </li>
+                                {allowsAlcohol && (
+                                    <li>
+                                        • If serving alcohol, a sober watch person
+                                        is required
+                                    </li>
+                                )}
+                                <li>• Follow all TIHLDE rules and regulations</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </CardContent>

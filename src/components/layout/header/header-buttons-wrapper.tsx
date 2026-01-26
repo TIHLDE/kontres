@@ -1,8 +1,10 @@
 import HeaderLink from '../../ui/header-link';
 import Logo from '../../ui/logo';
 import { UserArea } from '../user-area';
+import { ModeToggle } from '../../ui/theme-mode-toggler';
 import { auth } from '@/auth';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 const HeaderButtonsWrapper = async ({
     className,
@@ -11,33 +13,36 @@ const HeaderButtonsWrapper = async ({
     const session = await auth();
 
     return (
-        <div
+        <nav
             {...props}
             className={cn(
-                'w-full h-full justify-start items-center flex',
+                'flex items-center justify-between py-3 px-12 w-full',
                 className,
             )}
         >
-            <nav className="flex gap-6 w-full items-center">
-                <HeaderLink href="/" className="mr-16">
-                    <Logo />
-                </HeaderLink>
-                {/* <BookableItems className="flex gap-6" items={items} /> */}
+            <Link href="/" className="text-primary" aria-label="Til forsiden">
+                <Logo />
+            </Link>
+            
+            <div className="flex gap-6 items-center max-md:hidden">
                 <HeaderLink href="/booking">Booking</HeaderLink>
                 <HeaderLink href="/faq">FAQ</HeaderLink>
                 {session?.user?.role === 'ADMIN' && (
-                <HeaderLink href="/admin">Admin</HeaderLink>
-                )} 
-            </nav>
+                    <HeaderLink href="/admin">Admin</HeaderLink>
+                )}
+            </div>
 
-            {session?.user ? (
-                <UserArea
-                    name={session.user.firstName ?? ''}
-                    image={session.user.profilePicture ?? ''}
-                    admin={session.user.role == 'ADMIN'}
-                />
-            ) : undefined}
-        </div>
+            <div className="flex items-center gap-3 justify-end">
+                <ModeToggle />
+                {session?.user ? (
+                    <UserArea
+                        name={session.user.firstName ?? ''}
+                        image={session.user.profilePicture ?? ''}
+                        admin={session.user.role == 'ADMIN'}
+                    />
+                ) : undefined}
+            </div>
+        </nav>
     );
 };
 

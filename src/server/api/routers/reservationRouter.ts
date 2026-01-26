@@ -64,61 +64,114 @@ export const reservationRouter = createTRPCRouter({
                 };
             }
 
-            // Query database (includes all new reservations)
-            const reservations = (await ctx.db.reservation.findMany({
-                take: limit + 1,
-                cursor: cursor ? { reservationId: cursor } : undefined,
+            // Build where clause
+            const whereClause: any = {
+                ...(input.filters.state && input.filters.state.length > 0
+                    ? {
+                          status: {
+                              in: input.filters.state,
+                          },
+                      }
+                    : {}),
+                ...(input.filters.groupSlugs &&
+                input.filters.groupSlugs.length > 0
+                    ? {
+                          groupSlug: {
+                              in: input.filters.groupSlugs,
+                          },
+                      }
+                    : {}),
+                ...(input.filters.fromDate ||
+                input.filters.toDate ||
+                (input.filters.timeDirection &&
+                    input.filters.timeDirection?.length > 0)
+                    ? {
+                          OR: [
+                              {
+                                  startTime: {
+                                      gte:
+                                          (input.filters.fromDate ??
+                                          input.filters.timeDirection?.includes(
+                                              TimeDirection.FORWARD,
+                                          ))
+                                              ? new Date()
+                                              : undefined,
+                                  },
+                                  endTime: {
+                                      lte:
+                                          (input.filters.toDate ??
+                                          input.filters.timeDirection?.includes(
+                                              TimeDirection.BACKWARD,
+                                          ))
+                                              ? new Date()
+                                              : undefined,
+                                  },
+                              },
+                          ],
+                      }
+                    : {}),
+                ...(input.filters.bookableItem &&
+                input.filters.bookableItem.length > 0
+                    ? {
+                          bookableItem: {
+                              itemId: {
+                                  in: input.filters.bookableItem,
+                              },
+                          },
+                      }
+                    : {}),
+            };
+
+            // Fetch all matching reservations (we'll sort in memory)
+            // Use a larger limit to ensure we have enough data for proper sorting
+            const allReservations = (await ctx.db.reservation.findMany({
+                take: 1000, // Fetch more to ensure proper sorting
                 include: {
                     bookableItem: true,
                 },
-                where: {
-                    status: {
-                        in: input.filters.state,
-                    },
-                    groupSlug: {
-                        in: input.filters.groupSlugs,
-                    },
-
-                    ...(input.filters.fromDate ||
-                    input.filters.toDate ||
-                    (input.filters.timeDirection &&
-                        input.filters.timeDirection?.length > 0)
-                        ? {
-                              OR: [
-                                  {
-                                      startTime: {
-                                          gte:
-                                              (input.filters.fromDate ??
-                                              input.filters.timeDirection?.includes(
-                                                  TimeDirection.FORWARD,
-                                              ))
-                                                  ? new Date()
-                                                  : undefined,
-                                      },
-                                      endTime: {
-                                          lte:
-                                              (input.filters.toDate ??
-                                              input.filters.timeDirection?.includes(
-                                                  TimeDirection.BACKWARD,
-                                              ))
-                                                  ? new Date()
-                                                  : undefined,
-                                      },
-                                  },
-                              ],
-                          }
-                        : {}),
-
-                    bookableItem: {
-                        itemId: {
-                            in: input.filters.bookableItem,
-                        },
-                    },
-                },
+                where: whereClause,
                 orderBy: {
-                    reservationId: 'asc',
+                    reservationId: 'asc', // Initial sort by ID (proxy for created_at)
                 },
             })) as ReservationWithAuthorAndItem[];
+
+            // Define status order: PENDING, APPROVED, REJECTED
+            const statusOrder = {
+                [ReservationState.PENDING]: 0,
+                [ReservationState.APPROVED]: 1,
+                [ReservationState.REJECTED]: 2,
+            };
+
+            // Sort by status first, then by reservationId (created_at proxy)
+            const sortedReservations = allReservations.sort((a, b) => {
+                const statusA = statusOrder[a.status] ?? 999;
+                const statusB = statusOrder[b.status] ?? 999;
+
+                if (statusA !== statusB) {
+                    return statusA - statusB;
+                }
+
+                // Within same status, sort by reservationId (ascending = oldest first)
+                return a.reservationId - b.reservationId;
+            });
+
+            // Apply cursor-based pagination after sorting
+            let reservations: ReservationWithAuthorAndItem[];
+            if (cursor) {
+                const cursorIndex = sortedReservations.findIndex(
+                    (r) => r.reservationId === cursor,
+                );
+                if (cursorIndex >= 0) {
+                    reservations = sortedReservations.slice(
+                        cursorIndex + 1,
+                        cursorIndex + 1 + limit + 1,
+                    );
+                } else {
+                    reservations = sortedReservations.slice(0, limit + 1);
+                }
+            } else {
+                reservations = sortedReservations.slice(0, limit + 1);
+            }
 
             let nextCursor: typeof cursor | undefined = undefined;
             if (reservations.length > limit) {

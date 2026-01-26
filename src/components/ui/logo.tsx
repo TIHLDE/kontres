@@ -1,7 +1,8 @@
 export default function Logo() {
     return (
         <svg
-            className="fill-foreground stroke-foreground w-40 h-8"
+            className="text-primary dark:text-white h-[28px] w-auto"
+            fill="currentColor"
             id="svg2"
             version="1.1"
             viewBox="250 435 2000 450"

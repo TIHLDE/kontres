@@ -4,11 +4,11 @@ import { Button } from '@/components/ui/button';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/ui/loadingspinner';
 
-import BookingList from './components/booking-list/booking-list';
 import AdminBookingFilters, {
     reservationStateParser,
     timeDirectionParser,
 } from './components/booking-filters/booking-filters';
+import BookingList from './components/booking-list/booking-list';
 import { groupParser } from '@/app/booking/components/SearchFilters';
 import { cn } from '@/lib/utils';
 import { api } from '@/trpc/react';

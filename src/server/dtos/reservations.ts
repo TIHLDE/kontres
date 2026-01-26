@@ -1,5 +1,5 @@
 import { type User } from './user';
-import { type Reservation, type BookableItem } from '@prisma/client';
+import { type BookableItem, type Reservation } from '@prisma/client';
 
 export type ReservationWithAuthor = Reservation & {
     author: User;

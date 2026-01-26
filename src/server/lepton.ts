@@ -19,11 +19,14 @@ const getUserById = async (userId: string, requestToken: string) => {
 };
 
 const getReservations = async (requestToken: string) => {
-    const response = await fetch(`${env.LEPTON_API_URL}/${URLS.RESERVATIONS}/`, {
-        headers: {
-            ...getHeaders(undefined, requestToken),
+    const response = await fetch(
+        `${env.LEPTON_API_URL}/${URLS.RESERVATIONS}/`,
+        {
+            headers: {
+                ...getHeaders(undefined, requestToken),
+            },
         },
-    });
+    );
 
     if (!response.ok) {
         console.error(

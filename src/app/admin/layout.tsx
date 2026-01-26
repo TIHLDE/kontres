@@ -29,7 +29,10 @@ export function SideBarNavigationButton({
             <Button
                 variant={highlighted ? 'default' : 'ghost'}
                 {...props}
-                className={cn('w-full gap-2.5 items-center justify-start', className)}
+                className={cn(
+                    'w-full gap-2.5 items-center justify-start',
+                    className,
+                )}
             >
                 {icon}
                 {children}

@@ -9,8 +9,6 @@ import { CalendarEvent } from '@/components/ui/full-calendar/calendar-types';
 
 import { api } from '@/trpc/react';
 import { useMediaQuery } from '@uidotdev/usehooks';
-import { CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useMemo, useState } from 'react';
 import {
     addDays,
     eachDayOfInterval,
@@ -19,6 +17,8 @@ import {
     isSameDay,
     startOfDay,
 } from 'date-fns';
+import { CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
 interface ItemCalendarProps {
     itemId: number;
@@ -26,17 +26,17 @@ interface ItemCalendarProps {
 
 export default function ItemCalendar({ itemId }: ItemCalendarProps) {
     const [currentDate, setCurrentDate] = useState(() => new Date());
-    
+
     const isMobile = useMediaQuery('(max-width: 768px)');
     const mode = isMobile ? 'day' : 'week';
-    
+
     // Calculate date range based on current view (show 2 weeks before/after for context)
     const viewStartDate = useMemo(() => {
         const date = new Date(currentDate);
         date.setDate(date.getDate() - (mode === 'day' ? 7 : 14));
         return date;
     }, [currentDate, mode]);
-    
+
     const viewEndDate = useMemo(() => {
         const date = new Date(currentDate);
         date.setDate(date.getDate() + (mode === 'day' ? 7 : 14));
@@ -141,7 +141,9 @@ export default function ItemCalendar({ itemId }: ItemCalendarProps) {
                                         type="button"
                                         variant="outline"
                                         size="icon"
-                                        onClick={() => handleNavigate('previous')}
+                                        onClick={() =>
+                                            handleNavigate('previous')
+                                        }
                                         aria-label={
                                             mode === 'day'
                                                 ? 'Forrige dag'

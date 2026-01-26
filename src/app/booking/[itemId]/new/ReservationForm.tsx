@@ -39,7 +39,9 @@ const formSchema = z
         description: z
             .string()
             .min(10, { message: 'Beskrivelse må være minst 10 tegn' })
-            .max(500, { message: 'Beskrivelse kan ikke være mer enn 500 tegn' }),
+            .max(500, {
+                message: 'Beskrivelse kan ikke være mer enn 500 tegn',
+            }),
         servesAlcohol: z.boolean().default(false),
         soberWatch: z.string().optional(),
         acceptedRules: z.boolean().refine((val) => val === true, {
@@ -56,16 +58,14 @@ interface ReservationFormProps {
     itemName?: string;
 }
 
-const ReservationForm = ({ 
-    itemId, 
-    itemName, 
-}: ReservationFormProps) => {
+const ReservationForm = ({ itemId, itemName }: ReservationFormProps) => {
     const router = useRouter();
-    
+
     // Fetch user's group slugs and all available groups
     const { data: userGroupSlugs } = api.group.getUserGroups.useQuery();
-    const { data: allGroups, isLoading: groupsLoading } = api.group.getAll.useQuery();
-    
+    const { data: allGroups, isLoading: groupsLoading } =
+        api.group.getAll.useQuery();
+
     // Filter groups to only show ones the user is a member of
     const availableGroups = useMemo(() => {
         if (!userGroupSlugs || !allGroups) return [];
@@ -76,7 +76,7 @@ const ReservationForm = ({
                 label: group.groupName,
             }));
     }, [userGroupSlugs, allGroups]);
-    
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         shouldUnregister: false,
@@ -102,7 +102,8 @@ const ReservationForm = ({
         onError: (error) => {
             toast({
                 title: 'Feil',
-                description: error.message || 'Noe gikk galt. Prøv igjen senere.',
+                description:
+                    error.message || 'Noe gikk galt. Prøv igjen senere.',
                 variant: 'destructive',
             });
         },
@@ -131,23 +132,32 @@ const ReservationForm = ({
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                        <form
+                            onSubmit={form.handleSubmit(onSubmit)}
+                            className="space-y-6"
+                        >
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <FormField
                                     control={form.control}
                                     name="from"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Fra dato og tid</FormLabel>
+                                            <FormLabel>
+                                                Fra dato og tid
+                                            </FormLabel>
                                             <FormControl>
                                                 <DateTimeField
                                                     value={field.value ?? null}
                                                     onChange={(next) => {
-                                                        form.setValue('from', next, {
-                                                            shouldValidate: true,
-                                                            shouldDirty: true,
-                                                            shouldTouch: true,
-                                                        });
+                                                        form.setValue(
+                                                            'from',
+                                                            next,
+                                                            {
+                                                                shouldValidate: true,
+                                                                shouldDirty: true,
+                                                                shouldTouch: true,
+                                                            },
+                                                        );
                                                     }}
                                                 />
                                             </FormControl>
@@ -161,16 +171,22 @@ const ReservationForm = ({
                                     name="to"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Til dato og tid</FormLabel>
+                                            <FormLabel>
+                                                Til dato og tid
+                                            </FormLabel>
                                             <FormControl>
                                                 <DateTimeField
                                                     value={field.value ?? null}
                                                     onChange={(next) => {
-                                                        form.setValue('to', next, {
-                                                            shouldValidate: true,
-                                                            shouldDirty: true,
-                                                            shouldTouch: true,
-                                                        });
+                                                        form.setValue(
+                                                            'to',
+                                                            next,
+                                                            {
+                                                                shouldValidate: true,
+                                                                shouldDirty: true,
+                                                                shouldTouch: true,
+                                                            },
+                                                        );
                                                     }}
                                                 />
                                             </FormControl>
@@ -185,7 +201,9 @@ const ReservationForm = ({
                                 name="onBehalfOf"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>På vegne av gruppe</FormLabel>
+                                        <FormLabel>
+                                            På vegne av gruppe
+                                        </FormLabel>
                                         <FormControl>
                                             <GroupSelect
                                                 groups={availableGroups}
@@ -195,12 +213,11 @@ const ReservationForm = ({
                                             />
                                         </FormControl>
                                         <FormDescription>
-                                            {groupsLoading 
+                                            {groupsLoading
                                                 ? 'Laster grupper...'
                                                 : availableGroups.length === 0
-                                                ? 'Du er ikke medlem av noen grupper'
-                                                : 'Du kan kun sende inn forespørsler på vegne av grupper du er medlem av'
-                                            }
+                                                  ? 'Du er ikke medlem av noen grupper'
+                                                  : 'Du kan kun sende inn forespørsler på vegne av grupper du er medlem av'}
                                         </FormDescription>
                                         <FormMessage />
                                     </FormItem>
@@ -257,7 +274,8 @@ const ReservationForm = ({
                                                     className="font-bold underline hover:text-primary"
                                                     target="_blank"
                                                 >
-                                                    vilkårene for bruk og utlån av TIHLDEs eiendeler
+                                                    vilkårene for bruk og utlån
+                                                    av TIHLDEs eiendeler
                                                 </Link>
                                             </FormLabel>
                                             <FormMessage />
@@ -272,19 +290,28 @@ const ReservationForm = ({
                                     variant="outline"
                                     className="w-full"
                                     onClick={() => router.back()}
-                                    disabled={form.formState.isSubmitting || createReservation.isPending}
+                                    disabled={
+                                        form.formState.isSubmitting ||
+                                        createReservation.isPending
+                                    }
                                 >
                                     Avbryt
                                 </Button>
                                 <Button
                                     type="submit"
                                     className="w-full"
-                                    disabled={form.formState.isSubmitting || createReservation.isPending}
+                                    disabled={
+                                        form.formState.isSubmitting ||
+                                        createReservation.isPending
+                                    }
                                 >
-                                    {form.formState.isSubmitting || createReservation.isPending ? (
+                                    {form.formState.isSubmitting ||
+                                    createReservation.isPending ? (
                                         <>
                                             <LoadingSpinner />
-                                            <span className="ml-2">Sender...</span>
+                                            <span className="ml-2">
+                                                Sender...
+                                            </span>
                                         </>
                                     ) : (
                                         'Send inn reservasjon'

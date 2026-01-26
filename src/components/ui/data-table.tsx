@@ -49,7 +49,7 @@ export function DataTable<TData, TValue>({
     headerItem,
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = useState<SortingState>([
-        { id: 'status', desc: false } // Default sort by status ascending
+        { id: 'status', desc: false }, // Default sort by status ascending
     ]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 

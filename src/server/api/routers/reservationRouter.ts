@@ -1,4 +1,7 @@
-import { type ReservationWithAuthor, type ReservationWithAuthorAndItem } from '@/server/dtos/reservations';
+import {
+    type ReservationWithAuthor,
+    type ReservationWithAuthorAndItem,
+} from '@/server/dtos/reservations';
 import { User } from '@/server/dtos/user';
 
 import {
@@ -135,7 +138,10 @@ export const reservationRouter = createTRPCRouter({
                 // Fetch all users in parallel (much faster than sequential)
                 // Limit concurrent requests to avoid overwhelming the API
                 const BATCH_SIZE = 10;
-                const userPromises: Promise<{ userId: string; user: User | null }>[] = [];
+                const userPromises: Promise<{
+                    userId: string;
+                    user: User | null;
+                }>[] = [];
 
                 for (let i = 0; i < authorIds.length; i += BATCH_SIZE) {
                     const batch = authorIds.slice(i, i + BATCH_SIZE);
@@ -151,7 +157,10 @@ export const reservationRouter = createTRPCRouter({
                             const user = (await response.json()) as User;
                             return { userId, user };
                         } catch (error) {
-                            console.error(`Failed to fetch user ${userId}:`, error);
+                            console.error(
+                                `Failed to fetch user ${userId}:`,
+                                error,
+                            );
                             return { userId, user: null };
                         }
                     });
@@ -197,7 +206,7 @@ export const reservationRouter = createTRPCRouter({
             // This prevents loading hundreds/thousands of old reservations
             const defaultStartDate = startDate || new Date();
             defaultStartDate.setMonth(defaultStartDate.getMonth() - 3);
-            
+
             const defaultEndDate = endDate || new Date();
             defaultEndDate.setMonth(defaultEndDate.getMonth() + 6);
 

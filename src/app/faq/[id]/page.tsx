@@ -15,9 +15,7 @@ type QuestionPageParams = {
 export default async function Page(props: QuestionPageParams) {
     const params = await props.params;
 
-    const {
-        id
-    } = params;
+    const { id } = params;
 
     const data = await api.faq.getById({ questionId: +id });
     const session = await auth();

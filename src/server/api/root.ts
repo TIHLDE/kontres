@@ -6,6 +6,7 @@ import { authTesterRouter } from './routers/auth-tester';
 import { bookableItemRouter } from './routers/bookableItem';
 import { groupRouter } from './routers/groupRouter';
 import { itemRouter } from './routers/itemRouter';
+import { linkRouter } from './routers/linkRouter';
 import { reservationRouter } from './routers/reservationRouter';
 
 /**
@@ -21,6 +22,7 @@ export const appRouter = createTRPCRouter({
     reservation: reservationRouter,
     faq: faqRouter,
     group: groupRouter,
+    link: linkRouter,
 });
 
 // export type definition of API

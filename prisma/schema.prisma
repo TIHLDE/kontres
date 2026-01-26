@@ -54,3 +54,13 @@ model FAQ {
     bookableItems   BookableItem[]
     imageUrl        String
 }
+
+model ResourceLink {
+    linkId          Int @id @default(autoincrement())
+    title           String
+    url             String
+    description     String?
+    createdAt       DateTime @default(now())
+    createdBy       String
+    @@index([title])
+}

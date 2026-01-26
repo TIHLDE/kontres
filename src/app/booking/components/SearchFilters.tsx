@@ -5,10 +5,10 @@ import { GroupInfo } from '@/server/api/routers/groupRouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import { DateTimeField } from '@/components/ui/date-time-field';
 import Expandable from '@/components/ui/expandable';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { DateTimeField } from '@/components/ui/date-time-field';
 import { Separator } from '@/components/ui/separator';
 
 import { cn } from '@/lib/utils';
@@ -267,7 +267,8 @@ function Filters({
                                         } else {
                                             await setGroups(
                                                 groups.filter(
-                                                    (g) => g !== group.groupSlug,
+                                                    (g) =>
+                                                        g !== group.groupSlug,
                                                 ),
                                             );
                                         }

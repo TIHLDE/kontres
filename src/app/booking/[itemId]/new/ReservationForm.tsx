@@ -240,18 +240,36 @@ const ReservationForm = ({
                             {/* Alcohol Section */}
                             {allowsAlcohol && (
                                 <div className="space-y-4">
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox
-                                            id="servesAlcohol"
-                                            checked={servesAlcohol}
-                                            onCheckedChange={(checked) =>
-                                                form.setValue('servesAlcohol', Boolean(checked))
-                                            }
-                                        />
-                                        <Label htmlFor="servesAlcohol">
-                                            Vil servere alkohol
-                                        </Label>
-                                    </div>
+                                    <FormField
+                                        control={form.control}
+                                        name="servesAlcohol"
+                                        render={({ field: { value, ...rest } }) => (
+                                            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                                                <FormControl>
+                                                    <Checkbox
+                                                        {...rest}
+                                                        checked={!!value}
+                                                        onCheckedChange={(e) => {
+                                                            form.setValue(
+                                                                'servesAlcohol',
+                                                                Boolean(e.valueOf()),
+                                                                {
+                                                                    shouldValidate: true,
+                                                                    shouldDirty: true,
+                                                                    shouldTouch: true,
+                                                                },
+                                                            );
+                                                        }}
+                                                    />
+                                                </FormControl>
+                                                <div className="space-y-1 leading-none">
+                                                    <FormLabel className="cursor-pointer">
+                                                        Vil servere alkohol
+                                                    </FormLabel>
+                                                </div>
+                                            </FormItem>
+                                        )}
+                                    />
 
                                     {servesAlcohol && (
                                         <FormField

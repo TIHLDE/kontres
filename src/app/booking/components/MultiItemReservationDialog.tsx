@@ -278,17 +278,23 @@ export default function MultiItemReservationDialog({
                     {/* Alcohol Section */}
                     {allAllowAlcohol && (
                         <div className="space-y-4">
-                            <div className="flex items-center space-x-2">
+                            <div className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                                 <Checkbox
                                     id="servesAlcohol"
                                     checked={servesAlcohol}
                                     onCheckedChange={(checked) =>
-                                        form.setValue('servesAlcohol', Boolean(checked))
+                                        form.setValue('servesAlcohol', Boolean(checked), {
+                                            shouldValidate: true,
+                                            shouldDirty: true,
+                                            shouldTouch: true,
+                                        })
                                     }
                                 />
-                                <Label htmlFor="servesAlcohol">
-                                    Vil servere alkohol
-                                </Label>
+                                <div className="space-y-1 leading-none">
+                                    <Label htmlFor="servesAlcohol" className="cursor-pointer">
+                                        Vil servere alkohol
+                                    </Label>
+                                </div>
                             </div>
 
                             {servesAlcohol && (

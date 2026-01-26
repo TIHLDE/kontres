@@ -144,7 +144,7 @@ export default function ReservationForm({
                             </div>
                             <div className="flex items-end">
                                 <div className="flex items-center space-x-2">
-                                    <Switch
+                                    <Checkbox
                                         id="allowsAlcohol"
                                         checked={allowsAlcohol}
                                         disabled
@@ -215,17 +215,23 @@ export default function ReservationForm({
 
                     {allowsAlcohol && (
                         <div className="space-y-4">
-                            <div className="flex items-center space-x-2">
+                            <div className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                                 <Checkbox
                                     id="servesAlcohol"
                                     checked={servesAlcohol}
                                     onCheckedChange={(checked) =>
-                                        setValue('servesAlcohol', Boolean(checked))
+                                        setValue('servesAlcohol', Boolean(checked), {
+                                            shouldValidate: true,
+                                            shouldDirty: true,
+                                            shouldTouch: true,
+                                        })
                                     }
                                 />
-                                <Label htmlFor="servesAlcohol">
-                                    Will serve alcohol
-                                </Label>
+                                <div className="space-y-1 leading-none">
+                                    <Label htmlFor="servesAlcohol" className="cursor-pointer">
+                                        Will serve alcohol
+                                    </Label>
+                                </div>
                             </div>
 
                             {servesAlcohol && (

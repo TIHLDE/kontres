@@ -77,6 +77,7 @@ export const itemRouter = createTRPCRouter({
                 description: z.string(),
                 allowsAlcohol: z.boolean(),
                 groupSlug: z.string(),
+                imageUrl: z.string().optional(),
             }),
         )
         .mutation(({ ctx, input }) => {
@@ -86,6 +87,7 @@ export const itemRouter = createTRPCRouter({
                     description: input.description,
                     allowsAlcohol: input.allowsAlcohol,
                     groupSlug: input.groupSlug,
+                    imageUrl: input.imageUrl ?? '',
                 },
             });
         }),
@@ -98,7 +100,7 @@ export const itemRouter = createTRPCRouter({
                     name: z.string().optional(),
                     description: z.string().optional(),
                     allows_alcohol: z.boolean().optional(),
-                    image: z.string().optional(),
+                    imageUrl: z.string().optional(),
                 }),
             }),
         )

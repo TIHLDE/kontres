@@ -11,7 +11,7 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog';
 
-import ItemForm from './item-form';
+import ItemForm, { type ItemFormValues } from './item-form';
 import { api } from '@/trpc/react';
 import { inferProcedureOutput } from '@trpc/server';
 import { PlusIcon } from 'lucide-react';
@@ -46,18 +46,14 @@ export default function ItemDialog({
 
     const action = !!item ? 'edit' : 'create';
 
-    const onSubmit = (values: {
-        name: string;
-        groupSlug: string;
-        description: string;
-        allowsAlcohol: boolean;
-    }) => {
+    const onSubmit = (values: ItemFormValues) => {
         mutate(
             {
                 name: values.name,
                 description: values.description,
                 allowsAlcohol: values.allowsAlcohol,
-                groupSlug: values.groupSlug,
+                groupSlug: values.group,
+                imageUrl: values.imageUrl,
             },
             {
                 onSuccess: () => {
@@ -115,14 +111,10 @@ export default function ItemDialog({
                         description: item?.description ?? '',
                         group: item?.groupSlug ?? '',
                         allowsAlcohol: item?.allowsAlcohol ?? false,
+                        imageUrl: item?.imageUrl ?? '',
                     }}
                     formAction={action}
-                    onSubmit={(values) =>
-                        onSubmit({
-                            ...values,
-                            groupSlug: values.group,
-                        })
-                    }
+                    onSubmit={onSubmit}
                     isSubmitting={isPending}
                 />
             </DialogContent>

@@ -19,7 +19,6 @@ import {
 import { datetimeParser, groupParser } from './SearchFilters';
 import { cn } from '@/lib/utils';
 import { api } from '@/trpc/react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { parseAsBoolean, parseAsString, useQueryStates } from 'nuqs';
 import { useEffect, useState } from 'react';
@@ -133,7 +132,6 @@ export default function BookableItemsView({
                     <TableHeader>
                         <TableRow>
                             <TableHead className="w-12"></TableHead>
-                            <TableHead className="w-16">Bilde</TableHead>
                             <TableHead>Navn</TableHead>
                             <TableHead>Gruppe</TableHead>
                             <TableHead>Beskrivelse</TableHead>
@@ -145,7 +143,7 @@ export default function BookableItemsView({
                         {filteredData.length === 0 ? (
                             <TableRow>
                                 <TableCell
-                                    colSpan={7}
+                                    colSpan={6}
                                     className="text-center text-muted-foreground py-8"
                                 >
                                     Ingen elementer funnet
@@ -174,22 +172,6 @@ export default function BookableItemsView({
                                             }
                                             onClick={(e) => e.stopPropagation()}
                                         />
-                                    </TableCell>
-                                    <TableCell>
-                                        {item.imageUrl && item.imageUrl !== '' ? (
-                                            <div className="relative w-12 h-12 flex-shrink-0">
-                                                <Image
-                                                    src={item.imageUrl}
-                                                    alt={item.name}
-                                                    fill
-                                                    className="object-cover rounded"
-                                                />
-                                            </div>
-                                        ) : (
-                                            <div className="w-12 h-12 bg-muted rounded flex items-center justify-center">
-                                                <span className="text-xs text-muted-foreground">N/A</span>
-                                            </div>
-                                        )}
                                     </TableCell>
                                     <TableCell className="font-medium">
                                         {item.name}

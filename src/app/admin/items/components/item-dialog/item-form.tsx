@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { FileUpload } from '@/components/ui/file-upload';
+import FileInput from '@/components/ui/file-input';
 import {
     Form,
     FormControl,
@@ -17,11 +17,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { LoadingSpinner } from '@/components/ui/loadingspinner';
 
-import { getImageUrl } from './uploadFile';
 import { api } from '@/trpc/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useSession } from 'next-auth/react';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -36,15 +35,12 @@ const schema = z.object({
         message: 'Gjenstanden må tilhøre en gruppe',
     }),
     allowsAlcohol: z.boolean().default(false),
-    imageUrl: z.string().optional(),
 });
 
-export type ItemFormValues = z.infer<typeof schema>;
-
 interface ItemFormProps {
-    onSubmit: (values: ItemFormValues) => void;
+    onSubmit: (values: z.infer<typeof schema>) => void;
     isSubmitting?: boolean;
-    defaultValues?: ItemFormValues;
+    defaultValues?: z.infer<typeof schema>;
     formAction?: 'edit' | 'create';
 }
 
@@ -54,15 +50,12 @@ export default function ItemForm({
     defaultValues,
     isSubmitting,
 }: ItemFormProps) {
-    const form = useForm<ItemFormValues>({
+    const form = useForm<z.infer<typeof schema>>({
         resolver: zodResolver(schema),
         defaultValues,
     });
 
-    const [file, setFile] = useState<File>();
-
     const { data: session } = useSession();
-    const token = useMemo(() => session?.user.TIHLDE_Token, [session]);
     const membershipGroups = useMemo(() => session?.user.groups, [session]);
     const { data: allGroups } = api.group.getAll.useQuery();
     const pickableGroups = useMemo(() => {
@@ -76,27 +69,6 @@ export default function ItemForm({
                     g.groupName,
             );
     }, [allGroups, membershipGroups]);
-
-    async function handleSubmit(formData: ItemFormValues) {
-        try {
-            const imageUrl =
-                file && token ? await getImageUrl(file, token) : (formData.imageUrl ?? '');
-            
-            onSubmit({
-                ...formData,
-                imageUrl,
-            });
-        } catch (error) {
-            console.error('Error uploading image:', error);
-            onSubmit(formData);
-        }
-    }
-
-    function handleFileUpload(files: File[]): void {
-        if (files[0]) {
-            setFile(files[0]);
-        }
-    }
 
     return (
         <div>
@@ -185,14 +157,18 @@ export default function ItemForm({
                     />
                 </form>
             </Form>
-            <FileUpload
+            <FileInput
+                disabled
+                title="Ikke ferdigimplementert"
+                className="mt-5"
+                label="Velg bilde"
                 accept="image/*"
-                onChange={handleFileUpload}
+                maxSize={0}
             />
             <div className="mt-5 flex justify-end gap-5">
                 <Button variant="ghost" type="button">Avbryt</Button>
                 <Button
-                    onClick={form.handleSubmit(handleSubmit)}
+                    onClick={form.handleSubmit(onSubmit)}
                     disabled={isSubmitting}
                     className="gap-2.5"
                     type="button"

@@ -53,7 +53,6 @@ export default async function Page(props: PageProps) {
                     description={item.description}
                     allowsAlcohol={item.allowsAlcohol}
                     groupSlug={item.groupSlug}
-                    imageUrl={item.imageUrl}
                 />
 
                 <ItemCalendar itemId={item.itemId} />

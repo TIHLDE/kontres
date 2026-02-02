@@ -15,7 +15,6 @@ interface ItemDetailsProps {
     description: string;
     allowsAlcohol: boolean;
     groupSlug: string;
-    imageUrl?: string;
 }
 
 export default function ItemDetails({
@@ -24,7 +23,6 @@ export default function ItemDetails({
     allowsAlcohol,
     groupSlug,
     itemId,
-    imageUrl,
 }: ItemDetailsProps) {
     return (
         <Card>
@@ -65,16 +63,14 @@ export default function ItemDetails({
             <CardContent>
                 <Separator className="mb-4" />
                 <div className="flex flex-col md:flex-row gap-6">
-                    {imageUrl && imageUrl !== '' && (
-                        <div className="relative w-full md:w-64 h-48 md:h-auto flex-shrink-0">
-                            <Image
-                                src={imageUrl}
-                                alt={name}
-                                fill
-                                className="object-cover rounded-lg"
-                            />
-                        </div>
-                    )}
+                    <div className="relative w-full md:w-64 h-48 md:h-auto flex-shrink-0">
+                        <Image
+                            src="/placeholder.svg"
+                            alt={name}
+                            fill
+                            className="object-cover rounded-lg"
+                        />
+                    </div>
                     <div className="flex-1 space-y-4">
                         <div>
                             <h3 className="font-semibold mb-2">Description</h3>

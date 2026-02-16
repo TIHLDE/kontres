@@ -117,6 +117,7 @@ export default function ItemDialog({
                         allowsAlcohol: item?.allowsAlcohol ?? false,
                     }}
                     formAction={action}
+                    onCancel={() => setOpen?.(false)}
                     onSubmit={(values) =>
                         onSubmit({
                             ...values,

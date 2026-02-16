@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog';
 
 import ItemForm from './item-form';
+import { useToast } from '@/components/ui/use-toast';
 import { api } from '@/trpc/react';
 import { inferProcedureOutput } from '@trpc/server';
 import { PlusIcon } from 'lucide-react';
@@ -40,35 +41,69 @@ export default function ItemDialog({
     enableTrigger = true,
     ...props
 }: ItemDialogProps) {
-    const { mutate, isPending } = api.item.createItem.useMutation();
+    const { toast } = useToast();
+    const { mutate: createItem, isPending: isCreatePending } =
+        api.item.createItem.useMutation();
+    const { mutate: updateItem, isPending: isUpdatePending } =
+        api.item.updateItem.useMutation();
     const [internalOpen, internalSetOpen] = useState(false);
     const utils = api.useUtils();
 
     const action = !!item ? 'edit' : 'create';
+    const isPending = isCreatePending || isUpdatePending;
+
+    const onSuccess = () => {
+        utils.item.invalidate();
+        internalSetOpen(false);
+        toast({
+            title: item ? 'Gjenstand oppdatert' : 'Gjenstand opprettet',
+            description: item
+                ? 'Endringene er lagret.'
+                : 'Den nye gjenstanden er lagt til.',
+        });
+    };
+
+    const onError = (err: { message: string }) => {
+        toast({
+            title: item ? 'Kunne ikke oppdatere' : 'Kunne ikke opprette',
+            description: err.message,
+            variant: 'destructive',
+        });
+    };
 
     const onSubmit = (values: {
         name: string;
         groupSlug: string;
         description: string;
         allowsAlcohol: boolean;
+        imageUrl?: string;
     }) => {
-        mutate(
-            {
-                name: values.name,
-                description: values.description,
-                allowsAlcohol: values.allowsAlcohol,
-                groupSlug: values.groupSlug,
-            },
-            {
-                onSuccess: () => {
-                    // Invalidate existing items
-                    utils.item.invalidate();
-
-                    // Close the dialog
-                    internalSetOpen(false);
+        if (item) {
+            updateItem(
+                {
+                    itemId: item.itemId,
+                    groupSlug: values.groupSlug,
+                    data: {
+                        name: values.name,
+                        description: values.description,
+                        allowsAlcohol: values.allowsAlcohol,
+                        imageUrl: values.imageUrl,
+                    },
                 },
-            },
-        );
+                { onSuccess, onError },
+            );
+        } else {
+            createItem(
+                {
+                    name: values.name,
+                    description: values.description,
+                    allowsAlcohol: values.allowsAlcohol,
+                    groupSlug: values.groupSlug,
+                    imageUrl: values.imageUrl,
+                },
+                { onSuccess, onError },
+            );
+        }
     };
 
     const open = useMemo(() => {
@@ -110,17 +145,25 @@ export default function ItemDialog({
                 </DialogHeader>
 
                 <ItemForm
+                    key={item?.itemId ?? 'new'}
                     defaultValues={{
                         name: item?.name ?? '',
                         description: item?.description ?? '',
                         group: item?.groupSlug ?? '',
                         allowsAlcohol: item?.allowsAlcohol ?? false,
                     }}
+                    existingImageUrl={
+                        item && 'imageUrl' in item
+                            ? (item as { imageUrl?: string | null }).imageUrl
+                            : undefined
+                    }
                     formAction={action}
+                    onCancel={() => setOpen?.(false)}
                     onSubmit={(values) =>
                         onSubmit({
                             ...values,
                             groupSlug: values.group,
+                            imageUrl: values.imageUrl,
                         })
                     }
                     isSubmitting={isPending}

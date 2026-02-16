@@ -3,7 +3,7 @@ import { createTRPCContext } from '@/server/api/trpc';
 
 import { createQueryClient } from './query-client';
 import { createHydrationHelpers } from '@trpc/react-query/rsc';
-import { headers, type UnsafeUnwrappedHeaders } from 'next/headers';
+import { headers } from 'next/headers';
 import { cache } from 'react';
 import 'server-only';
 
@@ -11,8 +11,9 @@ import 'server-only';
  * This wraps the `createTRPCContext` helper and provides the required context for the tRPC API when
  * handling a tRPC call from a React Server Component.
  */
-const createContext = cache(() => {
-    const heads = new Headers((headers() as unknown as UnsafeUnwrappedHeaders));
+const createContext = cache(async () => {
+    const h = await headers();
+    const heads = new Headers(h);
     heads.set('x-trpc-source', 'rsc');
 
     return createTRPCContext({

@@ -262,10 +262,22 @@ const ReservationForm = ({
                                                         }}
                                                     />
                                                 </FormControl>
-                                                <div className="space-y-1 leading-none">
+                                                <div className="space-y-1 leading-none flex-1">
                                                     <FormLabel className="cursor-pointer">
                                                         Vil servere alkohol
                                                     </FormLabel>
+                                                    <span className="text-muted-foreground text-sm ml-1">
+                                                        (
+                                                        <a
+                                                            href="https://wiki.tihlde.org/retningslinjer/kontoret"
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="underline hover:text-foreground"
+                                                        >
+                                                            Se retningslinjer for kontoret
+                                                        </a>
+                                                        )
+                                                    </span>
                                                 </div>
                                             </FormItem>
                                         )}

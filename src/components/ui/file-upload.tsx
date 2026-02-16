@@ -28,16 +28,27 @@ const secondaryVariant = {
 export const FileUpload = ({
     onChange,
     accept,
+    maxFiles = 1,
 }: {
     onChange?: (files: File[]) => void;
     accept?: string;
+    maxFiles?: number;
 }) => {
     const [files, setFiles] = useState<File[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFileChange = (newFiles: File[]) => {
-        setFiles((prevFiles) => [...prevFiles, ...newFiles]);
-        onChange && onChange(newFiles);
+        if (maxFiles === 1) {
+            const single = newFiles.slice(0, 1);
+            setFiles(single);
+            onChange?.(single);
+        } else {
+            setFiles((prev) => {
+                const combined = [...prev, ...newFiles].slice(0, maxFiles);
+                onChange?.(combined);
+                return combined;
+            });
+        }
     };
 
     const handleClick = () => {
@@ -45,7 +56,7 @@ export const FileUpload = ({
     };
 
     const { getRootProps, isDragActive } = useDropzone({
-        multiple: false,
+        multiple: maxFiles > 1,
         noClick: true,
         onDrop: handleFileChange,
         onDropRejected: (error) => {

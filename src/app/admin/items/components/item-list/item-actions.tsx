@@ -22,17 +22,16 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 import ItemDialog from '../item-dialog/item-dialog';
+import { useToast } from '@/components/ui/use-toast';
 import { api } from '@/trpc/react';
 import { inferProcedureOutput } from '@trpc/server';
 import {
     CornerUpRightIcon,
     MoreHorizontal,
     PencilIcon,
-    Trash,
     TrashIcon,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-// import { resolve } from 'path';
 import { useState } from 'react';
 
 type GetItemsOutput = inferProcedureOutput<
@@ -43,18 +42,32 @@ const ItemActions = ({ item }: { item: GetItemsOutput }) => {
     const [editOpen, setEditOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
     const router = useRouter();
-    const { mutate } = api.item.deleteItem.useMutation();
+    const { toast } = useToast();
+    const { mutate: deleteItem, isPending: isDeleting } =
+        api.item.deleteItem.useMutation();
     const queryUtils = api.useUtils();
 
     const onDelete = () => {
-        mutate(
+        deleteItem(
             {
                 groupSlug: item.groupSlug,
                 itemId: item.itemId,
             },
             {
                 onSuccess: () => {
+                    setDeleteOpen(false);
                     queryUtils.item.invalidate();
+                    toast({
+                        title: 'Gjenstand slettet',
+                        description: `${item.name} er fjernet.`,
+                    });
+                },
+                onError: (err) => {
+                    toast({
+                        title: 'Kunne ikke slette',
+                        description: err.message,
+                        variant: 'destructive',
+                    });
                 },
             },
         );
@@ -91,10 +104,8 @@ const ItemActions = ({ item }: { item: GetItemsOutput }) => {
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                        onClick={(e) => {
-                            setDeleteOpen(!deleteOpen);
-                        }}
-                        className="gap-2"
+                        onClick={() => setDeleteOpen(true)}
+                        className="gap-2 text-destructive focus:text-destructive"
                     >
                         <TrashIcon size={14} />
                         Slett
@@ -120,12 +131,15 @@ const ItemActions = ({ item }: { item: GetItemsOutput }) => {
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                        <AlertDialogCancel disabled={isDeleting}>
+                            Avbryt
+                        </AlertDialogCancel>
                         <AlertDialogAction
-                            className="bg-destructive"
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                             onClick={onDelete}
+                            disabled={isDeleting}
                         >
-                            <Trash className="w-4 h-4" />
+                            {isDeleting ? 'Sletter…' : 'Slett'}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

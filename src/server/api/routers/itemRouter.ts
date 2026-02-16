@@ -3,6 +3,7 @@ import {
     groupLeaderProcedure,
     memberProcedure,
 } from '../trpc';
+import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 
 export const itemRouter = createTRPCRouter({
@@ -77,28 +78,38 @@ export const itemRouter = createTRPCRouter({
                 description: z.string(),
                 allowsAlcohol: z.boolean(),
                 groupSlug: z.string(),
+                imageUrl: z.string().optional(),
             }),
         )
         .mutation(({ ctx, input }) => {
-            return ctx.db.bookableItem.create({
-                data: {
-                    name: input.name,
-                    description: input.description,
-                    allowsAlcohol: input.allowsAlcohol,
-                    groupSlug: input.groupSlug,
-                },
-            });
+            const data: {
+                name: string;
+                description: string;
+                allowsAlcohol: boolean;
+                groupSlug: string;
+                imageUrl?: string;
+            } = {
+                name: input.name,
+                description: input.description,
+                allowsAlcohol: input.allowsAlcohol,
+                groupSlug: input.groupSlug,
+            };
+            if (input.imageUrl && input.imageUrl.trim() !== '') {
+                data.imageUrl = input.imageUrl.trim();
+            }
+            return ctx.db.bookableItem.create({ data });
         }),
 
     updateItem: groupLeaderProcedure
         .input(
             z.object({
+                groupSlug: z.string(),
                 itemId: z.number(),
                 data: z.object({
                     name: z.string().optional(),
                     description: z.string().optional(),
-                    allows_alcohol: z.boolean().optional(),
-                    image: z.string().optional(),
+                    allowsAlcohol: z.boolean().optional(),
+                    imageUrl: z.string().optional(),
                 }),
             }),
         )
@@ -111,7 +122,16 @@ export const itemRouter = createTRPCRouter({
 
     deleteItem: groupLeaderProcedure
         .input(z.object({ itemId: z.number(), groupSlug: z.string() }))
-        .mutation(({ ctx, input: { itemId } }) => {
+        .mutation(async ({ ctx, input: { itemId } }) => {
+            const reservationCount = await ctx.db.reservation.count({
+                where: { bookableItemId: itemId },
+            });
+            if (reservationCount > 0) {
+                throw new TRPCError({
+                    code: 'CONFLICT',
+                    message: `Kan ikke slette gjenstanden: den har ${reservationCount} reservasjon(er). Slett eller flytt reservasjonene først.`,
+                });
+            }
             return ctx.db.bookableItem.delete({
                 where: { itemId },
             });

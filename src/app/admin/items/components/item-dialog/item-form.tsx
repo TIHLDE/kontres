@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import FileInput from '@/components/ui/file-input';
+import { FileUpload } from '@/components/ui/file-upload';
 import {
     Form,
     FormControl,
@@ -17,10 +17,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { LoadingSpinner } from '@/components/ui/loadingspinner';
 
+import { getImageUrl } from '@/app/faq/components/uploadFile';
 import { api } from '@/trpc/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useSession } from 'next-auth/react';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -37,11 +38,16 @@ const schema = z.object({
     allowsAlcohol: z.boolean().default(false),
 });
 
+export type ItemFormSubmitValues = z.infer<typeof schema> & {
+    imageUrl?: string;
+};
+
 interface ItemFormProps {
-    onSubmit: (values: z.infer<typeof schema>) => void;
+    onSubmit: (values: ItemFormSubmitValues) => void;
     onCancel?: () => void;
     isSubmitting?: boolean;
     defaultValues?: z.infer<typeof schema>;
+    existingImageUrl?: string | null;
     formAction?: 'edit' | 'create';
 }
 
@@ -50,14 +56,17 @@ export default function ItemForm({
     onCancel,
     formAction,
     defaultValues,
+    existingImageUrl,
     isSubmitting,
 }: ItemFormProps) {
+    const [file, setFile] = useState<File | undefined>();
     const form = useForm<z.infer<typeof schema>>({
         resolver: zodResolver(schema),
         defaultValues,
     });
 
     const { data: session } = useSession();
+    const token = session?.user?.TIHLDE_Token;
     const membershipGroups = useMemo(() => session?.user.groups, [session]);
     const { data: allGroups } = api.group.getAll.useQuery();
     const pickableGroups = useMemo(() => {
@@ -72,10 +81,26 @@ export default function ItemForm({
             );
     }, [allGroups, membershipGroups]);
 
+    const handleSubmitWithImage = form.handleSubmit(async (values) => {
+        let imageUrl = '';
+        if (file) {
+            try {
+                const uploaded = await getImageUrl(file, token);
+                imageUrl = uploaded ?? '';
+            } catch (err) {
+                console.error('[ItemForm] Image upload failed:', err);
+                imageUrl = '';
+            }
+        } else if (existingImageUrl) {
+            imageUrl = existingImageUrl;
+        }
+        onSubmit({ ...values, imageUrl: imageUrl || undefined });
+    });
+
     return (
         <div>
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)}>
+                <form onSubmit={handleSubmitWithImage}>
                     <FormField
                         control={form.control}
                         name="name"
@@ -157,42 +182,50 @@ export default function ItemForm({
                             </FormItem>
                         )}
                     />
+
+                    <div className="mt-5">
+                        <p className="text-sm font-medium mb-2">Bilde</p>
+                        <FileUpload
+                            accept="image/*"
+                            maxFiles={1}
+                            onChange={(files) => setFile(files[0])}
+                        />
+                        {existingImageUrl && !file && (
+                            <p className="text-sm text-muted-foreground mt-2">
+                                Nåværende bilde er satt. Velg et nytt bilde for
+                                å erstatte.
+                            </p>
+                        )}
+                    </div>
+                    <div className="mt-5 flex justify-end gap-5">
+                        <Button
+                            variant="ghost"
+                            type="button"
+                            onClick={onCancel}
+                        >
+                            Avbryt
+                        </Button>
+                        <Button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="gap-2.5"
+                        >
+                            {isSubmitting ? (
+                                <>
+                                    <LoadingSpinner />{' '}
+                                    {formAction === 'edit'
+                                        ? 'Lagrer'
+                                        : 'Oppretter'}
+                                </>
+                            ) : formAction === 'edit' ? (
+                                'Lagre endringer'
+                            ) : (
+                                'Opprett gjenstand'
+                            )}
+                        </Button>
+                    </div>
                 </form>
             </Form>
-            <FileInput
-                disabled
-                title="Ikke ferdigimplementert"
-                className="mt-5"
-                label="Velg bilde"
-                accept="image/*"
-                maxSize={0}
-            />
-            <div className="mt-5 flex justify-end gap-5">
-                <Button
-                    variant="ghost"
-                    type="button"
-                    onClick={onCancel}
-                >
-                    Avbryt
-                </Button>
-                <Button
-                    onClick={form.handleSubmit(onSubmit)}
-                    disabled={isSubmitting}
-                    className="gap-2.5"
-                    type="button"
-                >
-                    {isSubmitting ? (
-                        <>
-                            <LoadingSpinner />{' '}
-                            {formAction === 'edit' ? 'Lagrer' : 'Oppretter'}
-                        </>
-                    ) : formAction === 'edit' ? (
-                        'Lagre endringer'
-                    ) : (
-                        'Opprett gjenstand'
-                    )}
-                </Button>
-            </div>
         </div>
     );
 }

@@ -23,6 +23,7 @@ model BookableItem {
     description     String
     allowsAlcohol   Boolean
     groupSlug       String
+    imageUrl        String?
     reservations    Reservation[]
     FAQs            FAQ[] 
     @@index([name])

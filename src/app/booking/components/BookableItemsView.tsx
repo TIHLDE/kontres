@@ -19,6 +19,7 @@ import {
 import { datetimeParser, groupParser } from './SearchFilters';
 import { cn } from '@/lib/utils';
 import { api } from '@/trpc/react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { parseAsBoolean, parseAsString, useQueryStates } from 'nuqs';
 import { useEffect, useState } from 'react';
@@ -182,9 +183,22 @@ export default function BookableItemsView({
                                         </Badge>
                                     </TableCell>
                                     <TableCell className="max-w-md">
-                                        <p className="truncate text-sm text-muted-foreground">
-                                            {item.description}
-                                        </p>
+                                        <div className="flex items-center gap-3">
+                                            {item.imageUrl && (
+                                                <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded">
+                                                    <Image
+                                                        src={item.imageUrl}
+                                                        alt=""
+                                                        fill
+                                                        className="object-cover"
+                                                        unoptimized
+                                                    />
+                                                </div>
+                                            )}
+                                            <p className="truncate text-sm text-muted-foreground">
+                                                {item.description}
+                                            </p>
+                                        </div>
                                     </TableCell>
                                     <TableCell>
                                         {item.allowsAlcohol ? (

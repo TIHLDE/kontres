@@ -37,24 +37,8 @@ export async function POST(req: Request) {
         );
     }
 
-    // Convert blob to buffer for more reliable transmission in production
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const fileName = file instanceof File && file.name 
-        ? file.name 
-        : `upload.${file.type.split('/')[1] || 'bin'}`;
-    
-    // Create a new Blob with the buffer to ensure consistent behavior
-    const fileBlob = new Blob([buffer], { type: file.type });
-
     const uploadFormData = new FormData();
-    uploadFormData.append('file', fileBlob, fileName);
-
-    console.log('[upload] Uploading to:', LEPTON_UPLOAD);
-    console.log('[upload] File name:', fileName);
-    console.log('[upload] File type:', file.type);
-    console.log('[upload] File size:', buffer.length);
-    console.log('[upload] Has token:', !!token);
-    console.log('[upload] Token preview:', token?.substring(0, 20) + '...');
+    uploadFormData.append('file', file);
 
     const leptonRes = await fetch(LEPTON_UPLOAD, {
         method: 'POST',
@@ -64,18 +48,7 @@ export async function POST(req: Request) {
         },
     });
 
-    console.log('[upload] Lepton response status:', leptonRes.status);
-    console.log('[upload] Lepton response headers:', Object.fromEntries(leptonRes.headers.entries()));
-
-    const responseText = await leptonRes.text();
-    console.log('[upload] Lepton raw response:', responseText);
-
-    let body;
-    try {
-        body = JSON.parse(responseText);
-    } catch {
-        body = { rawResponse: responseText };
-    }
+    const body = await leptonRes.json().catch(() => ({}));
 
     if (!leptonRes.ok) {
         console.error('[upload] Lepton error:', leptonRes.status, body);

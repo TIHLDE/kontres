@@ -4,9 +4,6 @@ import { NextResponse } from 'next/server';
 
 const LEPTON_UPLOAD = `${env.LEPTON_API_URL}/upload/`;
 
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
-
 export async function POST(req: Request) {
     const session = await auth();
     const token = (session?.user as { TIHLDE_Token?: string } | undefined)

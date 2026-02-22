@@ -1,10 +1,10 @@
-import { Button } from './button';
 import {
     Collapsible,
     CollapsibleContent,
     CollapsibleTrigger,
 } from './collapsible';
 import { cn } from '@/lib/utils';
+import { buttonVariants } from './button';
 import { ChevronDownIcon, ChevronRightIcon } from 'lucide-react';
 import { type ReactNode, useState } from 'react';
 
@@ -41,12 +41,12 @@ const Expandable = ({
             open={open || expanded}
         >
             <CollapsibleTrigger asChild>
-                <Button
+                <div
                     className={cn(
-                        'whitespace-normal py-8 w-full rounded-t-md rounded-b-none bg-white dark:bg-inherit dark:hover:bg-secondary border-none flex justify-between items-center rounded-sm',
+                        buttonVariants({ variant: 'outline' }),
+                        'whitespace-normal py-8 w-full rounded-t-md rounded-b-none bg-white dark:bg-inherit dark:hover:bg-secondary border-none flex justify-between items-center rounded-sm cursor-pointer',
                         expanded && 'rounded-b-none',
                     )}
-                    variant="outline"
                 >
                     <div className="flex items-center space-x-2 md:space-x-4 w-full overflow-hidden">
                         {icon}
@@ -75,7 +75,7 @@ const Expandable = ({
                             <ChevronRightIcon className="stroke-[1.5px]" />
                         )}
                     </div>
-                </Button>
+                </div>
             </CollapsibleTrigger>
             <CollapsibleContent className="border border-t-secondary border-b-0 border-x-0 [&>*]:p-2 md:[&>*]:p-4">
                 {children}

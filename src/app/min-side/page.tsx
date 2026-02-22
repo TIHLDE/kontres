@@ -22,6 +22,7 @@ const Page = async () => {
                     <DataTable
                         columns={reservationColumns}
                         data={reservations}
+                        initialSorting={[{ id: 'status', desc: false }]}
                         search
                         filterProperty="description"
                         searchPlaceholder="Søk etter navn..."

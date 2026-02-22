@@ -12,6 +12,7 @@ export default function BookingList({ items }: BookingListProps) {
         <DataTable
             columns={columns}
             data={items}
+            initialSorting={[{ id: 'status', desc: false }]}
             displayPageNavigation={false}
         />
     );

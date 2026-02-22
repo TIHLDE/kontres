@@ -138,7 +138,10 @@ export default function SearchFilters({
                         <Button
                             variant="ghost"
                             size="sm"
-                            onClick={clearFilters}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                clearFilters();
+                            }}
                             disabled={!isFiltering}
                             className={cn(
                                 'gap-2 -mr-2',

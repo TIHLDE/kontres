@@ -35,6 +35,7 @@ type DataTableProps<TData, TValue> = {
     displayPageNavigation?: boolean;
     displaySearch?: boolean;
     pageSize?: number;
+    initialSorting?: SortingState;
 };
 
 export function DataTable<TData, TValue>({
@@ -47,10 +48,9 @@ export function DataTable<TData, TValue>({
     searchPlaceholder,
     filterProperty,
     headerItem,
+    initialSorting = [],
 }: DataTableProps<TData, TValue>) {
-    const [sorting, setSorting] = useState<SortingState>([
-        { id: 'status', desc: false } // Default sort by status ascending
-    ]);
+    const [sorting, setSorting] = useState<SortingState>(initialSorting);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
     const table = useReactTable({

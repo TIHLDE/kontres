@@ -40,15 +40,42 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-    ({ className, variant, size, asChild = false, ...props }, ref) => {
-        const Comp = asChild ? Slot : 'button';
-        return (
-            <Comp
-                className={cn(buttonVariants({ variant, size, className }))}
-                ref={ref}
-                {...props}
-            />
-        );
+    ({ className, variant, size, asChild = false, children, ...props }, ref) => {
+        // Avoid nesting: if our only child is a button (or Button), render as div with role="button" to satisfy HTML spec
+        const childArray = React.Children.toArray(children);
+        const singleChild =
+            childArray.length === 1 && React.isValidElement(childArray[0])
+                ? childArray[0]
+                : null;
+        const childIsButton =
+            singleChild &&
+            React.isValidElement(singleChild) &&
+            ((singleChild as React.ReactElement).type === 'button' ||
+                (typeof (singleChild as React.ReactElement).type ===
+                    'function' &&
+                    ((singleChild as React.ReactElement).type as { displayName?: string })
+                        ?.displayName === 'Button'));
+        const useDiv = !asChild && childIsButton;
+        const Comp = asChild ? Slot : useDiv ? 'div' : 'button';
+
+        const compProps = {
+            className: cn(buttonVariants({ variant, size, className })),
+            ref: ref as React.Ref<HTMLDivElement>,
+            ...(useDiv && {
+                role: 'button',
+                tabIndex: 0,
+                onKeyDown: (e: React.KeyboardEvent) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        (e.currentTarget as HTMLDivElement).click();
+                    }
+                },
+            }),
+            ...props,
+            children,
+        };
+
+        return <Comp {...compProps} />;
     },
 );
 Button.displayName = 'Button';

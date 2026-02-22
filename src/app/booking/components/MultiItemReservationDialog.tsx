@@ -199,7 +199,7 @@ export default function MultiItemReservationDialog({
                                         </p>
                                     </div>
                                     <Badge variant="outline" className="ml-2">
-                                        {item.groupSlug}
+                                        {allGroups?.find((g) => g.groupSlug === item.groupSlug)?.groupName ?? item.groupSlug}
                                     </Badge>
                                 </div>
                             ))}
@@ -232,9 +232,25 @@ export default function MultiItemReservationDialog({
                         <DateTimeField
                             value={form.watch('from') ?? null}
                             onChange={(next) => {
+                                const currentTo = form.getValues('to');
                                 form.setValue('from', next, {
                                     shouldValidate: true,
                                 });
+                                if (
+                                    currentTo != null &&
+                                    next > currentTo
+                                ) {
+                                    const adjustedTo = new Date(next);
+                                    adjustedTo.setHours(
+                                        currentTo.getHours(),
+                                        currentTo.getMinutes(),
+                                        currentTo.getSeconds(),
+                                        currentTo.getMilliseconds(),
+                                    );
+                                    form.setValue('to', adjustedTo, {
+                                        shouldValidate: true,
+                                    });
+                                }
                             }}
                         />
                         {form.formState.errors.from && (

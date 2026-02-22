@@ -8,7 +8,7 @@ services:
       POSTGRES_DB: ${DATABASE_NAME}
     image: postgres:16.4
     ports:
-      - 5432:5432
+      - 5433:5432
 
     volumes:
       - db_data:/var/lib/postgresql/data

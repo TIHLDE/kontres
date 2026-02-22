@@ -31,6 +31,7 @@ type BookableItemsViewProps = {
 };
 
 export default function BookableItemsView({
+    groups,
     className,
 }: BookableItemsViewProps) {
     const [filters] = useQueryStates({
@@ -159,9 +160,9 @@ export default function BookableItemsView({
                                         selectedItems.has(item.itemId) &&
                                             'bg-muted',
                                     )}
-                                    onClick={() => {
-                                        window.location.href = `/booking/${item.itemId}`;
-                                    }}
+                                    onClick={() =>
+                                        handleToggleItem(item.itemId)
+                                    }
                                 >
                                     <TableCell onClick={(e) => e.stopPropagation()}>
                                         <Checkbox
@@ -179,7 +180,7 @@ export default function BookableItemsView({
                                     </TableCell>
                                     <TableCell>
                                         <Badge variant="outline">
-                                            {item.groupSlug}
+                                            {groups.find((g) => g.groupSlug === item.groupSlug)?.groupName ?? item.groupSlug}
                                         </Badge>
                                     </TableCell>
                                     <TableCell className="max-w-md">

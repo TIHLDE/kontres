@@ -152,11 +152,29 @@ const ReservationForm = ({
                                                 <DateTimeField
                                                     value={field.value ?? null}
                                                     onChange={(next) => {
+                                                        const currentTo = form.getValues('to');
                                                         form.setValue('from', next, {
                                                             shouldValidate: true,
                                                             shouldDirty: true,
                                                             shouldTouch: true,
                                                         });
+                                                        if (
+                                                            currentTo != null &&
+                                                            next > currentTo
+                                                        ) {
+                                                            const adjustedTo = new Date(next);
+                                                            adjustedTo.setHours(
+                                                                currentTo.getHours(),
+                                                                currentTo.getMinutes(),
+                                                                currentTo.getSeconds(),
+                                                                currentTo.getMilliseconds(),
+                                                            );
+                                                            form.setValue('to', adjustedTo, {
+                                                                shouldValidate: true,
+                                                                shouldDirty: true,
+                                                                shouldTouch: true,
+                                                            });
+                                                        }
                                                     }}
                                                 />
                                             </FormControl>

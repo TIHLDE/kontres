@@ -166,11 +166,29 @@ export default function ReservationForm({
                         <DateTimeField
                             value={watch('startTime') ?? null}
                             onChange={(next) => {
+                                const currentEnd = watch('endTime');
                                 setValue('startTime', next, {
                                     shouldValidate: true,
                                     shouldDirty: true,
                                     shouldTouch: true,
                                 });
+                                if (
+                                    currentEnd != null &&
+                                    next > currentEnd
+                                ) {
+                                    const adjustedEnd = new Date(next);
+                                    adjustedEnd.setHours(
+                                        currentEnd.getHours(),
+                                        currentEnd.getMinutes(),
+                                        currentEnd.getSeconds(),
+                                        currentEnd.getMilliseconds(),
+                                    );
+                                    setValue('endTime', adjustedEnd, {
+                                        shouldValidate: true,
+                                        shouldDirty: true,
+                                        shouldTouch: true,
+                                    });
+                                }
                             }}
                         />
                         {errors.startTime && (

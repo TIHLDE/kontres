@@ -18,6 +18,22 @@ pnpm install
 
 From now on, it's enough to run `pnpm run dev` to start the application.
 
+### Development database (Docker)
+
+To run a local PostgreSQL database for development:
+
+```bash
+docker compose up -d
+```
+
+This starts Postgres 16 on `localhost:5433` (port 5433 avoids conflict with a local Postgres on 5432). Credentials come from your `.env` (see `.env.example`). Apply migrations with:
+
+```bash
+pnpm prisma migrate deploy
+```
+
+Stop the database with `docker compose down`.
+
 ## ⚙ Configuration
 The application requires configuration of some environment variables in order to run. These should be put in a .env file in the repository root.
 

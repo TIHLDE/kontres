@@ -318,7 +318,7 @@ export default function ReservationCard({
                             updateStatus.isPending ||
                             reservation.status === ReservationState.APPROVED
                         }
-                        className="flex-1 border-green-200 text-green-700 hover:bg-green-50"
+                        className="flex-1 border-0 bg-green-600 text-white hover:bg-green-500"
                     >
                         <CheckCircle2 className="h-4 w-4 mr-1" />
                         Godkjenn
@@ -333,7 +333,7 @@ export default function ReservationCard({
                             updateStatus.isPending ||
                             reservation.status === ReservationState.PENDING
                         }
-                        className="flex-1 border-yellow-200 text-yellow-700 hover:bg-yellow-50"
+                        className="flex-1 border-0 bg-yellow-600 text-white hover:bg-yellow-500"
                     >
                         <AlertCircle className="h-4 w-4 mr-1" />
                         Avventer
@@ -348,7 +348,7 @@ export default function ReservationCard({
                             updateStatus.isPending ||
                             reservation.status === ReservationState.REJECTED
                         }
-                        className="flex-1 border-red-200 text-red-700 hover:bg-red-50"
+                        className="flex-1 border-0 bg-red-600 text-white hover:bg-red-500"
                     >
                         <XCircle className="h-4 w-4 mr-1" />
                         Avvis

@@ -1,7 +1,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { FileUpload } from '@/components/ui/file-upload';
 import {
     Form,
     FormControl,
@@ -19,7 +18,7 @@ import { useToast } from '@/components/ui/use-toast';
 
 import BookableItemsSelect from './bookableItemsSelect';
 import { FaqFormValueTypes, formSchema } from './faqSchema';
-import { getImageUrl } from './uploadFile';
+
 import { CACHE_TAGS } from '@/lib/cache_tags';
 import { api } from '@/trpc/react';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -41,7 +40,7 @@ export default function CreateFaqForm({
     const { mutateAsync: updateFaq } = api.faq.update.useMutation();
     const queryClient = useQueryClient();
 
-    const [file, setFile] = useState<File>();
+  
 
     const router = useRouter();
 
@@ -82,9 +81,7 @@ export default function CreateFaqForm({
 
     async function onSubmit(formData: FaqFormValueTypes) {
         try {
-            const imageUrl =
-                file && token ? await getImageUrl(file, token) : '';
-            form.setValue('imageUrl', imageUrl);
+            const imageUrl = '';
 
             const faqData = {
                 question: formData.question,
@@ -133,10 +130,6 @@ export default function CreateFaqForm({
             console.error('Error i oppretting  av FAQ: ', error);
             toast({ variant: 'destructive', description: 'Noe gikk galt 😢' });
         }
-    }
-
-    function handleFileUpload(file: File): void {
-        setFile(file);
     }
 
     return (
@@ -257,13 +250,6 @@ export default function CreateFaqForm({
                         ></FormField>
                     )}
                 </div>
-
-                <FileUpload
-                    accept="image/*"
-                    onChange={(files) => {
-                        files[0] && handleFileUpload(files[0]);
-                    }}
-                />
 
                 <Button type="submit">
                     {questionId ? 'Oppdater' : 'Opprett'}

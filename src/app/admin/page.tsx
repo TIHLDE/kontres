@@ -57,6 +57,8 @@ export default function Page() {
         },
     );
 
+    const { data: groups = [] } = api.group.getAll.useQuery();
+
     return (
         <>
             <CardHeader>
@@ -77,6 +79,7 @@ export default function Page() {
                                     (page) => page.reservations,
                                 ) ?? []
                             }
+                            groups={groups}
                         />
                         {hasNextPage && (
                             <Button

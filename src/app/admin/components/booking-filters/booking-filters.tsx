@@ -37,6 +37,7 @@ export default function AdminBookingFilters() {
 
     // Get groups and items, as they are used in the filters
     const { data: existingGroups } = api.group.getAll.useQuery();
+    const { data: userGroupSlugs } = api.group.getUserGroups.useQuery();
     const { data: existingItems } = api.item.getItems.useQuery({});
 
     const [filterQueries, setFilterQueries] = useQueryStates({
@@ -47,6 +48,14 @@ export default function AdminBookingFilters() {
     });
 
     useEffect(() => {}, [existingItems]);
+
+    const availableGroups = useMemo(() => {
+        if (!existingGroups || !userGroupSlugs) return [];
+
+        return existingGroups.filter((group) =>
+            userGroupSlugs.includes(group.groupSlug),
+        );
+    }, [existingGroups, userGroupSlugs]);
 
     const filters = useMemo<FilterCallbackType[]>(() => {
         return [
@@ -144,7 +153,7 @@ export default function AdminBookingFilters() {
         });
     };
 
-    if (!existingGroups || !existingItems || !filters)
+    if (!existingGroups || !existingItems || !filters || !userGroupSlugs)
         return <FilterSkeleton />;
 
     return (
@@ -155,7 +164,7 @@ export default function AdminBookingFilters() {
             groupIcons={GroupIcons}
             displayGroupIcons={true}
             filterGroups={reservationFilterGroups({
-                groups: existingGroups ?? [],
+                groups: availableGroups,
                 items: existingItems?.items ?? [],
             })}
             onFilterChange={(value) => {

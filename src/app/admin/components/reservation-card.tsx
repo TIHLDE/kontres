@@ -1,6 +1,7 @@
 'use client';
 
 import { type ReservationWithAuthorAndItem } from '@/server/dtos/reservations';
+import { type GroupInfo } from '@/server/api/routers/groupRouter';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -55,11 +56,13 @@ const StatusConfig = {
 
 interface ReservationCardProps {
     reservation: ReservationWithAuthorAndItem;
+    groups: GroupInfo[];
     onUpdate?: () => void;
 }
 
 export default function ReservationCard({
     reservation,
+    groups,
     onUpdate,
 }: ReservationCardProps) {
     const utils = api.useUtils();
@@ -120,6 +123,10 @@ export default function ReservationCard({
             });
         }
     };
+
+    const groupName =
+        groups.find((g) => g.groupSlug === reservation.groupSlug)?.groupName ??
+        reservation.groupSlug;
 
     return (
         <Card className="w-full">
@@ -286,7 +293,7 @@ export default function ReservationCard({
                             <span className="text-sm">
                                 Gruppe:{' '}
                                 <span className="font-medium">
-                                    {reservation.groupSlug}
+                                    {groupName}
                                 </span>
                             </span>
                         </div>

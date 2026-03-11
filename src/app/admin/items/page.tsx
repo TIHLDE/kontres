@@ -36,6 +36,8 @@ export default function Page() {
         },
         { getNextPageParam: (lastPage) => lastPage.nextCursor },
     );
+
+    const { data: groups = [] } = api.group.getAll.useQuery();
     return (
         <>
             <CardHeader>
@@ -51,6 +53,7 @@ export default function Page() {
                 >
                     <ItemList
                         items={items?.pages.flatMap((page) => page.items) ?? []}
+                        groups={groups}
                     />
                 </div>
                 {hasNextPage && (

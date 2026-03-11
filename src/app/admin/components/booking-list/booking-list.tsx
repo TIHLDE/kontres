@@ -1,16 +1,18 @@
 import { type ReservationWithAuthorAndItem } from '@/server/dtos/reservations';
+import { type GroupInfo } from '@/server/api/routers/groupRouter';
 
 import { DataTable } from '../../../../components/ui/data-table';
-import { columns } from './columns';
+import { getColumns } from './columns';
 
 interface BookingListProps {
     items: ReservationWithAuthorAndItem[];
+    groups: GroupInfo[];
 }
 
-export default function BookingList({ items }: BookingListProps) {
+export default function BookingList({ items, groups }: BookingListProps) {
     return (
         <DataTable
-            columns={columns}
+            columns={getColumns(groups)}
             data={items}
             initialSorting={[{ id: 'status', desc: false }]}
             displayPageNavigation={false}

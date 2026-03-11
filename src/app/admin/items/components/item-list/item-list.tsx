@@ -1,6 +1,7 @@
 'use client';
 
 import { AppRouter } from '@/server/api/root';
+import { type GroupInfo } from '@/server/api/routers/groupRouter';
 
 import { DataTable } from '@/components/ui/data-table';
 
@@ -14,9 +15,10 @@ type GetItemsOutput = inferProcedureOutput<
 
 interface ItemListProps {
     items: GetItemsOutput[];
+    groups: GroupInfo[];
 }
 
-export default function ItemList({ items }: ItemListProps) {
+export default function ItemList({ items, groups }: ItemListProps) {
     const router = useRouter();
 
     const handleRowClick = (item: GetItemsOutput) => {
@@ -26,7 +28,7 @@ export default function ItemList({ items }: ItemListProps) {
     //NOE ER FEIL MED PAGINATION; FIKS DET
     return (
         <DataTable
-            columns={itemColumns}
+            columns={itemColumns(groups)}
             data={items}
             displayPageNavigation={false}
         />

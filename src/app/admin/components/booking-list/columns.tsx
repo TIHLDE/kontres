@@ -1,6 +1,7 @@
 'use client';
 
 import { type ReservationWithAuthorAndItem } from '@/server/dtos/reservations';
+import { type GroupInfo } from '@/server/api/routers/groupRouter';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ReservationState } from '@prisma/client';
@@ -21,7 +22,6 @@ import {
 import ReservationCard from '@/app/admin/components/reservation-card';
 import { useState } from 'react';
 
-
 const StatusMap = {
     [ReservationState.APPROVED]: 'Godkjent',
     [ReservationState.PENDING]: 'Avventer',
@@ -35,7 +35,9 @@ const StatusSortOrder = {
     [ReservationState.REJECTED]: 3,
 };
 
-export const columns: ColumnDef<ReservationWithAuthorAndItem>[] = [
+export const getColumns = (
+    groups: GroupInfo[],
+): ColumnDef<ReservationWithAuthorAndItem>[] => [
     {
         accessorKey: 'status',
         header: 'Status',
@@ -89,10 +91,9 @@ export const columns: ColumnDef<ReservationWithAuthorAndItem>[] = [
     },
     {
         id: 'actions',
-
-                header: 'Behandle',
-        cell: ({row}) => {
-             const reservation = row.original;
+        header: 'Behandle',
+        cell: ({ row }) => {
+            const reservation = row.original;
             const utils = api.useUtils();
 
             const handleReservation = api.reservation.updateStatus.useMutation({
@@ -110,11 +111,11 @@ export const columns: ColumnDef<ReservationWithAuthorAndItem>[] = [
                         variant: 'destructive',
                     });
                 },
-                
             });
+
             return (
                 <div>
-                    <RadioGroup 
+                    <RadioGroup
                         value={reservation.status}
                         className="flex flex-row items-center"
                     >
@@ -183,6 +184,7 @@ export const columns: ColumnDef<ReservationWithAuthorAndItem>[] = [
                         </DialogHeader>
                         <ReservationCard
                             reservation={reservation}
+                            groups={groups}
                             onUpdate={() => setOpen(false)}
                         />
                     </DialogContent>
@@ -192,12 +194,11 @@ export const columns: ColumnDef<ReservationWithAuthorAndItem>[] = [
     },
     {
         id: 'delete',
-
         header: 'Slett',
         cell: ({ row }) => {
             const reservation = row.original;
             const utils = api.useUtils();
-            
+
             const deleteReservation = api.reservation.delete.useMutation({
                 onSuccess: () => {
                     toast({
@@ -207,7 +208,7 @@ export const columns: ColumnDef<ReservationWithAuthorAndItem>[] = [
                     // Invalidate and refetch reservations
                     utils.reservation.getReservations.invalidate();
                 },
-                onError: (error) => {
+                onError: () => {
                     toast({
                         title: 'Feil',
                         description: 'Kunne ikke slette reservasjonen.',
@@ -217,8 +218,15 @@ export const columns: ColumnDef<ReservationWithAuthorAndItem>[] = [
             });
 
             const handleDelete = () => {
-                if (confirm('Er du sikker på at du vil slette denne reservasjonen?')) {
-                    deleteReservation.mutate({ groupSlug: reservation.groupSlug, reservationId: reservation.reservationId });
+                if (
+                    confirm(
+                        'Er du sikker på at du vil slette denne reservasjonen?',
+                    )
+                ) {
+                    deleteReservation.mutate({
+                        groupSlug: reservation.groupSlug,
+                        reservationId: reservation.reservationId,
+                    });
                 }
             };
 

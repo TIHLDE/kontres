@@ -39,14 +39,14 @@ export default function ItemDetails({
                                     <>
                                         <Wine className="h-4 w-4 text-green-600" />
                                         <span className="text-sm text-green-600">
-                                            Alcohol allowed
+                                            Alkohol tillatt
                                         </span>
                                     </>
                                 ) : (
                                     <>
                                         <WineOff className="h-4 w-4 text-red-600" />
                                         <span className="text-sm text-red-600">
-                                            No alcohol
+                                            Ingen alkohol
                                         </span>
                                     </>
                                 )}
@@ -84,23 +84,22 @@ export default function ItemDetails({
 
                         <div>
                             <h3 className="font-semibold mb-2">
-                                Booking Information
+                                Bookinginformasjon
                             </h3>
                             <ul className="text-sm text-muted-foreground space-y-1">
                                 <li>
-                                    • Reservations must be approved by group leaders
+                                    • Reservasjoner må godkjennes av gruppeledere
                                 </li>
                                 <li>
-                                    • Please provide detailed description of your
-                                    event
+                                    • Vennligst legg ved en detaljert beskrivelse av
+                                    arrangementet ditt
                                 </li>
                                 {allowsAlcohol && (
                                     <li>
-                                        • If serving alcohol, a sober watch person
-                                        is required
+                                        • Ved servering av alkohol kreves en edruvakt
                                     </li>
                                 )}
-                                <li>• Follow all TIHLDE rules and regulations</li>
+                                <li>• Følg alle TIHLDEs regler og retningslinjer</li>
                             </ul>
                         </div>
                     </div>

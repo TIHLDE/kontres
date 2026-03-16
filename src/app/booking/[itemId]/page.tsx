@@ -34,13 +34,13 @@ export default async function Page(props: PageProps) {
                 <Link href="/booking">
                     <Button variant="outline" size="sm">
                         <ArrowLeft className="h-4 w-4 mr-2" />
-                        Back to Booking
+                        Tilbake til booking
                     </Button>
                 </Link>
                 <div>
                     <h1 className="text-3xl font-semibold">{item.name}</h1>
                     <p className="text-sm text-muted-foreground">
-                        Book this item for your event or activity
+                        Book dette objektet for arrangementet eller aktiviteten din
                     </p>
                 </div>
             </div>

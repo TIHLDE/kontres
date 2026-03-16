@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { DateTimeField } from '@/components/ui/date-time-field';
 import { Separator } from '@/components/ui/separator';
 
+import { LoadingSpinner } from '@/components/ui/loadingspinner';
 import { cn } from '@/lib/utils';
 import {
     ChevronRight,
@@ -21,7 +22,7 @@ import {
 } from 'lucide-react';
 import { createParser, parseAsBoolean, useQueryState } from 'nuqs';
 import * as React from 'react';
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export const groupParser = createParser<string[]>({
     parse(value) {
@@ -93,21 +94,48 @@ export default function SearchFilters({
 
     const [searchFormExpanded, setSearchFormExpanded] = useState(false);
 
+    const [showFilterSpinner, setShowFilterSpinner] = useState(false);
+    const spinnerTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const isFirstRender = useRef(true);
+
+    const showSpinner = useCallback(() => {
+        setShowFilterSpinner(true);
+        if (spinnerTimeout.current) clearTimeout(spinnerTimeout.current);
+        spinnerTimeout.current = setTimeout(
+            () => setShowFilterSpinner(false),
+            200,
+        );
+    }, []);
+
+    useEffect(() => {
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
+        }
+        showSpinner();
+    }, [query, groups, isAlcoholAllowed, from, to, showSpinner]);
+
     return (
         <>
             {/* Desktop */}
             <Card className={cn('w-full h-fit hidden lg:block', className)}>
                 <CardHeader className="flex flex-row justify-between items-center px-6 py-4">
                     <h2 className="font-semibold">Filtrer</h2>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={clearFilters}
-                        disabled={!isFiltering}
-                        className={cn('gap-2', !isFiltering && 'invisible')}
-                    >
-                        <FunnelX className="h-4 w-4" />
-                    </Button>
+                    {showFilterSpinner ? (
+                        <div className="flex items-center justify-center h-9 w-9">
+                            <LoadingSpinner className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                    ) : (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={clearFilters}
+                            disabled={!isFiltering}
+                            className={cn('gap-2', !isFiltering && 'invisible')}
+                        >
+                            <FunnelX className="h-4 w-4" />
+                        </Button>
+                    )}
                 </CardHeader>
                 <Separator />
                 <CardContent className="w-full flex gap-3 flex-col mt-6">
@@ -135,21 +163,27 @@ export default function SearchFilters({
                 title={
                     <div className="flex items-center gap-3">
                         <span>Filter</span>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                clearFilters();
-                            }}
-                            disabled={!isFiltering}
-                            className={cn(
-                                'gap-2 -mr-2',
-                                !isFiltering && 'invisible',
-                            )}
-                        >
-                            <FunnelX className="h-4 w-4" />
-                        </Button>
+                        {showFilterSpinner ? (
+                            <div className="flex items-center justify-center h-9 w-9 -mr-2">
+                                <LoadingSpinner className="h-4 w-4 text-muted-foreground" />
+                            </div>
+                        ) : (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    clearFilters();
+                                }}
+                                disabled={!isFiltering}
+                                className={cn(
+                                    'gap-2 -mr-2',
+                                    !isFiltering && 'invisible',
+                                )}
+                            >
+                                <FunnelX className="h-4 w-4" />
+                            </Button>
+                        )}
                     </div>
                 }
             >

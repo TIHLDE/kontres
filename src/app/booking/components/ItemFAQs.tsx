@@ -44,7 +44,7 @@ export default function ItemFAQs({ itemId }: ItemFAQsProps) {
         return (
             <div className="text-center py-8">
                 <p className="text-muted-foreground">
-                    Could not load FAQ items
+                    Kunne ikke laste FAQ-elementer
                 </p>
             </div>
         );
@@ -54,7 +54,7 @@ export default function ItemFAQs({ itemId }: ItemFAQsProps) {
         return (
             <div className="text-center py-8">
                 <p className="text-muted-foreground">
-                    No FAQ items found for this bookable item
+                    Ingen FAQ-elementer funnet for dette bookbare objektet
                 </p>
             </div>
         );
@@ -63,12 +63,12 @@ export default function ItemFAQs({ itemId }: ItemFAQsProps) {
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-semibold">Related FAQ</h2>
+                <h2 className="text-2xl font-semibold">Relatert FAQ</h2>
                 <Link
                     href="/faq"
                     className="text-sm text-primary hover:underline"
                 >
-                    View all FAQs
+                    Se alle FAQ-er
                 </Link>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">

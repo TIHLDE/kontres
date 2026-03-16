@@ -1,228 +1,192 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import CalendarBody from '@/components/ui/full-calendar/body/calendar-body';
-import CalendarProvider from '@/components/ui/full-calendar/calendar-provider';
-import { CalendarEvent } from '@/components/ui/full-calendar/calendar-types';
-
 import { api } from '@/trpc/react';
-import { useMediaQuery } from '@uidotdev/usehooks';
-import { CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import {
-    addDays,
+    addMonths,
     eachDayOfInterval,
-    endOfDay,
+    endOfMonth,
+    endOfWeek,
     format,
-    isSameDay,
-    startOfDay,
+    isSameMonth,
+    isToday,
+    startOfMonth,
+    startOfWeek,
 } from 'date-fns';
+import { nb } from 'date-fns/locale';
 
 interface ItemCalendarProps {
     itemId: number;
 }
 
+const DAY_HEADERS = ['Ma', 'Ti', 'On', 'To', 'Fr', 'Lø', 'Sø'];
+
 export default function ItemCalendar({ itemId }: ItemCalendarProps) {
-    const [currentDate, setCurrentDate] = useState(() => new Date());
-    
-    const isMobile = useMediaQuery('(max-width: 768px)');
-    const mode = isMobile ? 'day' : 'week';
-    
-    // Calculate date range based on current view (show 2 weeks before/after for context)
-    const viewStartDate = useMemo(() => {
-        const date = new Date(currentDate);
-        date.setDate(date.getDate() - (mode === 'day' ? 7 : 14));
-        return date;
-    }, [currentDate, mode]);
-    
-    const viewEndDate = useMemo(() => {
-        const date = new Date(currentDate);
-        date.setDate(date.getDate() + (mode === 'day' ? 7 : 14));
-        return date;
-    }, [currentDate, mode]);
+    const [currentMonth, setCurrentMonth] = useState(() => new Date());
+
+    const monthStart = startOfMonth(currentMonth);
+    const monthEnd = endOfMonth(currentMonth);
+    const gridStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+    const gridEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+    const gridDays = eachDayOfInterval({ start: gridStart, end: gridEnd });
 
     const { data: reservations } =
         api.reservation.getReservationsByBookableItemId.useQuery(
             {
                 bookableItemId: itemId,
-                startDate: viewStartDate,
-                endDate: viewEndDate,
+                startDate: gridStart,
+                endDate: gridEnd,
             },
             {
-                staleTime: 30000, // Cache for 30 seconds
+                staleTime: 30000,
                 refetchOnWindowFocus: false,
             },
         );
 
-    const events = useMemo<CalendarEvent[]>(() => {
-        if (!reservations?.reservations) return [];
+    const reservationsByDay = useMemo(() => {
+        const map = new Map<string, { start: Date; end: Date }[]>();
+        if (!reservations?.reservations) return map;
 
-        return reservations.reservations.flatMap((res) => {
-            const reservationStart = new Date(res.startTime);
-            const reservationEnd = new Date(res.endTime);
+        for (const res of reservations.reservations) {
+            const resStart = new Date(res.startTime);
+            const resEnd = new Date(res.endTime);
 
-            const days = eachDayOfInterval({
-                start: startOfDay(reservationStart),
-                end: startOfDay(reservationEnd),
-            });
+            for (const day of gridDays) {
+                const dayStart = new Date(day);
+                dayStart.setHours(0, 0, 0, 0);
+                const dayEnd = new Date(day);
+                dayEnd.setHours(23, 59, 59, 999);
 
-            return days.map((day) => {
-                const segmentStart = isSameDay(day, reservationStart)
-                    ? reservationStart
-                    : startOfDay(day);
-                const segmentEnd = isSameDay(day, reservationEnd)
-                    ? reservationEnd
-                    : endOfDay(day);
+                if (resStart <= dayEnd && resEnd >= dayStart) {
+                    const key = format(day, 'yyyy-MM-dd');
+                    if (!map.has(key)) map.set(key, []);
+                    map.get(key)!.push({ start: resStart, end: resEnd });
+                }
+            }
+        }
 
-                return {
-                    id: `${res.reservationId}-${day.toISOString()}`,
-                    title: res.groupSlug.toUpperCase() ?? 'Enkelt person',
-                    start: segmentStart,
-                    end: segmentEnd,
-                    fullStart: reservationStart,
-                    fullEnd: reservationEnd,
-                    color: 'red',
-                } satisfies CalendarEvent;
-            });
-        });
-    }, [reservations]);
+        return map;
+    }, [reservations, gridDays]);
 
-    const handleNavigate = (direction: 'previous' | 'next') => {
-        const delta = mode === 'day' ? 1 : 7;
-        setCurrentDate((prev) =>
-            addDays(prev, direction === 'next' ? delta : -delta),
-        );
-    };
-
-    const handleResetToday = () => {
-        setCurrentDate(new Date());
-    };
+    const weeks: Date[][] = [];
+    for (let i = 0; i < gridDays.length; i += 7) {
+        weeks.push(gridDays.slice(i, i + 7));
+    }
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <CalendarIcon className="h-5 w-5" />
-                    Availability Calendar
-                </CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="space-y-4">
-                    <CalendarProvider
-                        events={events}
-                        mode={mode}
-                        date={currentDate}
-                        calendarIconIsToday
+        <div>
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold">Tilgjengelighet</h2>
+                <div className="flex items-center gap-1">
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() =>
+                            setCurrentMonth((prev) => addMonths(prev, -1))
+                        }
+                        aria-label="Forrige måned"
                     >
-                        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <span>
-                                    {format(
-                                        currentDate,
-                                        mode === 'day'
-                                            ? 'PPP'
-                                            : "wo 'uke' yyyy",
-                                    )}
-                                </span>
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={handleResetToday}
-                                >
-                                    I dag
-                                </Button>
-                                <div className="flex gap-2">
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="icon"
-                                        onClick={() => handleNavigate('previous')}
-                                        aria-label={
-                                            mode === 'day'
-                                                ? 'Forrige dag'
-                                                : 'Forrige uke'
-                                        }
-                                    >
-                                        <ChevronLeft className="h-4 w-4" />
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="icon"
-                                        onClick={() => handleNavigate('next')}
-                                        aria-label={
-                                            mode === 'day'
-                                                ? 'Neste dag'
-                                                : 'Neste uke'
-                                        }
-                                    >
-                                        <ChevronRight className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
-                        <CalendarBody />
-                    </CalendarProvider>
-                    <div className="flex items-center gap-4 text-sm">
-                        <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 bg-red-100 border bg-red-200 border-red-300 rounded"></div>
-                            <span>Reserved</span>
-                        </div>
-                    </div>
-
-                    {reservations && reservations.reservations.length > 0 && (
-                        <div className="mt-4">
-                            <h4 className="font-medium mb-2">
-                                Upcoming Reservations
-                            </h4>
-                            <div className="space-y-2">
-                                {reservations.reservations
-                                    .filter(
-                                        (reservation) =>
-                                            new Date(reservation.startTime) >=
-                                            new Date(),
-                                    )
-                                    .slice(0, 3)
-                                    .map((reservation, index) => (
-                                        <div
-                                            key={index}
-                                            className="flex items-center justify-between text-sm"
-                                        >
-                                            <span>
-                                                {new Date(
-                                                    reservation.startTime,
-                                                ).toLocaleDateString('nb-NO')}
-                                            </span>
-                                            <Badge
-                                                variant="secondary"
-                                                className="text-xs"
-                                            >
-                                                {new Date(
-                                                    reservation.startTime,
-                                                ).toLocaleTimeString('nb-NO', {
-                                                    hour: '2-digit',
-                                                    minute: '2-digit',
-                                                })}{' '}
-                                                -{' '}
-                                                {new Date(
-                                                    reservation.endTime,
-                                                ).toLocaleTimeString('nb-NO', {
-                                                    hour: '2-digit',
-                                                    minute: '2-digit',
-                                                })}
-                                            </Badge>
-                                        </div>
-                                    ))}
-                            </div>
-                        </div>
-                    )}
+                        <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <span className="text-sm font-medium w-28 text-center">
+                        {format(currentMonth, 'MMMM yyyy', { locale: nb })}
+                    </span>
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() =>
+                            setCurrentMonth((prev) => addMonths(prev, 1))
+                        }
+                        aria-label="Neste måned"
+                    >
+                        <ChevronRight className="h-4 w-4" />
+                    </Button>
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+
+            {/* Day-of-week headers */}
+            <div className="grid grid-cols-7 border-b">
+                {DAY_HEADERS.map((d) => (
+                    <div
+                        key={d}
+                        className="py-2 text-center text-sm text-muted-foreground"
+                    >
+                        {d}
+                    </div>
+                ))}
+            </div>
+
+            {/* Calendar grid */}
+            {weeks.map((week, wi) => (
+                <div key={wi} className="grid grid-cols-7">
+                    {week.map((day, di) => {
+                        const key = format(day, 'yyyy-MM-dd');
+                        const dayReservations = reservationsByDay.get(key) ?? [];
+                        const inMonth = isSameMonth(day, currentMonth);
+                        const today = isToday(day);
+
+                        return (
+                            <div
+                                key={di}
+                                className={`min-h-[80px] border-b p-1 ${
+                                    di < 6 ? 'border-r' : ''
+                                } ${today ? 'bg-muted/50' : ''}`}
+                            >
+                                <span
+                                    className={`block text-sm mb-1 ${
+                                        inMonth
+                                            ? 'text-foreground'
+                                            : 'text-muted-foreground'
+                                    }`}
+                                >
+                                    {format(day, 'd')}
+                                </span>
+
+                                {dayReservations.map((res, i) => {
+                                    const dayStart = new Date(day);
+                                    dayStart.setHours(0, 0, 0, 0);
+                                    const dayEnd = new Date(day);
+                                    dayEnd.setHours(23, 59, 59, 999);
+
+                                    const segStart =
+                                        res.start < dayStart
+                                            ? dayStart
+                                            : res.start;
+                                    const segEnd =
+                                        res.end > dayEnd ? dayEnd : res.end;
+
+                                    return (
+                                        <div
+                                            key={i}
+                                            className="bg-red-900 text-white text-xs rounded px-1 py-0.5 mb-0.5 truncate"
+                                        >
+                                            {format(segStart, 'HH:mm')}-
+                                            {format(segEnd, 'HH:mm')}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        );
+                    })}
+                </div>
+            ))}
+
+            {/* Legend */}
+            <div className="flex items-center justify-center gap-6 mt-4 text-sm">
+                <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-green-500" />
+                    <span>Valgt periode</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-red-900" />
+                    <span>Utilgjengelig</span>
+                </div>
+            </div>
+        </div>
     );
 }

@@ -30,5 +30,11 @@ export const getTIHLDEGroups = async (
 type GroupResponse = {
     name: string;
     slug: string;
-    type: 'STUDYYEAR' | 'STUDY' | 'COMMITTEE' | 'BOARD' | 'SUBGROUP';
+    type:
+        | 'STUDYYEAR'
+        | 'STUDY'
+        | 'COMMITTEE'
+        | 'BOARD'
+        | 'SUBGROUP'
+        | 'INTERESTGROUP';
 };

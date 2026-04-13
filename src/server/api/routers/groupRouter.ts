@@ -1,7 +1,12 @@
 import { createTRPCRouter, memberProcedure } from '@/server/api/trpc';
 import { getTIHLDEGroups } from '@/server/services/lepton/get-groups';
 
-const ALLOWED_GROUP_TYPES = ['BOARD', 'COMMITTEE', 'SUBGROUP'] as const;
+const ALLOWED_GROUP_TYPES = [
+    'BOARD',
+    'COMMITTEE',
+    'SUBGROUP',
+    'INTERESTGROUP',
+] as const;
 export type AllowedGroupType = (typeof ALLOWED_GROUP_TYPES)[number];
 export type GroupInfo = {
     groupSlug: string;

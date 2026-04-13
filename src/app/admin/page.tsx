@@ -3,7 +3,14 @@
 import { Button } from '@/components/ui/button';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/ui/loadingspinner';
+import {
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
+} from '@/components/ui/tabs';
 
+import AllReservationsCalendar from '@/app/booking/components/AllReservationsCalendar';
 import BookingList from './components/booking-list/booking-list';
 import AdminBookingFilters, {
     reservationStateParser,
@@ -25,12 +32,10 @@ export default function Page() {
         items: parseAsArrayOf<string>(parseAsString).withDefault([]),
     });
 
-    // Fetch the reservations based on filter params
     const {
         data,
         isLoading,
         hasNextPage,
-        hasPreviousPage,
         fetchNextPage,
         isFetchingNextPage,
     } = api.reservation.getReservations.useInfiniteQuery(
@@ -52,53 +57,62 @@ export default function Page() {
         },
         {
             getNextPageParam: (lastPage) => lastPage.nextCursor,
-            staleTime: 10000, // Cache for 10 seconds
-            refetchOnWindowFocus: false, // Don't refetch when window regains focus
+            staleTime: 10000,
+            refetchOnWindowFocus: false,
         },
     );
 
     const { data: groups = [] } = api.group.getAll.useQuery();
 
     return (
-        <>
-            <CardHeader>
+        <Tabs defaultValue="list">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <CardTitle>Reservasjoner</CardTitle>
+                <TabsList>
+                    <TabsTrigger value="list">Liste</TabsTrigger>
+                    <TabsTrigger value="calendar">Kalender</TabsTrigger>
+                </TabsList>
             </CardHeader>
             <CardContent>
-                <div className="gap-5 flex flex-col">
-                    <AdminBookingFilters />
-                    <div
-                        className={cn(
-                            'w-full h-full transition-all gap-5 flex flex-col',
-                            isLoading ? 'blur-sm' : '',
-                        )}
-                    >
-                        <BookingList
-                            items={
-                                data?.pages.flatMap(
-                                    (page) => page.reservations,
-                                ) ?? []
-                            }
-                            groups={groups}
-                        />
-                        {hasNextPage && (
-                            <Button
-                                className="ml-auto gap-2.5 items-center"
-                                onClick={() => fetchNextPage()}
-                                disabled={isFetchingNextPage}
-                            >
-                                {isFetchingNextPage ? (
-                                    <>
-                                        <LoadingSpinner /> Henter mer
-                                    </>
-                                ) : (
-                                    'Last inn mer'
-                                )}
-                            </Button>
-                        )}
+                <TabsContent value="list" className="mt-0">
+                    <div className="gap-5 flex flex-col">
+                        <AdminBookingFilters />
+                        <div
+                            className={cn(
+                                'w-full h-full transition-all gap-5 flex flex-col',
+                                isLoading ? 'blur-sm' : '',
+                            )}
+                        >
+                            <BookingList
+                                items={
+                                    data?.pages.flatMap(
+                                        (page) => page.reservations,
+                                    ) ?? []
+                                }
+                                groups={groups}
+                            />
+                            {hasNextPage && (
+                                <Button
+                                    className="ml-auto gap-2.5 items-center"
+                                    onClick={() => fetchNextPage()}
+                                    disabled={isFetchingNextPage}
+                                >
+                                    {isFetchingNextPage ? (
+                                        <>
+                                            <LoadingSpinner /> Henter mer
+                                        </>
+                                    ) : (
+                                        'Last inn mer'
+                                    )}
+                                </Button>
+                            )}
+                        </div>
                     </div>
-                </div>
+                </TabsContent>
+                <TabsContent value="calendar" className="mt-0">
+                    <AllReservationsCalendar />
+                </TabsContent>
             </CardContent>
-        </>
+        </Tabs>
     );
 }

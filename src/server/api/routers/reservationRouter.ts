@@ -299,6 +299,49 @@ export const reservationRouter = createTRPCRouter({
             };
         }),
 
+    getAllReservationsInRange: memberProcedure
+        .input(
+            z.object({
+                startDate: z.date(),
+                endDate: z.date(),
+            }),
+        )
+        .query(async ({ input, ctx }) => {
+            const { startDate, endDate } = input;
+
+            const reservations = await ctx.db.reservation.findMany({
+                where: {
+                    OR: [
+                        {
+                            startTime: { gte: startDate, lte: endDate },
+                        },
+                        {
+                            endTime: { gte: startDate, lte: endDate },
+                        },
+                        {
+                            AND: [
+                                { startTime: { lte: startDate } },
+                                { endTime: { gte: endDate } },
+                            ],
+                        },
+                    ],
+                },
+                include: {
+                    bookableItem: {
+                        select: {
+                            itemId: true,
+                            name: true,
+                        },
+                    },
+                },
+                orderBy: {
+                    startTime: 'asc',
+                },
+            });
+
+            return { reservations };
+        }),
+
     getUserReservations: memberProcedure
         .input(z.object({ userId: z.string() }))
         .query(({ input, ctx }) => {

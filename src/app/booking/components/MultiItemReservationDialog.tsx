@@ -308,19 +308,26 @@ export default function MultiItemReservationDialog({
                                 />
                                 <div className="space-y-1 leading-none flex-1">
                                     <Label htmlFor="servesAlcohol" className="cursor-pointer">
-                                        Vil servere alkohol
+                                        Jeg/vi vil servere alkohol
                                     </Label>
-                                    <span className="text-muted-foreground text-sm ml-1">
-                                        (
+                                    <span className="text-sm ml-1">
+                                        <a
+                                            href="https://hjelp.ntnu.no/tas/public/ssp/content/serviceflow?unid=8f090c9e58444762876750db1104178d&from=aef98c8c-3eb9-4e29-8439-e79834d88223&openedFromService=true"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="font-bold underline hover:text-primary"
+                                        >
+                                            Søk om skjenkebevilling hos NTNU
+                                        </a>
+                                        {' • '}
                                         <a
                                             href="https://wiki.tihlde.org/retningslinjer/kontoret"
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="underline hover:text-foreground"
+                                            className="font-bold underline hover:text-primary"
                                         >
                                             Se retningslinjer for kontoret
                                         </a>
-                                        )
                                     </span>
                                 </div>
                             </div>

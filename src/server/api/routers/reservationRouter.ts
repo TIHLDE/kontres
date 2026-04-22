@@ -339,7 +339,50 @@ export const reservationRouter = createTRPCRouter({
                 },
             });
 
-            return { reservations };
+            const authorIds = [...new Set(reservations.map((r) => r.authorId))];
+            let userMap = new Map<string, User>();
+
+            if (authorIds.length > 0) {
+                const BATCH_SIZE = 10;
+                const userPromises: Promise<{ userId: string; user: User | null }>[] = [];
+
+                for (let i = 0; i < authorIds.length; i += BATCH_SIZE) {
+                    const batch = authorIds.slice(i, i + BATCH_SIZE);
+                    const batchPromises = batch.map(async (userId) => {
+                        try {
+                            const response = await ctx.Lepton.getUserById(
+                                userId,
+                                ctx.session.user.TIHLDE_Token,
+                            );
+
+                            if (!response.ok) {
+                                throw new Error(`HTTP ${response.status}`);
+                            }
+
+                            const user = (await response.json()) as User;
+                            return { userId, user };
+                        } catch (error) {
+                            console.error(`Failed to fetch user ${userId}:`, error);
+                            return { userId, user: null };
+                        }
+                    });
+                    userPromises.push(...batchPromises);
+                }
+
+                const userResults = await Promise.all(userPromises);
+                userMap = new Map(
+                    userResults
+                        .filter((r) => r.user !== null)
+                        .map((r) => [r.userId, r.user!]),
+                );
+            }
+
+            const reservationsWithUsers = reservations.map((reservation) => ({
+                ...reservation,
+                author: userMap.get(reservation.authorId) || null,
+            }));
+
+            return { reservations: reservationsWithUsers };
         }),
 
     getUserReservations: memberProcedure

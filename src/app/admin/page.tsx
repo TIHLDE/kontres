@@ -20,6 +20,7 @@ import { groupParser } from '@/app/booking/components/SearchFilters';
 import { cn } from '@/lib/utils';
 import { api } from '@/trpc/react';
 import { parseAsArrayOf, parseAsString, useQueryStates } from 'nuqs';
+import { useEffect, useMemo, useState } from 'react';
 
 export default function Page() {
     const [filters] = useQueryStates({
@@ -32,13 +33,30 @@ export default function Page() {
         items: parseAsArrayOf<string>(parseAsString).withDefault([]),
     });
 
+    const [currentCursor, setCurrentCursor] = useState<number | null>(null);
+    const [cursorHistory, setCursorHistory] = useState<(number | null)[]>([]);
+
+    const filterKey = useMemo(
+        () =>
+            JSON.stringify({
+                groups: filters.groups,
+                states: filters.states,
+                items: filters.items,
+                time: filters.time,
+            }),
+        [filters.groups, filters.states, filters.items, filters.time],
+    );
+
+    useEffect(() => {
+        setCurrentCursor(null);
+        setCursorHistory([]);
+    }, [filterKey]);
+
     const {
         data,
         isLoading,
-        hasNextPage,
-        fetchNextPage,
-        isFetchingNextPage,
-    } = api.reservation.getReservations.useInfiniteQuery(
+        isFetching,
+    } = api.reservation.getReservations.useQuery(
         {
             filters: {
                 groupSlugs:
@@ -54,9 +72,9 @@ export default function Page() {
                 timeDirection: filters.time,
             },
             limit: 30,
+            cursor: currentCursor,
         },
         {
-            getNextPageParam: (lastPage) => lastPage.nextCursor,
             staleTime: 10000,
             refetchOnWindowFocus: false,
         },
@@ -84,28 +102,47 @@ export default function Page() {
                             )}
                         >
                             <BookingList
-                                items={
-                                    data?.pages.flatMap(
-                                        (page) => page.reservations,
-                                    ) ?? []
-                                }
+                                items={data?.reservations ?? []}
                                 groups={groups}
                             />
-                            {hasNextPage && (
+                            <div className="ml-auto flex items-center gap-2.5">
                                 <Button
-                                    className="ml-auto gap-2.5 items-center"
-                                    onClick={() => fetchNextPage()}
-                                    disabled={isFetchingNextPage}
+                                    variant="outline"
+                                    onClick={() => {
+                                        const previousCursor =
+                                            cursorHistory[
+                                                cursorHistory.length - 1
+                                            ];
+                                        setCursorHistory((prev) =>
+                                            prev.slice(0, -1),
+                                        );
+                                        setCurrentCursor(previousCursor ?? null);
+                                    }}
+                                    disabled={isFetching || cursorHistory.length === 0}
                                 >
-                                    {isFetchingNextPage ? (
+                                    Forrige
+                                </Button>
+                                <Button
+                                    className="gap-2.5 items-center"
+                                    onClick={() => {
+                                        if (!data?.nextCursor) return;
+                                        setCursorHistory((prev) => [
+                                            ...prev,
+                                            currentCursor,
+                                        ]);
+                                        setCurrentCursor(data.nextCursor);
+                                    }}
+                                    disabled={isFetching || !data?.nextCursor}
+                                >
+                                    {isFetching ? (
                                         <>
-                                            <LoadingSpinner /> Henter mer
+                                            <LoadingSpinner /> Henter
                                         </>
                                     ) : (
-                                        'Last inn mer'
+                                        'Neste'
                                     )}
                                 </Button>
-                            )}
+                            </div>
                         </div>
                     </div>
                 </TabsContent>

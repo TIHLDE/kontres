@@ -9,6 +9,8 @@
     "db:migrate": "prisma migrate deploy",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
+    "db:import:bookings": "pnpm dlx tsx scripts/import-bookings-from-prod.ts",
+    "db:import:bookings:dry": "pnpm dlx tsx scripts/import-bookings-from-prod.ts --dry-run",
     "dev": "next dev --turbopack",
     "postinstall": "prisma generate",
     "lint": "next lint",

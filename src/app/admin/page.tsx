@@ -1,8 +1,6 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { LoadingSpinner } from '@/components/ui/loadingspinner';
 import {
     Tabs,
     TabsContent,
@@ -20,7 +18,6 @@ import { groupParser } from '@/app/booking/components/SearchFilters';
 import { cn } from '@/lib/utils';
 import { api } from '@/trpc/react';
 import { parseAsArrayOf, parseAsString, useQueryStates } from 'nuqs';
-import { useEffect, useMemo, useState } from 'react';
 
 export default function Page() {
     const [filters] = useQueryStates({
@@ -33,29 +30,9 @@ export default function Page() {
         items: parseAsArrayOf<string>(parseAsString).withDefault([]),
     });
 
-    const [currentCursor, setCurrentCursor] = useState<number | null>(null);
-    const [cursorHistory, setCursorHistory] = useState<(number | null)[]>([]);
-
-    const filterKey = useMemo(
-        () =>
-            JSON.stringify({
-                groups: filters.groups,
-                states: filters.states,
-                items: filters.items,
-                time: filters.time,
-            }),
-        [filters.groups, filters.states, filters.items, filters.time],
-    );
-
-    useEffect(() => {
-        setCurrentCursor(null);
-        setCursorHistory([]);
-    }, [filterKey]);
-
     const {
         data,
         isLoading,
-        isFetching,
     } = api.reservation.getReservations.useQuery(
         {
             filters: {
@@ -71,8 +48,7 @@ export default function Page() {
                         : undefined,
                 timeDirection: filters.time,
             },
-            limit: 30,
-            cursor: currentCursor,
+            limit: 100,
         },
         {
             staleTime: 10000,
@@ -105,44 +81,6 @@ export default function Page() {
                                 items={data?.reservations ?? []}
                                 groups={groups}
                             />
-                            <div className="ml-auto flex items-center gap-2.5">
-                                <Button
-                                    variant="outline"
-                                    onClick={() => {
-                                        const previousCursor =
-                                            cursorHistory[
-                                                cursorHistory.length - 1
-                                            ];
-                                        setCursorHistory((prev) =>
-                                            prev.slice(0, -1),
-                                        );
-                                        setCurrentCursor(previousCursor ?? null);
-                                    }}
-                                    disabled={isFetching || cursorHistory.length === 0}
-                                >
-                                    Forrige
-                                </Button>
-                                <Button
-                                    className="gap-2.5 items-center"
-                                    onClick={() => {
-                                        if (!data?.nextCursor) return;
-                                        setCursorHistory((prev) => [
-                                            ...prev,
-                                            currentCursor,
-                                        ]);
-                                        setCurrentCursor(data.nextCursor);
-                                    }}
-                                    disabled={isFetching || !data?.nextCursor}
-                                >
-                                    {isFetching ? (
-                                        <>
-                                            <LoadingSpinner /> Henter
-                                        </>
-                                    ) : (
-                                        'Neste'
-                                    )}
-                                </Button>
-                            </div>
                         </div>
                     </div>
                 </TabsContent>

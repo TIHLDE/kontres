@@ -14,6 +14,7 @@ import {
 import {
     type ColumnDef,
     type ColumnFiltersState,
+    type PaginationState,
     type SortingState,
     flexRender,
     getCoreRowModel,
@@ -22,7 +23,7 @@ import {
     getSortedRowModel,
     useReactTable,
 } from '@tanstack/react-table';
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 type DataTableProps<TData, TValue> = {
     columns: ColumnDef<TData, TValue>[];
@@ -52,13 +53,34 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = useState<SortingState>(initialSorting);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+    const defaultPageSize = useMemo(() => pageSize ?? 10, [pageSize]);
+    const [pagination, setPagination] = useState<PaginationState>({
+        pageIndex: 0,
+        pageSize: defaultPageSize,
+    });
+
+    useEffect(() => {
+        setPagination((current) =>
+            current.pageSize === defaultPageSize
+                ? current
+                : { pageIndex: 0, pageSize: defaultPageSize },
+        );
+    }, [defaultPageSize]);
+
+    useEffect(() => {
+        setPagination((current) =>
+            current.pageIndex === 0
+                ? current
+                : { ...current, pageIndex: 0 },
+        );
+    }, [sorting, columnFilters, data.length]);
 
     const table = useReactTable({
         data,
         columns,
-        rowCount: pageSize ?? data.length,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
+        onPaginationChange: setPagination,
         onSortingChange: setSorting,
         getSortedRowModel: getSortedRowModel(),
         onColumnFiltersChange: setColumnFilters,
@@ -66,6 +88,7 @@ export function DataTable<TData, TValue>({
         state: {
             sorting,
             columnFilters,
+            pagination,
         },
     });
 

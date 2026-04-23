@@ -15,7 +15,7 @@ export default function BookingList({ items, groups }: BookingListProps) {
             columns={getColumns(groups)}
             data={items}
             initialSorting={[{ id: 'status', desc: false }]}
-            displayPageNavigation={false}
+            pageSize={30}
         />
     );
 }

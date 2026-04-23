@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/dialog';
 import ReservationCard from '@/app/admin/components/reservation-card';
 import { useState } from 'react';
+import { DataTableColumnHeader } from '@/components/ui/data-table-column-header';
 
 const StatusMap = {
     [ReservationState.APPROVED]: 'Godkjent',
@@ -40,7 +41,9 @@ export const getColumns = (
 ): ColumnDef<ReservationWithAuthorAndItem>[] => [
     {
         accessorKey: 'status',
-        header: 'Status',
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Status" />
+        ),
         cell: ({
             row: {
                 original: { status },
@@ -65,7 +68,9 @@ export const getColumns = (
     },
     {
         accessorKey: 'author',
-        header: 'Author',
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Author" />
+        ),
         accessorFn: (row) => {
             if (!row.author?.first_name) return 'Ukjent bruker';
             return `${row.author.first_name} ${row.author.last_name}`;
@@ -73,17 +78,23 @@ export const getColumns = (
     },
     {
         accessorKey: 'startTime',
-        header: 'Tidsrom',
-        accessorFn: (row) =>
-            `${format(row.startTime, 'd. LLLL HH:mm', {
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Tidsrom" />
+        ),
+        cell: ({ row }) =>
+            `${format(row.original.startTime, 'd. LLLL HH:mm', {
                 locale: nb,
-            })} - ${format(row.endTime, 'd. LLLL HH:mm', {
+            })} - ${format(row.original.endTime, 'd. LLLL HH:mm', {
                 locale: nb,
             })}`,
+        sortingFn: (rowA, rowB) =>
+            rowA.original.startTime.getTime() - rowB.original.startTime.getTime(),
     },
     {
         accessorKey: 'bookableItemId',
-        header: 'Gjenstand',
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Gjenstand" />
+        ),
         accessorFn: (row) => {
             if (!row.bookableItem?.name) return 'Ukjent gjenstand';
             return row.bookableItem.name;

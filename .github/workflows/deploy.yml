@@ -4,7 +4,7 @@ on:
     branches: [master]
     paths:
       - ./**
-      - .github/workflows/ci_prod.yml
+      - .github/workflows/deploy.yml
   workflow_dispatch:
 
 concurrency:

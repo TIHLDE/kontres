@@ -21,7 +21,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: TIHLDE/tihlde-workflows/.github/workflows/_ci_ghcr.yml
+    uses: TIHLDE/tihlde-workflows/.github/workflows/_ci_ghcr.yml@main
     with:
       context: .
       dockerfile: ./Dockerfile
@@ -29,4 +29,4 @@ jobs:
   deploy:
     needs: build
     if: github.event_name != 'pull_request'
-    uses: TIHLDE/tihlde-workflows/.github/workflows/_notify_deploy.yml
+    uses: TIHLDE/tihlde-workflows/.github/workflows/_notify_deploy.yml@main

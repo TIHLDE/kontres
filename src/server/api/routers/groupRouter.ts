@@ -1,5 +1,8 @@
 import { createTRPCRouter, memberProcedure } from '@/server/api/trpc';
-import { getTIHLDEGroups } from '@/server/services/lepton/get-groups';
+import {
+    getPhotonGroups,
+    normalizeGroupType,
+} from '@/server/services/photon/get-groups';
 
 const ALLOWED_GROUP_TYPES = [
     'BOARD',
@@ -16,11 +19,14 @@ export type GroupInfo = {
 
 export const groupRouter = createTRPCRouter({
     getAll: memberProcedure.query(async ({ ctx }) => {
-        const leptonGroups = await getTIHLDEGroups(
-            ctx.session.user.TIHLDE_Token,
+        const photonGroups = await getPhotonGroups(
+            await ctx.photonAccessToken(),
         );
 
-        const groups = leptonGroups
+        // Photon reports the type in lower case; the filter and the components
+        // downstream both speak Lepton's upper-case names.
+        const groups = photonGroups
+            .map((g) => ({ ...g, type: normalizeGroupType(g.type) }))
             .filter((g) =>
                 ALLOWED_GROUP_TYPES.includes(g.type as AllowedGroupType),
             )

@@ -1,14 +1,60 @@
 import { type ReservationWithAuthor, type ReservationWithAuthorAndItem } from '@/server/dtos/reservations';
-import { User } from '@/server/dtos/user';
+import { User, toReservationAuthor } from '@/server/dtos/user';
 
 import {
     createTRPCRouter,
     groupLeaderProcedure,
     memberProcedure,
 } from '../trpc';
+import type Photon from '@/server/photon';
 import { TimeDirection } from '@/app/admin/utils/enums';
 import { ReservationState } from '@prisma/client';
 import { z } from 'zod';
+
+/** How many profile lookups Photon is asked for at a time. */
+const AUTHOR_BATCH_SIZE = 10;
+
+/**
+ * The members behind a page of reservations, in one pass instead of N+1.
+ *
+ * `authorId` holds TIHLDE usernames going back to the Lepton days; Photon's
+ * `/api/user/:id` resolves those as well as its own ids, so nothing had to be
+ * rewritten in the database. A lookup that fails leaves that reservation
+ * without an author rather than failing the whole list — the UI already renders
+ * "Ukjent bruker" for it, and one deleted account should not blank the page.
+ */
+async function fetchAuthors(
+    photon: typeof Photon,
+    accessToken: string,
+    authorIds: string[],
+): Promise<Map<string, User>> {
+    const entries: [string, User][] = [];
+
+    for (let i = 0; i < authorIds.length; i += AUTHOR_BATCH_SIZE) {
+        const batch = authorIds.slice(i, i + AUTHOR_BATCH_SIZE);
+        const results = await Promise.all(
+            batch.map(async (userId) => {
+                try {
+                    const profile = await photon.getUserById(
+                        userId,
+                        accessToken,
+                    );
+                    return [userId, toReservationAuthor(profile, userId)] as [
+                        string,
+                        User,
+                    ];
+                } catch (error) {
+                    console.error(`Failed to fetch user ${userId}:`, error);
+                    return null;
+                }
+            }),
+        );
+
+        entries.push(...results.filter((r): r is [string, User] => r !== null));
+    }
+
+    return new Map(entries);
+}
 
 export const reservationRouter = createTRPCRouter({
     getReservation: memberProcedure
@@ -179,45 +225,14 @@ export const reservationRouter = createTRPCRouter({
                 nextCursor = nextItem!.reservationId;
             }
 
-            // Batch fetch user data from Lepton (instead of N+1 queries)
+            // Batch fetch user data from Photon (instead of N+1 queries)
             const authorIds = [...new Set(reservations.map((r) => r.authorId))];
 
-            // Only fetch users if we have reservations (avoid unnecessary API calls)
-            let userMap = new Map<string, User>();
-            if (authorIds.length > 0) {
-                // Fetch all users in parallel (much faster than sequential)
-                // Limit concurrent requests to avoid overwhelming the API
-                const BATCH_SIZE = 10;
-                const userPromises: Promise<{ userId: string; user: User | null }>[] = [];
-
-                for (let i = 0; i < authorIds.length; i += BATCH_SIZE) {
-                    const batch = authorIds.slice(i, i + BATCH_SIZE);
-                    const batchPromises = batch.map(async (userId) => {
-                        try {
-                            const response = await ctx.Lepton.getUserById(
-                                userId,
-                                ctx.session.user.TIHLDE_Token,
-                            );
-                            if (!response.ok) {
-                                throw new Error(`HTTP ${response.status}`);
-                            }
-                            const user = (await response.json()) as User;
-                            return { userId, user };
-                        } catch (error) {
-                            console.error(`Failed to fetch user ${userId}:`, error);
-                            return { userId, user: null };
-                        }
-                    });
-                    userPromises.push(...batchPromises);
-                }
-
-                const userResults = await Promise.all(userPromises);
-                userMap = new Map(
-                    userResults
-                        .filter((r) => r.user !== null)
-                        .map((r) => [r.userId, r.user!]),
-                );
-            }
+            const userMap = await fetchAuthors(
+                ctx.Photon,
+                authorIds.length > 0 ? await ctx.photonAccessToken() : '',
+                authorIds,
+            );
 
             // Attach user data to reservations
             const reservationsWithUsers = reservations.map((reservation) => ({
@@ -340,42 +355,12 @@ export const reservationRouter = createTRPCRouter({
             });
 
             const authorIds = [...new Set(reservations.map((r) => r.authorId))];
-            let userMap = new Map<string, User>();
 
-            if (authorIds.length > 0) {
-                const BATCH_SIZE = 10;
-                const userPromises: Promise<{ userId: string; user: User | null }>[] = [];
-
-                for (let i = 0; i < authorIds.length; i += BATCH_SIZE) {
-                    const batch = authorIds.slice(i, i + BATCH_SIZE);
-                    const batchPromises = batch.map(async (userId) => {
-                        try {
-                            const response = await ctx.Lepton.getUserById(
-                                userId,
-                                ctx.session.user.TIHLDE_Token,
-                            );
-
-                            if (!response.ok) {
-                                throw new Error(`HTTP ${response.status}`);
-                            }
-
-                            const user = (await response.json()) as User;
-                            return { userId, user };
-                        } catch (error) {
-                            console.error(`Failed to fetch user ${userId}:`, error);
-                            return { userId, user: null };
-                        }
-                    });
-                    userPromises.push(...batchPromises);
-                }
-
-                const userResults = await Promise.all(userPromises);
-                userMap = new Map(
-                    userResults
-                        .filter((r) => r.user !== null)
-                        .map((r) => [r.userId, r.user!]),
-                );
-            }
+            const userMap = await fetchAuthors(
+                ctx.Photon,
+                authorIds.length > 0 ? await ctx.photonAccessToken() : '',
+                authorIds,
+            );
 
             const reservationsWithUsers = reservations.map((reservation) => ({
                 ...reservation,

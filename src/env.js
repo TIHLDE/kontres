@@ -11,7 +11,9 @@ export const env = createEnv({
         NODE_ENV: z
             .enum(['development', 'test', 'production'])
             .default('development'),
-        LEPTON_API_URL: z.string().url(),
+        PHOTON_API_URL: z.string().url().default('https://photon.tihlde.org'),
+        PHOTON_OAUTH_CLIENT_ID: z.string(),
+        PHOTON_OAUTH_CLIENT_SECRET: z.string(),
         AUTH_SECRET: z.string(),
     },
 
@@ -31,7 +33,9 @@ export const env = createEnv({
     runtimeEnv: {
         DATABASE_URL: process.env.DATABASE_URL,
         NODE_ENV: process.env.NODE_ENV,
-        LEPTON_API_URL: process.env.LEPTON_API_URL,
+        PHOTON_API_URL: process.env.PHOTON_API_URL,
+        PHOTON_OAUTH_CLIENT_ID: process.env.PHOTON_OAUTH_CLIENT_ID,
+        PHOTON_OAUTH_CLIENT_SECRET: process.env.PHOTON_OAUTH_CLIENT_SECRET,
         AUTH_SECRET: process.env.AUTH_SECRET,
         // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
     },

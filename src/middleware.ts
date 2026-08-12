@@ -1,5 +1,17 @@
-import { auth } from '@/auth';
+import { authConfig } from '@/auth.config';
+import NextAuth from 'next-auth';
 import { NextResponse } from 'next/server';
+
+/**
+ * Egen NextAuth-instans, uten `jwt`-callbacken i `auth.ts`.
+ *
+ * Mellomvaren kjører i sin egen kjøretid med sine egne modulkopier. Hadde den
+ * kjørt tokenfornyelsen også, ville den og serveren fornyet med det samme
+ * refresh-tokenet uavhengig av hverandre, og Photon ville lest den andre bruken
+ * som tyveri og logget brukeren ut. Alt mellomvaren trenger — om noen er logget
+ * inn og om de er admin — ligger allerede i JWT-en.
+ */
+const { auth } = NextAuth(authConfig);
 
 export const middleware = auth((req) => {
     const path = req.nextUrl.pathname;

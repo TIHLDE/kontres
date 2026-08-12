@@ -35,11 +35,36 @@ pnpm prisma migrate deploy
 Stop the database with `docker compose down`.
 
 ## ⚙ Configuration
-The application requires configuration of some environment variables in order to run. These should be put in a .env file in the repository root.
+The application requires configuration of some environment variables in order to run. These should be put in a .env file in the repository root. `.env.example` lists them all.
 
 ```bash
-NEXT_PUBLIC_API_URL=YOUR_API_URL_HERE
+DATABASE_URL="postgresql://..."
+AUTH_SECRET="..."
+AUTH_URL="https://kontres.tihlde.org"
+
+PHOTON_API_URL="https://photon.tihlde.org"
+PHOTON_OAUTH_CLIENT_ID="kontres"
+PHOTON_OAUTH_CLIENT_SECRET="tihlde_cs_..."
 ```
+
+### Innlogging
+
+Innlogging går via Photon (tihlde.org) med OAuth2 og PKCE. KontRes lagrer ingen
+passord og snakker ikke med Lepton.
+
+Appen må være registrert som OAuth-klient i Photon. Det gjøres i adminpanelet på
+tihlde.org under **Super admin → OAuth-klienter** — ikke direkte i databasen:
+klienthemmeligheten lagres hashet, og en rå verdi i basen blir avvist med
+`invalid client_secret`. Klienten trenger:
+
+- **Redirect URI:** `<AUTH_URL>/api/auth/callback/tihlde`
+- **Scopes:** `openid`, `profile`, `email` og `offline_access`
+
+`offline_access` er ikke valgfritt. Uten det utsteder Photon ikke noe
+refresh-token, og innloggingen varer bare én time.
+
+Hemmeligheten inkluderer prefikset `tihlde_cs_`; det er en del av verdien og
+skal med i `PHOTON_OAUTH_CLIENT_SECRET`.
 ## 🔧 Technologies
 
 - NextJS

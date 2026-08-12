@@ -43,7 +43,7 @@ AUTH_SECRET="..."
 AUTH_URL="https://kontres.tihlde.org"
 
 PHOTON_API_URL="https://photon.tihlde.org"
-PHOTON_OAUTH_CLIENT_ID="kontres"
+PHOTON_OAUTH_CLIENT_ID="<generert av Photon>"
 PHOTON_OAUTH_CLIENT_SECRET="tihlde_cs_..."
 ```
 
@@ -60,11 +60,19 @@ klienthemmeligheten lagres hashet, og en rå verdi i basen blir avvist med
 - **Redirect URI:** `<AUTH_URL>/api/auth/callback/tihlde`
 - **Scopes:** `openid`, `profile`, `email` og `offline_access`
 
+Photon genererer både `client_id` og `client_secret`, og viser dem én gang når
+klienten er opprettet. `client_id` er en tilfeldig streng på 32 tegn — den kan
+altså ikke settes til «kontres». Kopier begge ordrett inn i `.env`.
+
 `offline_access` er ikke valgfritt. Uten det utsteder Photon ikke noe
 refresh-token, og innloggingen varer bare én time.
 
 Hemmeligheten inkluderer prefikset `tihlde_cs_`; det er en del av verdien og
 skal med i `PHOTON_OAUTH_CLIENT_SECRET`.
+
+`AUTH_URL` må være satt i miljøet appen faktisk kjører i. Uten den bygger
+Auth.js absolutte URL-er fra containerens eget vertsnavn (`https://<container-id>:3000`),
+og innloggingen sender brukeren til en adresse som ikke finnes.
 ## 🔧 Technologies
 
 - NextJS

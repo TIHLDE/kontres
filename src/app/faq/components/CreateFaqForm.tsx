@@ -46,12 +46,8 @@ export default function CreateFaqForm({
 
     const { data: session } = useSession();
     const { data: allGroups } = api.group.getAll.useQuery();
-    const [token, groups, admin] = useMemo(() => {
-        return [
-            session?.user.TIHLDE_Token,
-            session?.user.groups,
-            session?.user.role === 'ADMIN',
-        ];
+    const [groups, admin] = useMemo(() => {
+        return [session?.user.groups, session?.user.role === 'ADMIN'];
     }, [session]);
 
     const { toast } = useToast();

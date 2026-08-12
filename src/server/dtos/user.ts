@@ -1,27 +1,31 @@
+/**
+ * The bit of a TIHLDE member this app shows next to a reservation.
+ *
+ * The snake_case names are Lepton's, kept because every table and card in the
+ * UI reads them and because renaming them buys nothing — the data now comes
+ * from Photon's `GET /api/user/:id`, mapped in `toReservationAuthor` below.
+ */
 export type User = {
     user_id: string;
     first_name: string;
     last_name: string;
     image: string;
     email: string;
-    gender: number;
-    study: string;
-    studyyear: string;
-    allergy: string;
-    tool: string;
-    public_event_registrations: boolean;
-    unread_notifications: string;
-    unanswered_evaluations_count: string;
-    number_of_strikes: string;
-    slack_user_id: string;
-    allows_photo_by_default: boolean;
-    accepts_event_rules: boolean;
-    bio: UserBio;
 };
 
-export type UserBio = {
-    id: number;
-    description: string;
-    gitHub_link: string;
-    linkedIn_link: string;
-};
+import { type PhotonUser, splitName } from '../services/photon/get-user';
+
+export function toReservationAuthor(
+    profile: PhotonUser,
+    fallbackId: string,
+): User {
+    const { firstName, lastName } = splitName(profile.name);
+
+    return {
+        user_id: profile.username ?? fallbackId,
+        first_name: firstName,
+        last_name: lastName,
+        image: profile.image ?? '',
+        email: profile.email ?? '',
+    };
+}

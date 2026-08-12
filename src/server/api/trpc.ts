@@ -1,6 +1,7 @@
 import { db } from '@/server/db';
 
-import Lepton from '../lepton';
+import Photon from '../photon';
+import { getValidAccessToken } from '../services/photon/session';
 import { auth } from '@/auth';
 import { TRPCError, initTRPC } from '@trpc/server';
 import superjson from 'superjson';
@@ -11,8 +12,23 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
 
     return {
         session,
-        Lepton,
+        Photon,
         db,
+        /**
+         * Et gyldig Photon-token, hentet først når en prosedyre faktisk
+         * trenger det. De fleste kallene her rører aldri Photon, og et oppslag
+         * i basen per forespørsel for ingenting er sløsing.
+         */
+        photonAccessToken: async () => {
+            if (!session?.photonSessionId) {
+                throw new TRPCError({ code: 'UNAUTHORIZED' });
+            }
+
+            const tokens = await getValidAccessToken(session.photonSessionId);
+            if (!tokens) throw new TRPCError({ code: 'UNAUTHORIZED' });
+
+            return tokens.accessToken;
+        },
         ...opts,
     };
 };

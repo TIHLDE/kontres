@@ -9,7 +9,12 @@ WORKDIR /build
 COPY package.json pnpm-lock.yaml ./
 COPY prisma ./prisma/
 
-RUN npm i -g pnpm
+# Samme versjon som `packageManager` i package.json. Uten versjonen henter
+# npm nyeste pnpm, og nyere pnpm prøver da å selv-installere den pinnede
+# versjonen via @pnpm/exe og verifisere den mot pnpm-lock.yaml. Den oppføringen
+# finnes ikke i lockfila, så bygget dør på «Cannot verify the identity of the
+# @pnpm/exe.linux-x64 native binary». Holdes i synk med package.json.
+RUN npm i -g pnpm@10.33.0
 
 RUN pnpm i --frozen-lockfile
 

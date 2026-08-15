@@ -1,0 +1,34 @@
+# pnpm-innstillinger.
+#
+# De lå i "pnpm"-feltet i package.json, men pnpm 10 leser dem ikke lenger
+# derfra — den skriver bare en advarsel og går videre. Overstyringene under har
+# altså vært uten virkning en stund. Se https://pnpm.io/settings
+
+overrides:
+    # Låst av Next.js sitt eget React-oppsett. Uten disse trekker
+    # avhengighetene inn flere @types/react-versjoner, og typene kolliderer.
+    '@types/react': 19.1.13
+    '@types/react-dom': 19.1.9
+
+    # Sikkerhetsfikser i transitive pakker. Ingen av dem er noe vi ber om
+    # selv — de kommer via andre pakker, som kapper dem på en sårbar versjon.
+    # Dependabot kan ikke løse dem alene (den melder
+    # `security_update_not_possible` fordi den bare oppdaterer direkte
+    # avhengigheter), så de må tvinges her.
+    #
+    # Når foreldrepakkene selv rekker forbi disse versjonene, kan linjene
+    # fjernes igjen.
+    'js-yaml@4': ^4.3.1
+    'fast-uri@3': ^3.1.5
+    # Både 1.x og 2.x ligger i treet, og de er sårbare hver for seg. Én felles
+    # overstyring ville tvunget alle ned på samme major og brukket den andre.
+    'brace-expansion@1': ^1.1.18
+    'brace-expansion@2': ^2.1.4
+
+# Pakker som får lov til å kjøre byggeskript ved installasjon. pnpm 10 blokkerer
+# dem som standard.
+onlyBuiltDependencies:
+    - '@prisma/client'
+    - '@prisma/engines'
+    - prisma
+    - sharp

@@ -6,7 +6,10 @@ FROM base AS deps
 
 WORKDIR /build
 
-COPY package.json pnpm-lock.yaml ./
+# pnpm-workspace.yaml må være med: den holder overrides, og uten den løser
+# installasjonen andre versjoner enn pnpm-lock.yaml er skrevet for — da faller
+# `--frozen-lockfile` og bygget stopper.
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY prisma ./prisma/
 
 # Samme versjon som `packageManager` i package.json. Uten versjonen henter

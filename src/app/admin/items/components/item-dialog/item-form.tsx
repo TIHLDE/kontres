@@ -38,6 +38,7 @@ const schema = z.object({
 
 interface ItemFormProps {
     onSubmit: (values: z.infer<typeof schema>) => void;
+    onCancel?: () => void;
     isSubmitting?: boolean;
     defaultValues?: z.infer<typeof schema>;
     formAction?: 'edit' | 'create';
@@ -45,6 +46,7 @@ interface ItemFormProps {
 
 export default function ItemForm({
     onSubmit,
+    onCancel,
     formAction,
     defaultValues,
     isSubmitting,
@@ -158,7 +160,9 @@ export default function ItemForm({
             </Form>
           
             <div className="mt-5 flex justify-end gap-5">
-                <Button variant="ghost" type="button">Avbryt</Button>
+                <Button variant="ghost" type="button" onClick={onCancel}>
+                    Avbryt
+                </Button>
                 <Button
                     onClick={form.handleSubmit(onSubmit)}
                     disabled={isSubmitting}

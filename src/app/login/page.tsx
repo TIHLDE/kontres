@@ -1,7 +1,7 @@
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-import { auth, signIn } from '@/auth';
+import { TihldeSignInButton } from './tihlde-sign-in-button';
+import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 
 /**
@@ -37,16 +37,7 @@ export default async function Page(props: {
                             Innloggingen ble avbrutt. Prøv på nytt.
                         </p>
                     ) : null}
-                    <form
-                        action={async () => {
-                            'use server';
-                            await signIn('tihlde', { redirectTo: redirectUrl });
-                        }}
-                    >
-                        <Button className="w-full" type="submit">
-                            Logg inn med TIHLDE
-                        </Button>
-                    </form>
+                    <TihldeSignInButton redirectTo={redirectUrl} />
                 </CardContent>
             </Card>
         </div>

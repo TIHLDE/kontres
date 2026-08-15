@@ -75,7 +75,7 @@ export default function ReservationCard({
                 title: 'Status oppdatert',
                 description: 'Reservasjonsstatusen er oppdatert.',
             });
-            utils.reservation.getReservations.invalidate();
+            void utils.reservation.getReservations.invalidate();
             onUpdate?.();
         },
         onError: (error) => {
@@ -93,7 +93,7 @@ export default function ReservationCard({
                 title: 'Reservasjon slettet',
                 description: 'Reservasjonen har blitt slettet.',
             });
-            utils.reservation.getReservations.invalidate();
+            void utils.reservation.getReservations.invalidate();
             onUpdate?.();
         },
         onError: (error) => {

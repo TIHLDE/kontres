@@ -142,7 +142,7 @@ export default function MultiItemReservationDialog({
             groupSlug: data.onBehalfOf,
             description: data.description,
             servesAlcohol: data.servesAlcohol,
-            soberWatch: data.soberWatch || '',
+            soberWatch: data.soberWatch ?? '',
             startTime: data.from,
             endTime: data.to,
             acceptedRules: data.acceptedRules,

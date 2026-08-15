@@ -8,7 +8,7 @@ import {
 } from '../trpc';
 import type Photon from '@/server/photon';
 import { TimeDirection } from '@/app/admin/utils/enums';
-import { ReservationState } from '@prisma/client';
+import { type Prisma, ReservationState } from '@prisma/client';
 import { z } from 'zod';
 
 /** How many profile lookups Photon is asked for at a time. */
@@ -111,7 +111,7 @@ export const reservationRouter = createTRPCRouter({
             }
 
             // Build where clause
-            const whereClause: any = {
+            const whereClause: Prisma.ReservationWhereInput = {
                 ...(input.filters.state && input.filters.state.length > 0
                     ? {
                           status: {
@@ -237,7 +237,7 @@ export const reservationRouter = createTRPCRouter({
             // Attach user data to reservations
             const reservationsWithUsers = reservations.map((reservation) => ({
                 ...reservation,
-                author: userMap.get(reservation.authorId) || null,
+                author: userMap.get(reservation.authorId) ?? null,
             })) as ReservationWithAuthorAndItem[];
 
             return {
@@ -263,10 +263,10 @@ export const reservationRouter = createTRPCRouter({
 
             // Default to 3 months past and 6 months future if no dates provided
             // This prevents loading hundreds/thousands of old reservations
-            const defaultStartDate = startDate || new Date();
+            const defaultStartDate = startDate ?? new Date();
             defaultStartDate.setMonth(defaultStartDate.getMonth() - 3);
             
-            const defaultEndDate = endDate || new Date();
+            const defaultEndDate = endDate ?? new Date();
             defaultEndDate.setMonth(defaultEndDate.getMonth() + 6);
 
             const where = {
@@ -364,7 +364,7 @@ export const reservationRouter = createTRPCRouter({
 
             const reservationsWithUsers = reservations.map((reservation) => ({
                 ...reservation,
-                author: userMap.get(reservation.authorId) || null,
+                author: userMap.get(reservation.authorId) ?? null,
             }));
 
             return { reservations: reservationsWithUsers };

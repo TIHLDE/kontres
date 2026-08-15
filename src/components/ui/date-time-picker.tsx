@@ -23,7 +23,7 @@ export function DateTimePicker({
     ...props
 }: InputProps) {
     const [date, setDate] = React.useState<Date | null>(
-        initialDate ||
+        initialDate ??
             (typeof value !== 'undefined' ? new Date(value as string) : null),
     );
     const handleDateChange = (newDate?: Date) => {
@@ -70,14 +70,14 @@ export function DateTimePicker({
                     {...props}
                     mode="single"
                     locale={nb}
-                    selected={date || new Date()}
+                    selected={date ?? new Date()}
                     onSelect={handleDateChange}
                     initialFocus
                 />
                 <div className="p-3 border-t border-border">
                     <TimePickerSection
                         setDate={handleDateChange}
-                        date={date || new Date()}
+                        date={date ?? new Date()}
                     />
                 </div>
             </PopoverContent>

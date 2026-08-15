@@ -37,8 +37,8 @@ const Expandable = ({
                 'w-full bg-white dark:bg-inherit border border-secondary rounded-md',
                 className,
             )}
-            onOpenChange={onOpenChange || setExpanded}
-            open={open || expanded}
+            onOpenChange={onOpenChange ?? setExpanded}
+            open={open ?? expanded}
         >
             <CollapsibleTrigger asChild>
                 <div

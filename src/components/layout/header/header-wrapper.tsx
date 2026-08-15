@@ -3,7 +3,7 @@
 import { cn } from '../../../lib/utils';
 import { useEffect, useState } from 'react';
 
-interface HeaderWrapperProps extends React.HTMLProps<HTMLHeadElement> {}
+type HeaderWrapperProps = React.HTMLProps<HTMLHeadElement>;
 
 export default function HeaderWrapper({
     children,

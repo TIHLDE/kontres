@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 
-interface BlurBackgroundProps extends React.HTMLProps<HTMLDivElement> {}
+type BlurBackgroundProps = React.HTMLProps<HTMLDivElement>;
 const BlurBackground = ({
     className,
     children,

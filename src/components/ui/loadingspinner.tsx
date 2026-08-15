@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 
-interface LoadingSpinnerProps extends React.SVGProps<SVGSVGElement> {}
+type LoadingSpinnerProps = React.SVGProps<SVGSVGElement>;
 
 export const LoadingSpinner = ({ className }: LoadingSpinnerProps) => {
     return (

@@ -113,7 +113,31 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             if (now - checkedAt < PROFILE_MAX_AGE_SECONDS) return token;
 
             // ===== Hent grupper og adminstatus på nytt en gang i blant =====
-            const tokens = await getValidAccessToken(sessionId);
+            let tokens;
+            try {
+                tokens = await getValidAccessToken(sessionId);
+            } catch (err) {
+                /**
+                 * Fornyelsen når ikke fram til Photon — timeout, DNS, TLS.
+                 *
+                 * Dette må fanges her, ellers kaster `jwt` videre og `auth()`
+                 * med den. Da kræsjer hver serverkomponent som spør etter
+                 * økta — og `/login` er selv en av dem, så medlemmet får en
+                 * hvit «Something went wrong» på selve innloggingssiden og
+                 * kommer seg ikke videre til tihlde.org. Et kort blaff hos
+                 * Photon rakk å låse ute alle som var innlogget fra før.
+                 *
+                 * Merk at det er *fornyelsen* som er den kastende veien: en
+                 * rad som mangler gir `null` og en ren utlogging. Derfor traff
+                 * det nettopp dem som logget inn for over en time siden.
+                 *
+                 * Samme svar som når profiloppdateringen under feiler: behold
+                 * det vi har og prøv igjen ved neste forespørsel.
+                 */
+                console.error('[auth] kunne ikke fornye tokenet', err);
+                return token;
+            }
+
             if (!tokens) return null;
 
             try {

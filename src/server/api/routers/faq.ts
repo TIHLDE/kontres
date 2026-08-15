@@ -4,7 +4,7 @@ import {
     memberProcedure,
 } from '@/server/api/trpc';
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, type Prisma } from '@prisma/client';
 import { z } from 'zod';
 
 const prisma = new PrismaClient();
@@ -94,7 +94,7 @@ export const faqRouter = createTRPCRouter({
                     question: input.question,
                     answer: input.answer,
                     groupSlug: input.groupSlug || '',
-                    imageUrl: input.imageUrl || '',
+                    imageUrl: input.imageUrl ?? '',
                     ...(input.bookableItemIds?.length
                         ? {
                               bookableItems: {
@@ -123,7 +123,7 @@ export const faqRouter = createTRPCRouter({
             }),
         )
         .mutation(async ({ input }) => {
-            const updateData: any = {
+            const updateData: Prisma.FAQUpdateInput = {
                 question: input.question,
                 answer: input.answer,
                 groupSlug: input.groupSlug,

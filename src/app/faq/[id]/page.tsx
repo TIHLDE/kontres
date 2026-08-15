@@ -47,10 +47,8 @@ export default async function Page(props: QuestionPageParams) {
                             <div className="flex gap-1 mt-1">
                                 {data?.bookableItems.map(
                                     (bookableItem, index) => (
-                                        <Link href={`./${''}`}>
-                                            <Badge key={index}>
-                                                {bookableItem.name}
-                                            </Badge>
+                                        <Link key={index} href={`./${''}`}>
+                                            <Badge>{bookableItem.name}</Badge>
                                         </Link>
                                     ),
                                 )}

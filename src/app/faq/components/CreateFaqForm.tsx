@@ -68,9 +68,14 @@ export default function CreateFaqForm({
             form.reset({
                 question: question?.question || '',
                 answer: question?.answer || '',
-                bookableItemIds: question.bookableItemIds || [],
-                group: question?.group || (groups ? groups[0] : ''),
-                imageUrl: question?.imageUrl || '',
+                bookableItemIds: question.bookableItemIds ?? [],
+                // `group` er valgfri i skjemaet og kan stå som tom streng, ikke
+                // bare mangle, så `??` ville sluppet tomheten igjennom.
+                group:
+                    question.group === undefined || question.group === ''
+                        ? (groups?.[0] ?? '')
+                        : question.group,
+                imageUrl: question?.imageUrl ?? '',
             });
         }
     }, [question, groups, form]);
@@ -79,12 +84,19 @@ export default function CreateFaqForm({
         try {
             const imageUrl = '';
 
+            // Samme grunn som i `form.reset` over: feltet kan stå tomt, og da
+            // skal gruppa falle tilbake på den første brukeren leder.
+            const group =
+                formData.group === undefined || formData.group === ''
+                    ? session?.user.leaderOf[0]
+                    : formData.group;
+
             const faqData = {
                 question: formData.question,
                 answer: formData.answer,
                 bookableItemIds: formData.bookableItemIds,
                 author: `${session?.user?.firstName} ${session?.user?.lastName}`,
-                group: formData.group || session?.user.leaderOf[0],
+                group,
                 imageUrl,
             };
 
@@ -96,8 +108,7 @@ export default function CreateFaqForm({
             } else {
                 await createFaq({
                     ...faqData,
-                    groupSlug:
-                        formData.group || session?.user.leaderOf[0] || '',
+                    groupSlug: group ?? '',
                 });
             }
 

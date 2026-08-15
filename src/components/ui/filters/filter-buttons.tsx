@@ -35,7 +35,7 @@ interface FilterButtonsProps extends React.HTMLProps<HTMLDivElement> {
     setTimeDirection: Dispatch<TimeDirection>;
 }
 
-export const stateMap: { [key in ReservationState]: string } = {
+export const stateMap: Record<ReservationState, string> = {
     APPROVED: 'Bekreftet',
     PENDING: 'Avventer',
     REJECTED: 'Avslått',

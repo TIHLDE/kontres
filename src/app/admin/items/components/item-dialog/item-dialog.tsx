@@ -53,7 +53,7 @@ export default function ItemDialog({
     const isPending = isCreatePending || isUpdatePending;
 
     const onSuccess = () => {
-        utils.item.invalidate();
+        void utils.item.invalidate();
         internalSetOpen(false);
         toast({
             title: item ? 'Gjenstand oppdatert' : 'Gjenstand opprettet',

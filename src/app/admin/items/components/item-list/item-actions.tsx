@@ -56,7 +56,7 @@ const ItemActions = ({ item }: { item: GetItemsOutput }) => {
             {
                 onSuccess: () => {
                     setDeleteOpen(false);
-                    queryUtils.item.invalidate();
+                    void queryUtils.item.invalidate();
                     toast({
                         title: 'Gjenstand slettet',
                         description: `${item.name} er fjernet.`,

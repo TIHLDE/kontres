@@ -98,12 +98,12 @@ export default function AdminItemFilters() {
     }, []);
 
     const onFilterChange = (filters: FilterCallbackType[]) => {
-        setFilterQueries({
+        void setFilterQueries({
             groups: filters
-                .filter((f) => f.parentValue === FilterGroups.GROUP)
+                .filter((f) => f.parentValue === (FilterGroups.GROUP as string))
                 .map((f) => f.filter.value),
             items: filters
-                .filter((f) => f.parentValue === FilterGroups.ITEM)
+                .filter((f) => f.parentValue === (FilterGroups.ITEM as string))
                 .map((f) => f.filter.value),
         });
     };

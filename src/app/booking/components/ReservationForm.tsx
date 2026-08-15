@@ -95,7 +95,7 @@ export default function ReservationForm({
             groupSlug,
             description: data.description,
             servesAlcohol: data.servesAlcohol,
-            soberWatch: data.soberWatch || '',
+            soberWatch: data.soberWatch ?? '',
             startTime: data.startTime,
             endTime: data.endTime,
             acceptedRules: data.acceptedRules,

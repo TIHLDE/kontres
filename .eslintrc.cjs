@@ -1,5 +1,6 @@
 /** @type {import("eslint").Linter.LegacyConfig} */
 const config = {
+  "root": true,
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "project": true

@@ -20,6 +20,10 @@ export default async function Page(props: QuestionPageParams) {
     } = params;
 
     const data = await api.faq.getById({ questionId: +id });
+    const groups = await api.group.getAll();
+    const groupName =
+        groups.find((g) => g.groupSlug === data.groupSlug)?.groupName ??
+        data.groupSlug;
     const session = await auth();
     const isAdmin = session?.user.role === 'ADMIN';
 
@@ -41,7 +45,7 @@ export default async function Page(props: QuestionPageParams) {
                             <h3 className="scroll-m-20 text-3xl font-semibold tracking-tight flex flex-col">
                                 {data.question}
                                 <span className="text-xs text-muted-foreground ">
-                                    Postet av {data?.author}, {data?.groupSlug}
+                                    Postet av {data?.author}, {groupName}
                                 </span>
                             </h3>
                             <div className="flex gap-1 mt-1">

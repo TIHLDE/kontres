@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { useGroupName } from '@/hooks/useGroupName';
 import Image from 'next/image';
 
 import { Wine, WineOff } from 'lucide-react';
@@ -26,6 +27,8 @@ export default function ItemDetails({
     itemId,
     imageUrl,
 }: ItemDetailsProps) {
+    const groupName = useGroupName();
+
     return (
         <Card>
             <CardHeader>
@@ -33,7 +36,9 @@ export default function ItemDetails({
                     <div>
                         <CardTitle className="text-2xl">{name}</CardTitle>
                         <div className="flex items-center gap-2 mt-2">
-                            <Badge variant="secondary">{groupSlug}</Badge>
+                            <Badge variant="secondary">
+                                {groupName(groupSlug)}
+                            </Badge>
                             <div className="flex items-center gap-1">
                                 {allowsAlcohol ? (
                                     <>

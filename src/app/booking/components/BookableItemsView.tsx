@@ -135,7 +135,9 @@ export default function BookableItemsView({
                         <TableRow>
                             <TableHead className="w-12"></TableHead>
                             <TableHead>Navn</TableHead>
-                            <TableHead>Gruppe</TableHead>
+                            <TableHead className="w-[1%] whitespace-nowrap">
+                                Gruppe
+                            </TableHead>
                             <TableHead>Beskrivelse</TableHead>
                             <TableHead>Alkohol</TableHead>
                             <TableHead className="text-right">Handlinger</TableHead>
@@ -178,12 +180,12 @@ export default function BookableItemsView({
                                     <TableCell className="font-medium">
                                         {item.name}
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell className="w-[1%] whitespace-nowrap">
                                         <Badge variant="outline">
                                             {groups.find((g) => g.groupSlug === item.groupSlug)?.groupName ?? item.groupSlug}
                                         </Badge>
                                     </TableCell>
-                                    <TableCell className="max-w-md">
+                                    <TableCell className="max-w-sm">
                                         <div className="flex items-center gap-3">
                                             {item.imageUrl && (
                                                 <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded">

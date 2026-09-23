@@ -56,7 +56,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                     ((singleChild as React.ReactElement).type as { displayName?: string })
                         ?.displayName === 'Button'));
         const useDiv = !asChild && childIsButton;
-        const Comp = asChild ? Slot : useDiv ? 'div' : 'button';
+        const Comp: React.ElementType = asChild
+            ? Slot
+            : useDiv
+              ? 'div'
+              : 'button';
 
         const compProps = {
             className: cn(buttonVariants({ variant, size, className })),

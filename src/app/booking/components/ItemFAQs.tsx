@@ -30,7 +30,7 @@ export default function ItemFAQs({ itemId }: ItemFAQsProps) {
             .flatMap((page) => page.faqs)
             .filter((faq) =>
                 faq.bookableItems.some((item) => item.itemId === itemId),
-            ) || [];
+            ) ?? [];
 
     if (isLoading) {
         return (

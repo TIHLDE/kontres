@@ -16,7 +16,7 @@ import { type Dispatch, type SetStateAction } from 'react';
 
 // import { type DetailedItem } from '@/utils/apis/types'; // TODO: Fix this import
 
-type DetailedItem = any; // Temporary type
+type DetailedItem = { id: string; name: string }; // Temporary type
 
 interface MoreProps {
     items?: DetailedItem[];

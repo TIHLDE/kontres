@@ -45,7 +45,7 @@ export async function POST(req: Request) {
         },
     });
 
-    const body = await leptonRes.json().catch(() => ({}));
+    const body: unknown = await leptonRes.json().catch(() => ({}));
 
     if (!leptonRes.ok) {
         console.error('[upload] Lepton error:', leptonRes.status, body);

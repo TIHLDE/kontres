@@ -19,12 +19,11 @@ import { ArrowLeft, Menu, UserRound } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-// import { type User } from '@/types/User'; // TODO: Fix this import
+import { type User } from '@/server/dtos/user';
 
 // import { type DetailedItem } from '@/utils/apis/types'; // TODO: Fix this import
 
-type User = any; // Temporary type
-type DetailedItem = any; // Temporary type
+type DetailedItem = { id: string; name: string }; // Temporary type
 
 interface BottomBarProps extends HTMLMotionProps<'div'> {
     user?: User;
@@ -151,7 +150,7 @@ const BottomBar = ({
             {/* The back button, which is only shown in narrow mode */}
             <Button
                 variant={'ghost'}
-                onClick={router.back}
+                onClick={() => router.back()}
                 id="small-show"
                 className="absolute"
                 aria-label="Gå tilbake"

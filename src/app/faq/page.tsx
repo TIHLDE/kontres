@@ -9,7 +9,9 @@ import Link from 'next/link';
 
 export default async function page() {
     const session = await auth();
-    const isAdmin = session?.user.role === 'ADMIN';
+    const canCreate =
+        session?.user.role === 'ADMIN' ||
+        (session?.user.leaderOf.length ?? 0) > 0;
 
     return (
         <div className="max-w-page mx-auto min-h-screen flex flex-col gap-10 w-full">
@@ -17,7 +19,7 @@ export default async function page() {
                 <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl w-fit">
                     FAQ
                 </h1>
-                {isAdmin && (
+                {canCreate && (
                     <Link href={'./faq/create/'} className="w-fit">
                         <Button className="gap-2.5">
                             <Plus size={16} strokeWidth={2.5} />

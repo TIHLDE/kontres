@@ -1,8 +1,4 @@
-import {
-    createTRPCRouter,
-    groupLeaderProcedure,
-    memberProcedure,
-} from '@/server/api/trpc';
+import { createTRPCRouter, memberProcedure } from '@/server/api/trpc';
 
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
@@ -67,26 +63,4 @@ export const bookableItemRouter = createTRPCRouter({
             },
         });
     }),
-
-    //create new bookable item
-    create: groupLeaderProcedure
-        .input(
-            z.object({
-                name: z.string(),
-                description: z.string(),
-                groupSlug: z.string(),
-                allwosAlcohol: z.boolean(),
-            }),
-        )
-        .mutation(async ({ input }) => {
-            const newBookableItem = await prisma.bookableItem.create({
-                data: {
-                    name: input.name,
-                    description: input.description,
-                    allowsAlcohol: input.allwosAlcohol,
-                    groupSlug: input.groupSlug,
-                },
-            });
-            return newBookableItem;
-        }),
 });

@@ -75,7 +75,7 @@ export default function ReservationCard({
                 title: 'Status oppdatert',
                 description: 'Reservasjonsstatusen er oppdatert.',
             });
-            utils.reservation.getReservations.invalidate();
+            void utils.reservation.getReservations.invalidate();
             onUpdate?.();
         },
         onError: (error) => {
@@ -93,7 +93,7 @@ export default function ReservationCard({
                 title: 'Reservasjon slettet',
                 description: 'Reservasjonen har blitt slettet.',
             });
-            utils.reservation.getReservations.invalidate();
+            void utils.reservation.getReservations.invalidate();
             onUpdate?.();
         },
         onError: (error) => {
@@ -107,7 +107,6 @@ export default function ReservationCard({
 
     const handleStatusChange = (status: ReservationState) => {
         updateStatus.mutate({
-            groupSlug: reservation.groupSlug,
             reservationId: reservation.reservationId,
             status,
         });
@@ -118,7 +117,6 @@ export default function ReservationCard({
             confirm('Er du sikker på at du vil slette denne reservasjonen?')
         ) {
             deleteReservation.mutate({
-                groupSlug: reservation.groupSlug,
                 reservationId: reservation.reservationId,
             });
         }

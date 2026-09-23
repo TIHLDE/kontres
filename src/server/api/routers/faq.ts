@@ -1,10 +1,13 @@
 import {
+    canManageGroup,
     createTRPCRouter,
+    faqLeaderProcedure,
     groupLeaderProcedure,
     memberProcedure,
 } from '@/server/api/trpc';
 
-import { PrismaClient } from '@prisma/client';
+import { TRPCError } from '@trpc/server';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 
 const prisma = new PrismaClient();
@@ -93,8 +96,8 @@ export const faqRouter = createTRPCRouter({
                 data: {
                     question: input.question,
                     answer: input.answer,
-                    groupSlug: input.groupSlug || '',
-                    imageUrl: input.imageUrl || '',
+                    groupSlug: input.groupSlug ?? '',
+                    imageUrl: input.imageUrl ?? '',
                     ...(input.bookableItemIds?.length
                         ? {
                               bookableItems: {
@@ -110,10 +113,9 @@ export const faqRouter = createTRPCRouter({
             return newFAQ;
         }),
 
-    update: memberProcedure
+    update: faqLeaderProcedure
         .input(
             z.object({
-                questionId: z.number(),
                 question: z.string(),
                 answer: z.string(),
                 groupSlug: z.string().optional(),
@@ -122,11 +124,20 @@ export const faqRouter = createTRPCRouter({
                 imageUrl: z.string().optional(),
             }),
         )
-        .mutation(async ({ input }) => {
-            const updateData: any = {
+        .mutation(async ({ ctx, input }) => {
+            // Flytting til en annen gruppe krever at du også styrer målgruppa;
+            // tom verdi lar gruppa stå i fred i stedet for å gjøre FAQ-en eierløs
+            if (
+                input.groupSlug &&
+                !canManageGroup(ctx.session.user, input.groupSlug)
+            ) {
+                throw new TRPCError({ code: 'UNAUTHORIZED' });
+            }
+
+            const updateData: Prisma.FAQUpdateInput = {
                 question: input.question,
                 answer: input.answer,
-                groupSlug: input.groupSlug,
+                ...(input.groupSlug ? { groupSlug: input.groupSlug } : {}),
                 ...(input.bookableItemIds?.length
                     ? {
                           bookableItems: {

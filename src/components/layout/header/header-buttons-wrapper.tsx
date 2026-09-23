@@ -11,6 +11,9 @@ const HeaderButtonsWrapper = async ({
     ...props
 }: React.HTMLProps<HTMLDivElement>) => {
     const session = await auth();
+    const canAdminister =
+        session?.user?.role === 'ADMIN' ||
+        (session?.user?.leaderOf?.length ?? 0) > 0;
 
     return (
         <nav
@@ -29,7 +32,7 @@ const HeaderButtonsWrapper = async ({
             <div className="absolute left-1/2 -translate-x-1/2 flex gap-6 items-center max-md:hidden">
                 <HeaderLink href="/booking">Booking</HeaderLink>
                 <HeaderLink href="/faq">FAQ</HeaderLink>
-                {session?.user?.role === 'ADMIN' && (
+                {canAdminister && (
                     <HeaderLink href="/admin">Admin</HeaderLink>
                 )}
             </div>
@@ -40,7 +43,7 @@ const HeaderButtonsWrapper = async ({
                     <UserArea
                         name={session.user.firstName ?? ''}
                         image={session.user.profilePicture ?? ''}
-                        admin={session.user.role == 'ADMIN'}
+                        admin={canAdminister}
                     />
                 ) : undefined}
             </div>

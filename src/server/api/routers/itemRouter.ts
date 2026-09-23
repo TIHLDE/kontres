@@ -1,6 +1,7 @@
 import {
     createTRPCRouter,
     groupLeaderProcedure,
+    itemLeaderProcedure,
     memberProcedure,
 } from '../trpc';
 import { TRPCError } from '@trpc/server';
@@ -34,12 +35,21 @@ export const itemRouter = createTRPCRouter({
         )
         .query(async ({ ctx, input }) => {
             const limit = input.limit ?? 20;
-            console.log(
-                'ITEMS: ',
-                input.filters?.items,
-                input.filters?.groupIds,
-            );
             const { cursor } = input;
+
+            const managedGroups =
+                ctx.session.user.role === 'ADMIN'
+                    ? undefined
+                    : ctx.session.user.leaderOf;
+
+            const groupSlugs = managedGroups
+                ? input.filters?.groupIds
+                    ? input.filters.groupIds.filter((slug) =>
+                          managedGroups.includes(slug),
+                      )
+                    : managedGroups
+                : input.filters?.groupIds;
+
             const items = await ctx.db.bookableItem.findMany({
                 take: limit + 1,
                 cursor: cursor ? { itemId: cursor } : undefined,
@@ -48,7 +58,7 @@ export const itemRouter = createTRPCRouter({
                         contains: input.filters?.query,
                     },
                     groupSlug: {
-                        in: input.filters?.groupIds,
+                        in: groupSlugs,
                     },
                     itemId: {
                         in: input.filters?.items,
@@ -100,11 +110,9 @@ export const itemRouter = createTRPCRouter({
             return ctx.db.bookableItem.create({ data });
         }),
 
-    updateItem: groupLeaderProcedure
+    updateItem: itemLeaderProcedure
         .input(
             z.object({
-                groupSlug: z.string(),
-                itemId: z.number(),
                 data: z.object({
                     name: z.string().optional(),
                     description: z.string().optional(),
@@ -120,9 +128,8 @@ export const itemRouter = createTRPCRouter({
             });
         }),
 
-    deleteItem: groupLeaderProcedure
-        .input(z.object({ itemId: z.number(), groupSlug: z.string() }))
-        .mutation(async ({ ctx, input: { itemId } }) => {
+    deleteItem: itemLeaderProcedure.mutation(
+        async ({ ctx, input: { itemId } }) => {
             const reservationCount = await ctx.db.reservation.count({
                 where: { bookableItemId: itemId },
             });
@@ -135,5 +142,6 @@ export const itemRouter = createTRPCRouter({
             return ctx.db.bookableItem.delete({
                 where: { itemId },
             });
-        }),
+        },
+    ),
 });

@@ -15,9 +15,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { type Dispatch, type SetStateAction } from 'react';
 
-// import { type User } from '@/types/User'; // TODO: Fix this import
-
-type User = any; // Temporary type
+import { type User } from '@/server/dtos/user';
 
 interface ProfileProps {
     user?: User;

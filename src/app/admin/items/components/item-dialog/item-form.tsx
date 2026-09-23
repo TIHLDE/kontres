@@ -38,6 +38,7 @@ const schema = z.object({
 
 interface ItemFormProps {
     onSubmit: (values: z.infer<typeof schema>) => void;
+    onCancel?: () => void;
     isSubmitting?: boolean;
     defaultValues?: z.infer<typeof schema>;
     formAction?: 'edit' | 'create';
@@ -45,6 +46,7 @@ interface ItemFormProps {
 
 export default function ItemForm({
     onSubmit,
+    onCancel,
     formAction,
     defaultValues,
     isSubmitting,
@@ -55,19 +57,20 @@ export default function ItemForm({
     });
 
     const { data: session } = useSession();
-    const membershipGroups = useMemo(() => session?.user.groups, [session]);
     const { data: allGroups } = api.group.getAll.useQuery();
     const pickableGroups = useMemo(() => {
-        return allGroups
-            ?.filter(
-                (g: { groupSlug: string; groupName: string; type: string }) =>
-                    membershipGroups?.includes(g.groupSlug),
-            )
-            .map(
-                (g: { groupSlug: string; groupName: string; type: string }) =>
-                    g.groupName,
-            );
-    }, [allGroups, membershipGroups]);
+        const groups =
+            session?.user.role === 'ADMIN'
+                ? allGroups
+                : allGroups?.filter((g) =>
+                      session?.user.leaderOf.includes(g.groupSlug),
+                  );
+
+        return groups?.map((g) => ({
+            label: g.groupName,
+            value: g.groupSlug,
+        }));
+    }, [allGroups, session]);
 
     return (
         <div>
@@ -113,18 +116,10 @@ export default function ItemForm({
                                 <FormLabel>Gruppe</FormLabel>
                                 <FormControl>
                                     <GroupSelect
-                                        groups={allGroups?.map(
-                                            (g: {
-                                                groupSlug: string;
-                                                groupName: string;
-                                                type: string;
-                                            }) => ({
-                                                label: g.groupName,
-                                                value: g.groupSlug,
-                                            }),
-                                        )}
+                                        groups={pickableGroups}
                                         onChange={onChange}
                                         value={value}
+                                        disabled={formAction === 'edit'}
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -158,7 +153,9 @@ export default function ItemForm({
             </Form>
           
             <div className="mt-5 flex justify-end gap-5">
-                <Button variant="ghost" type="button">Avbryt</Button>
+                <Button variant="ghost" type="button" onClick={onCancel}>
+                    Avbryt
+                </Button>
                 <Button
                     onClick={form.handleSubmit(onSubmit)}
                     disabled={isSubmitting}

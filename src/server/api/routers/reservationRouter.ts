@@ -3,11 +3,12 @@ import { User } from '@/server/dtos/user';
 
 import {
     createTRPCRouter,
-    groupLeaderProcedure,
     memberProcedure,
+    reservationLeaderProcedure,
 } from '../trpc';
 import { TimeDirection } from '@/app/admin/utils/enums';
-import { ReservationState } from '@prisma/client';
+import { TRPCError } from '@trpc/server';
+import { Prisma, ReservationState } from '@prisma/client';
 import { z } from 'zod';
 
 export const reservationRouter = createTRPCRouter({
@@ -64,8 +65,22 @@ export const reservationRouter = createTRPCRouter({
                 };
             }
 
+            const managedGroups =
+                ctx.session.user.role === 'ADMIN'
+                    ? undefined
+                    : ctx.session.user.leaderOf;
+
             // Build where clause
-            const whereClause: any = {
+            const whereClause: Prisma.ReservationWhereInput = {
+                ...(managedGroups
+                    ? {
+                          bookableItem: {
+                              groupSlug: {
+                                  in: managedGroups,
+                              },
+                          },
+                      }
+                    : {}),
                 ...(input.filters.state && input.filters.state.length > 0
                     ? {
                           status: {
@@ -114,6 +129,9 @@ export const reservationRouter = createTRPCRouter({
                 input.filters.bookableItem.length > 0
                     ? {
                           bookableItem: {
+                              ...(managedGroups
+                                  ? { groupSlug: { in: managedGroups } }
+                                  : {}),
                               itemId: {
                                   in: input.filters.bookableItem,
                               },
@@ -222,7 +240,7 @@ export const reservationRouter = createTRPCRouter({
             // Attach user data to reservations
             const reservationsWithUsers = reservations.map((reservation) => ({
                 ...reservation,
-                author: userMap.get(reservation.authorId) || null,
+                author: userMap.get(reservation.authorId) ?? null,
             })) as ReservationWithAuthorAndItem[];
 
             return {
@@ -248,10 +266,10 @@ export const reservationRouter = createTRPCRouter({
 
             // Default to 3 months past and 6 months future if no dates provided
             // This prevents loading hundreds/thousands of old reservations
-            const defaultStartDate = startDate || new Date();
+            const defaultStartDate = startDate ?? new Date();
             defaultStartDate.setMonth(defaultStartDate.getMonth() - 3);
             
-            const defaultEndDate = endDate || new Date();
+            const defaultEndDate = endDate ?? new Date();
             defaultEndDate.setMonth(defaultEndDate.getMonth() + 6);
 
             const where = {
@@ -379,7 +397,7 @@ export const reservationRouter = createTRPCRouter({
 
             const reservationsWithUsers = reservations.map((reservation) => ({
                 ...reservation,
-                author: userMap.get(reservation.authorId) || null,
+                author: userMap.get(reservation.authorId) ?? null,
             }));
 
             return { reservations: reservationsWithUsers };
@@ -412,6 +430,14 @@ export const reservationRouter = createTRPCRouter({
             }),
         )
         .mutation(async ({ input, ctx }) => {
+            if (!ctx.session.user.groups.includes(input.groupSlug)) {
+                throw new TRPCError({
+                    code: 'FORBIDDEN',
+                    message:
+                        'Du kan bare reservere på vegne av en gruppe du er medlem av.',
+                });
+            }
+
             // Validate that if serving alcohol, all items must allow alcohol
             if (input.servesAlcohol) {
                 const items = await ctx.db.bookableItem.findMany({
@@ -533,10 +559,9 @@ export const reservationRouter = createTRPCRouter({
                 count: reservations.length,
             };
         }),
-    updateStatus: groupLeaderProcedure
+    updateStatus: reservationLeaderProcedure
         .input(
             z.object({
-                reservationId: z.number(),
                 status: z.enum(['PENDING', 'APPROVED', 'REJECTED']),
             }),
         )
@@ -562,11 +587,11 @@ export const reservationRouter = createTRPCRouter({
                 },
             });
         }),
-    delete: groupLeaderProcedure
-        .input(z.object({ reservationId: z.number() }))
-        .mutation(({ input: { reservationId }, ctx }) => {
+    delete: reservationLeaderProcedure.mutation(
+        ({ input: { reservationId }, ctx }) => {
             return ctx.db.reservation.delete({
                 where: { reservationId },
             });
-        }),
+        },
+    ),
 });

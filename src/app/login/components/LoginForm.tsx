@@ -49,6 +49,7 @@ export function LoginForm({ redirectUrl }: LoginFormProps) {
                 router.refresh();
             } else {
                 form.setError('root', {
+                    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- tom feilmelding fra NextAuth skal også gi fallback
                     message: result.error || 'Noe gikk galt. Prøv igjen senere.',
                 });
             }

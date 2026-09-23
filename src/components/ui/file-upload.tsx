@@ -77,7 +77,7 @@ export const FileUpload = ({
                     type="file"
                     accept={accept}
                     onChange={(e) =>
-                        handleFileChange(Array.from(e.target.files || []))
+                        handleFileChange(Array.from(e.target.files ?? []))
                     }
                     className="hidden"
                 />

@@ -24,7 +24,7 @@ export const getTIHLDEGroups = async (
         throw new Error('Failed to fetch memberships');
     }
 
-    return await response.json();
+    return (await response.json()) as GroupResponse[];
 };
 
 type GroupResponse = {

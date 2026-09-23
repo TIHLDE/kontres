@@ -124,7 +124,7 @@ const ReservationForm = ({
             startTime: data.from,
             endTime: data.to,
             servesAlcohol: data.servesAlcohol,
-            soberWatch: data.soberWatch || '',
+            soberWatch: data.soberWatch ?? '',
             acceptedRules: data.acceptedRules,
         });
     }

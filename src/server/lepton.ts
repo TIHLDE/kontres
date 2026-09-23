@@ -18,7 +18,7 @@ const getUserById = async (userId: string, requestToken: string) => {
     });
 };
 
-const getReservations = async (requestToken: string) => {
+const getReservations = async (requestToken: string): Promise<unknown> => {
     const response = await fetch(`${env.LEPTON_API_URL}/${URLS.RESERVATIONS}/`, {
         headers: {
             ...getHeaders(undefined, requestToken),

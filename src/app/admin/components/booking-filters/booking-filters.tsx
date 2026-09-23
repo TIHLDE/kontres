@@ -47,8 +47,6 @@ export default function AdminBookingFilters() {
         time: timeDirectionParser.withDefault([]),
     });
 
-    useEffect(() => {}, [existingItems]);
-
     const availableGroups = useMemo(() => {
         if (!existingGroups || !userGroupSlugs) return [];
 
@@ -73,7 +71,7 @@ export default function AdminBookingFilters() {
                                     }) => g.groupSlug === group,
                                 )?.groupName ?? 'Ukjent gruppe',
                             value: group,
-                            icon: GroupIcons['group'],
+                            icon: GroupIcons.group,
                         },
                     }) as FilterCallbackType,
             ),
@@ -137,7 +135,7 @@ export default function AdminBookingFilters() {
     }, []);
 
     const onFilterChange = (filters: FilterCallbackType[]) => {
-        setFilterQueries({
+        void setFilterQueries({
             groups: filters
                 .filter((f) => f.parentValue === 'group')
                 .map((f) => f.filter.value),

@@ -21,7 +21,10 @@ export default async function Page(props: QuestionPageParams) {
 
     const data = await api.faq.getById({ questionId: +id });
     const session = await auth();
-    const isAdmin = session?.user.role === 'ADMIN';
+    const canEdit =
+        session?.user.role === 'ADMIN' ||
+        (!!data.groupSlug &&
+            (session?.user.leaderOf.includes(data.groupSlug) ?? false));
 
     return (
         <div>
@@ -47,10 +50,8 @@ export default async function Page(props: QuestionPageParams) {
                             <div className="flex gap-1 mt-1">
                                 {data?.bookableItems.map(
                                     (bookableItem, index) => (
-                                        <Link href={`./${''}`}>
-                                            <Badge key={index}>
-                                                {bookableItem.name}
-                                            </Badge>
+                                        <Link key={index} href={`./${''}`}>
+                                            <Badge>{bookableItem.name}</Badge>
                                         </Link>
                                     ),
                                 )}
@@ -59,7 +60,7 @@ export default async function Page(props: QuestionPageParams) {
                         </div>
                     </CardContent>
                 </Card>
-                {isAdmin && (
+                {canEdit && (
                     <Link href={`./edit/${id}`} className="w-fit">
                         <Button className="flex gap-2.5 items-center">
                             <PencilIcon size={16} />

@@ -22,12 +22,14 @@ export const middleware = auth((req) => {
         );
         return NextResponse.redirect(redirectUrl);
     }
-    const isAdmin = req.auth?.user?.role === 'ADMIN';
+    const user = req.auth?.user;
+    const canAdminister =
+        user?.role === 'ADMIN' || (user?.leaderOf?.length ?? 0) > 0;
 
     console.log('[MIDDLEWARE] User is logged in');
 
-    if (!isAdmin) {
-        console.log('[MIDDLEWARE] User is not an admin');
+    if (!canAdminister) {
+        console.log('[MIDDLEWARE] User does not administer any group');
         if (path.startsWith('/admin')) {
             return NextResponse.redirect(new URL('/', req.url));
         }

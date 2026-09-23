@@ -50,13 +50,12 @@ const ItemActions = ({ item }: { item: GetItemsOutput }) => {
     const onDelete = () => {
         deleteItem(
             {
-                groupSlug: item.groupSlug,
                 itemId: item.itemId,
             },
             {
                 onSuccess: () => {
                     setDeleteOpen(false);
-                    queryUtils.item.invalidate();
+                    void queryUtils.item.invalidate();
                     toast({
                         title: 'Gjenstand slettet',
                         description: `${item.name} er fjernet.`,

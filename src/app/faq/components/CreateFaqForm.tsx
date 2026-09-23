@@ -46,10 +46,10 @@ export default function CreateFaqForm({
 
     const { data: session } = useSession();
     const { data: allGroups } = api.group.getAll.useQuery();
-    const [token, groups, admin] = useMemo(() => {
+    // FAQ-mutasjonene krever lederverv, ikke bare medlemskap
+    const [leaderOfGroups, admin] = useMemo(() => {
         return [
-            session?.user.TIHLDE_Token,
-            session?.user.groups,
+            session?.user.leaderOf,
             session?.user.role === 'ADMIN',
         ];
     }, [session]);
@@ -62,33 +62,39 @@ export default function CreateFaqForm({
             question: '',
             answer: '',
             bookableItemIds: [],
-            group: groups ? groups[0] : '',
+            group: leaderOfGroups ? leaderOfGroups[0] : '',
             imageUrl: '',
         },
     });
 
     useEffect(() => {
         if (question) {
+            // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- tom gruppe skal falle tilbake til første gruppa du leder
+            const group = question.group || (leaderOfGroups ? leaderOfGroups[0] : '');
+
             form.reset({
                 question: question?.question || '',
                 answer: question?.answer || '',
-                bookableItemIds: question.bookableItemIds || [],
-                group: question?.group || (groups ? groups[0] : ''),
-                imageUrl: question?.imageUrl || '',
+                bookableItemIds: question.bookableItemIds ?? [],
+                group,
+                imageUrl: question?.imageUrl ?? '',
             });
         }
-    }, [question, groups, form]);
+    }, [question, leaderOfGroups, form]);
 
     async function onSubmit(formData: FaqFormValueTypes) {
         try {
             const imageUrl = '';
+
+            // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- ingen gruppe valgt i skjemaet skal falle tilbake til gruppa brukeren leder
+            const group = formData.group || session?.user.leaderOf[0];
 
             const faqData = {
                 question: formData.question,
                 answer: formData.answer,
                 bookableItemIds: formData.bookableItemIds,
                 author: `${session?.user?.firstName} ${session?.user?.lastName}`,
-                group: formData.group || session?.user.leaderOf[0],
+                group,
                 imageUrl,
             };
 
@@ -100,8 +106,7 @@ export default function CreateFaqForm({
             } else {
                 await createFaq({
                     ...faqData,
-                    groupSlug:
-                        formData.group || session?.user.leaderOf[0] || '',
+                    groupSlug: group ?? '',
                 });
             }
 
@@ -193,7 +198,7 @@ export default function CreateFaqForm({
                             </FormItem>
                         )}
                     ></FormField>
-                    {(groups ? groups.length > 1 : false) && (
+                    {(leaderOfGroups ? leaderOfGroups.length > 1 : false) && (
                         <FormField
                             control={form.control}
                             name="group"
@@ -225,7 +230,7 @@ export default function CreateFaqForm({
                                                                   groupName: string;
                                                                   type: string;
                                                               }) =>
-                                                                  groups?.includes(
+                                                                  leaderOfGroups?.includes(
                                                                       g.groupSlug,
                                                                   ),
                                                           )

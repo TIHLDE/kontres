@@ -26,7 +26,7 @@ export default function BookableItemsSelect({
     form,
 }: {
     field: { value: number[] | undefined };
-    form: any;
+    form: { setValue: (name: 'bookableItemIds', value: number[]) => void };
 }) {
     const { data: bookableItems, isLoading } =
         api.bookableItem.getAll.useQuery();
@@ -73,12 +73,12 @@ export default function BookableItemsSelect({
                                     value={item.name.toString()}
                                     key={item.name}
                                     onSelect={() => {
-                                        let newItems = field.value ?? [];
-                                        let index = newItems.findIndex(
-                                            (v: number) => v == item.itemId,
+                                        const newItems = field.value ?? [];
+                                        const index = newItems.findIndex(
+                                            (v: number) => v === item.itemId,
                                         );
 
-                                        if (index != -1) {
+                                        if (index !== -1) {
                                             newItems.splice(index, 1);
                                         } else {
                                             newItems.push(item.itemId);

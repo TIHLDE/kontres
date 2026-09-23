@@ -36,6 +36,40 @@ const StatusSortOrder = {
     [ReservationState.REJECTED]: 3,
 };
 
+function ReservationDetailsCell({
+    reservation,
+    groups,
+}: {
+    reservation: ReservationWithAuthorAndItem;
+    groups: GroupInfo[];
+}) {
+    const [open, setOpen] = useState(false);
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                >
+                    <Eye className="h-4 w-4" />
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                    <DialogTitle>Reservasjonsdetaljer</DialogTitle>
+                </DialogHeader>
+                <ReservationCard
+                    reservation={reservation}
+                    groups={groups}
+                    onUpdate={() => setOpen(false)}
+                />
+            </DialogContent>
+        </Dialog>
+    );
+}
+
 export const getColumns = (
     groups: GroupInfo[],
 ): ColumnDef<ReservationWithAuthorAndItem>[] => [
@@ -113,7 +147,7 @@ export const getColumns = (
                         title: 'Status oppdatert',
                         description: 'Reservasjonsstatusen er oppdatert.',
                     });
-                    utils.reservation.getReservations.invalidate();
+                    void utils.reservation.getReservations.invalidate();
                 },
                 onError: () => {
                     toast({
@@ -134,7 +168,6 @@ export const getColumns = (
                             value={ReservationState.APPROVED}
                             onClick={() =>
                                 handleReservation.mutate({
-                                    groupSlug: reservation.groupSlug,
                                     reservationId: reservation.reservationId,
                                     status: ReservationState.APPROVED,
                                 })
@@ -146,7 +179,6 @@ export const getColumns = (
                             value={ReservationState.PENDING}
                             onClick={() =>
                                 handleReservation.mutate({
-                                    groupSlug: reservation.groupSlug,
                                     reservationId: reservation.reservationId,
                                     status: ReservationState.PENDING,
                                 })
@@ -158,7 +190,6 @@ export const getColumns = (
                             value={ReservationState.REJECTED}
                             onClick={() =>
                                 handleReservation.mutate({
-                                    groupSlug: reservation.groupSlug,
                                     reservationId: reservation.reservationId,
                                     status: ReservationState.REJECTED,
                                 })
@@ -174,34 +205,12 @@ export const getColumns = (
     {
         id: 'view',
         header: 'Detaljer',
-        cell: ({ row }) => {
-            const reservation = row.original;
-            const [open, setOpen] = useState(false);
-
-            return (
-                <Dialog open={open} onOpenChange={setOpen}>
-                    <DialogTrigger asChild>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                        >
-                            <Eye className="h-4 w-4" />
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-                        <DialogHeader>
-                            <DialogTitle>Reservasjonsdetaljer</DialogTitle>
-                        </DialogHeader>
-                        <ReservationCard
-                            reservation={reservation}
-                            groups={groups}
-                            onUpdate={() => setOpen(false)}
-                        />
-                    </DialogContent>
-                </Dialog>
-            );
-        },
+        cell: ({ row }) => (
+            <ReservationDetailsCell
+                reservation={row.original}
+                groups={groups}
+            />
+        ),
     },
     {
         id: 'delete',
@@ -217,7 +226,7 @@ export const getColumns = (
                         description: 'Reservasjonen har blitt slettet.',
                     });
                     // Invalidate and refetch reservations
-                    utils.reservation.getReservations.invalidate();
+                    void utils.reservation.getReservations.invalidate();
                 },
                 onError: () => {
                     toast({
@@ -235,7 +244,6 @@ export const getColumns = (
                     )
                 ) {
                     deleteReservation.mutate({
-                        groupSlug: reservation.groupSlug,
                         reservationId: reservation.reservationId,
                     });
                 }

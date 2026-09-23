@@ -1,6 +1,7 @@
 export type CalendarProps = {
     events: CalendarEvent[];
     mode: Mode;
+    setMode?: (mode: Mode) => void;
     date: Date;
     calendarIconIsToday?: boolean;
 };

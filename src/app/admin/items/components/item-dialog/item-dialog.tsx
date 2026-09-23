@@ -53,7 +53,7 @@ export default function ItemDialog({
     const isPending = isCreatePending || isUpdatePending;
 
     const onSuccess = () => {
-        utils.item.invalidate();
+        void utils.item.invalidate();
         internalSetOpen(false);
         toast({
             title: item ? 'Gjenstand oppdatert' : 'Gjenstand opprettet',
@@ -76,18 +76,15 @@ export default function ItemDialog({
         groupSlug: string;
         description: string;
         allowsAlcohol: boolean;
-        imageUrl?: string;
     }) => {
         if (item) {
             updateItem(
                 {
                     itemId: item.itemId,
-                    groupSlug: values.groupSlug,
                     data: {
                         name: values.name,
                         description: values.description,
                         allowsAlcohol: values.allowsAlcohol,
-                        imageUrl: values.imageUrl,
                     },
                 },
                 { onSuccess, onError },
@@ -99,7 +96,6 @@ export default function ItemDialog({
                     description: values.description,
                     allowsAlcohol: values.allowsAlcohol,
                     groupSlug: values.groupSlug,
-                    imageUrl: values.imageUrl,
                 },
                 { onSuccess, onError },
             );
@@ -152,18 +148,12 @@ export default function ItemDialog({
                         group: item?.groupSlug ?? '',
                         allowsAlcohol: item?.allowsAlcohol ?? false,
                     }}
-                    existingImageUrl={
-                        item && 'imageUrl' in item
-                            ? (item as { imageUrl?: string | null }).imageUrl
-                            : undefined
-                    }
                     formAction={action}
                     onCancel={() => setOpen?.(false)}
                     onSubmit={(values) =>
                         onSubmit({
                             ...values,
                             groupSlug: values.group,
-                            imageUrl: values.imageUrl,
                         })
                     }
                     isSubmitting={isPending}

@@ -46,12 +46,16 @@ export default function CreateFaqForm({
 
     const { data: session } = useSession();
     const { data: allGroups } = api.group.getAll.useQuery();
-    // FAQ-mutasjonene krever lederverv, ikke bare medlemskap
-    const [leaderOfGroups, admin] = useMemo(() => {
+    // FAQ-mutasjonene krever lederverv, ikke bare medlemskap. Index/HS leder
+    // sjelden en gruppe, så de faller tilbake på en gruppe de er medlem av.
+    const [leaderOfGroups, admin, fallbackGroup] = useMemo(() => {
+        const isAdmin = session?.user.role === 'ADMIN';
         return [
             session?.user.leaderOf,
-            session?.user.role === 'ADMIN',
-        ];
+            isAdmin,
+            session?.user.leaderOf[0] ??
+                (isAdmin ? session?.user.groups[0] : undefined),
+        ] as const;
     }, [session]);
 
     const { toast } = useToast();
@@ -62,7 +66,7 @@ export default function CreateFaqForm({
             question: '',
             answer: '',
             bookableItemIds: [],
-            group: leaderOfGroups ? leaderOfGroups[0] : '',
+            group: fallbackGroup ?? '',
             imageUrl: '',
         },
     });
@@ -77,22 +81,21 @@ export default function CreateFaqForm({
                 // bare mangle, så `??` ville sluppet tomheten igjennom.
                 group:
                     question.group === undefined || question.group === ''
-                        ? (leaderOfGroups?.[0] ?? '')
+                        ? (fallbackGroup ?? '')
                         : question.group,
                 imageUrl: question?.imageUrl ?? '',
             });
         }
-    }, [question, leaderOfGroups, form]);
+    }, [question, fallbackGroup, form]);
 
     async function onSubmit(formData: FaqFormValueTypes) {
         try {
             const imageUrl = '';
 
-            // Samme grunn som i `form.reset` over: feltet kan stå tomt, og da
-            // skal gruppa falle tilbake på den første brukeren leder.
+            // Samme grunn som i `form.reset` over: feltet kan stå tomt.
             const group =
                 formData.group === undefined || formData.group === ''
-                    ? session?.user.leaderOf[0]
+                    ? fallbackGroup
                     : formData.group;
 
             const faqData = {
@@ -204,7 +207,7 @@ export default function CreateFaqForm({
                             </FormItem>
                         )}
                     ></FormField>
-                    {(leaderOfGroups ? leaderOfGroups.length > 1 : false) && (
+                    {(admin || (leaderOfGroups?.length ?? 0) > 1) && (
                         <FormField
                             control={form.control}
                             name="group"

@@ -85,7 +85,7 @@ export function DateTimeField({
 
     return (
         <div className={cn('flex flex-wrap gap-3', className)}>
-            <Popover open={open} onOpenChange={setOpen}>
+            <Popover modal open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                     <Button
                         type="button"

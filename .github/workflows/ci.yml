@@ -1,0 +1,55 @@
+name: "typecheck -> lint -> build"
+
+# Sjekkene som ikke fantes fra før. `deploy.yml` fyrer bare på push til
+# master, så ingenting kjørte på en pull request — derfor sto master rød på
+# seks typefeil og 67 lint-feil uten at noen så det.
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    # `next.config.js` importerer `src/env.js`, så både lint og build laster
+    # env-skjemaet og faller på manglende hemmeligheter. Sjekkene trenger dem
+    # ikke — de skal bare vite at koden kompilerer. Samme flagg som Dockerfile.
+    env:
+      SKIP_ENV_VALIDATION: 1
+
+    steps:
+      - uses: actions/checkout@v6
+
+      # Leser versjonen fra `packageManager` i package.json, så den ikke kan
+      # komme ut av synk slik den gjorde i Dockerfile.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      # `postinstall` kjører `prisma generate`, som typecheck og build trenger.
+      - run: pnpm install --frozen-lockfile
+
+      # Alle tre kjører selv om en av dem feiler, så én kjøring viser hele
+      # bildet i stedet for én feil om gangen.
+      - name: Typecheck
+        if: ${{ !cancelled() }}
+        run: pnpm typecheck
+
+      - name: Lint
+        if: ${{ !cancelled() }}
+        run: pnpm lint
+
+      - name: Build
+        if: ${{ !cancelled() }}
+        run: pnpm build

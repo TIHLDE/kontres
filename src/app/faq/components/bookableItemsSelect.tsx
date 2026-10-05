@@ -16,17 +16,20 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover';
 
+import { type FaqFormValueTypes } from './faqSchema';
+
 import { cn } from '@/lib/utils';
 import { api } from '@/trpc/react';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { useMemo } from 'react';
+import { type UseFormReturn } from 'react-hook-form';
 
 export default function BookableItemsSelect({
     field,
     form,
 }: {
     field: { value: number[] | undefined };
-    form: { setValue: (name: 'bookableItemIds', value: number[]) => void };
+    form: UseFormReturn<FaqFormValueTypes>;
 }) {
     const { data: bookableItems, isLoading } =
         api.bookableItem.getAll.useQuery();
@@ -75,10 +78,10 @@ export default function BookableItemsSelect({
                                     onSelect={() => {
                                         const newItems = field.value ?? [];
                                         const index = newItems.findIndex(
-                                            (v: number) => v === item.itemId,
+                                            (v: number) => v == item.itemId,
                                         );
 
-                                        if (index !== -1) {
+                                        if (index != -1) {
                                             newItems.splice(index, 1);
                                         } else {
                                             newItems.push(item.itemId);

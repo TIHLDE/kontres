@@ -69,14 +69,16 @@ export default function CreateFaqForm({
 
     useEffect(() => {
         if (question) {
-            // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- tom gruppe skal falle tilbake til første gruppa du leder
-            const group = question.group || (leaderOfGroups ? leaderOfGroups[0] : '');
-
             form.reset({
                 question: question?.question || '',
                 answer: question?.answer || '',
                 bookableItemIds: question.bookableItemIds ?? [],
-                group,
+                // `group` er valgfri i skjemaet og kan stå som tom streng, ikke
+                // bare mangle, så `??` ville sluppet tomheten igjennom.
+                group:
+                    question.group === undefined || question.group === ''
+                        ? (leaderOfGroups?.[0] ?? '')
+                        : question.group,
                 imageUrl: question?.imageUrl ?? '',
             });
         }
@@ -86,8 +88,12 @@ export default function CreateFaqForm({
         try {
             const imageUrl = '';
 
-            // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- ingen gruppe valgt i skjemaet skal falle tilbake til gruppa brukeren leder
-            const group = formData.group || session?.user.leaderOf[0];
+            // Samme grunn som i `form.reset` over: feltet kan stå tomt, og da
+            // skal gruppa falle tilbake på den første brukeren leder.
+            const group =
+                formData.group === undefined || formData.group === ''
+                    ? session?.user.leaderOf[0]
+                    : formData.group;
 
             const faqData = {
                 question: formData.question,

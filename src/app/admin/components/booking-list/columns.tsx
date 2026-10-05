@@ -36,6 +36,13 @@ const StatusSortOrder = {
     [ReservationState.REJECTED]: 3,
 };
 
+/**
+ * Detaljknappen med dialogen sin.
+ *
+ * Egen komponent fordi `useState` hører hjemme i en komponent, ikke i en
+ * `cell`-funksjon. Tabellen kaller `cell` under rendring, så det virket, men
+ * React har ingen garanti for at kallrekkefølgen holder seg stabil der.
+ */
 function ReservationDetailsCell({
     reservation,
     groups,

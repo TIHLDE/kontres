@@ -38,7 +38,7 @@ const Expandable = ({
                 className,
             )}
             onOpenChange={onOpenChange ?? setExpanded}
-            open={open === true || expanded}
+            open={open ?? expanded}
         >
             <CollapsibleTrigger asChild>
                 <div

@@ -23,6 +23,8 @@ const CollapsibleContent = forwardRef<
         {...props}
     />
 ));
+CollapsibleContent.displayName =
+    CollapsiblePrimitive.CollapsibleContent.displayName;
 
 CollapsibleContent.displayName =
     CollapsiblePrimitive.CollapsibleContent.displayName;

@@ -1,15 +1,9 @@
-name: "CI - Trigger build and push"
+name: "build -> push -> deploy"
 on:
   push:
     branches: [master]
     paths:
-      - ./**
-      - .github/workflows/ci_prod.yml
-  pull_request:
-    branches: [master]
-    paths:
-      - ./**
-      - .github/workflows/ci_prod.yml
+      - '**'
   workflow_dispatch:
 
 concurrency:
@@ -30,3 +24,5 @@ jobs:
     needs: build
     if: github.event_name != 'pull_request'
     uses: TIHLDE/tihlde-workflows/.github/workflows/_notify_deploy.yml@main
+    secrets:
+      DEPLOY_RECEIVER_TOKEN: ${{ secrets.DEPLOY_RECEIVER_TOKEN }}

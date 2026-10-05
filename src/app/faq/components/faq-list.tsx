@@ -5,11 +5,13 @@ import { LoadingSpinner } from '@/components/ui/loadingspinner';
 
 import FaqCard from './faq-card';
 import FAQListSkeleton from './faq-list-skeleton';
+import { useGroupName } from '@/hooks/useGroupName';
 import { api } from '@/trpc/react';
 import { ArrowDown } from 'lucide-react';
 import Link from 'next/link';
 
 const FaqList = () => {
+    const groupName = useGroupName();
     const {
         data,
         fetchNextPage,
@@ -39,7 +41,7 @@ const FaqList = () => {
                                 title={object.question}
                                 bookableItems={object.bookableItems}
                                 author={object.author}
-                                group={object.groupSlug ?? ''}
+                                group={groupName(object.groupSlug ?? '')}
                             />
                         </Link>
                     )),

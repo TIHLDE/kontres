@@ -56,6 +56,12 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                     ((singleChild as React.ReactElement).type as { displayName?: string })
                         ?.displayName === 'Button'));
         const useDiv = !asChild && childIsButton;
+        /**
+         * `React.ElementType` fordi elementet velges først når vi vet hva
+         * barnet er. Uten den sjekker TypeScript propene mot alle tre — og
+         * `ref`-en, som forwardRef gir oss for `HTMLButtonElement`, passer
+         * ikke `div`-grenen.
+         */
         const Comp: React.ElementType = asChild
             ? Slot
             : useDiv
@@ -64,7 +70,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
         const compProps = {
             className: cn(buttonVariants({ variant, size, className })),
-            ref: ref as React.Ref<HTMLDivElement>,
+            ref,
             ...(useDiv && {
                 role: 'button',
                 tabIndex: 0,

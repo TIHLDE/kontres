@@ -46,6 +46,32 @@ model Reservation {
     approvedById    String?
 }
 
+/**
+ * Photon-tokenene som hører til en innlogget økt.
+ *
+ * De kunne ligget i JWT-en sammen med resten av økta, men Photon roterer
+ * refresh-tokens og regner andre gangs bruk som tyveri — hele kjeden slettes og
+ * brukeren kastes ut. To forespørsler som kommer samtidig bærer med seg den
+ * samme informasjonskapselen, altså det samme refresh-tokenet, så det ville
+ * skjedd omtrent hver time når tokenet utløper. Her ligger de ett sted, og en
+ * fornyelse er synlig for alle forespørsler med én gang.
+ *
+ * JWT-en inneholder bare `id` herfra. Access-tokenet nås aldri av nettleseren.
+ */
+model PhotonSession {
+    id           String   @id @default(uuid())
+    /// Photons bruker-id (`sub`), som profiloppslag gjøres med.
+    subject      String
+    accessToken  String
+    refreshToken String?
+    /// Når access-tokenet utløper.
+    expiresAt    DateTime
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+    @@index([updatedAt])
+}
+
 model FAQ {
     questionId      Int @id @default(autoincrement())
     question        String

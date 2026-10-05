@@ -3,6 +3,7 @@
 import { LoadingSpinner } from '@/components/ui/loadingspinner';
 
 import FaqCard from '@/app/faq/components/faq-card';
+import { useGroupName } from '@/hooks/useGroupName';
 import { api } from '@/trpc/react';
 import Link from 'next/link';
 
@@ -11,6 +12,7 @@ interface ItemFAQsProps {
 }
 
 export default function ItemFAQs({ itemId }: ItemFAQsProps) {
+    const groupName = useGroupName();
     const {
         data: faqs,
         isLoading,
@@ -79,7 +81,7 @@ export default function ItemFAQs({ itemId }: ItemFAQsProps) {
                             description={faq.answer}
                             bookableItems={faq.bookableItems}
                             author={faq.author}
-                            group={faq.groupSlug ?? ''}
+                            group={groupName(faq.groupSlug ?? '')}
                         />
                     </Link>
                 ))}

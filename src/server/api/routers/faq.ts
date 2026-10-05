@@ -7,7 +7,7 @@ import {
 } from '@/server/api/trpc';
 
 import { TRPCError } from '@trpc/server';
-import { Prisma, PrismaClient } from '@prisma/client';
+import { PrismaClient, type Prisma } from '@prisma/client';
 import { z } from 'zod';
 
 const prisma = new PrismaClient();

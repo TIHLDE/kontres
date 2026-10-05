@@ -175,7 +175,6 @@ export const getColumns = (
                             value={ReservationState.APPROVED}
                             onClick={() =>
                                 handleReservation.mutate({
-                                    groupSlug: reservation.groupSlug,
                                     reservationId: reservation.reservationId,
                                     status: ReservationState.APPROVED,
                                 })
@@ -187,7 +186,6 @@ export const getColumns = (
                             value={ReservationState.PENDING}
                             onClick={() =>
                                 handleReservation.mutate({
-                                    groupSlug: reservation.groupSlug,
                                     reservationId: reservation.reservationId,
                                     status: ReservationState.PENDING,
                                 })
@@ -199,7 +197,6 @@ export const getColumns = (
                             value={ReservationState.REJECTED}
                             onClick={() =>
                                 handleReservation.mutate({
-                                    groupSlug: reservation.groupSlug,
                                     reservationId: reservation.reservationId,
                                     status: ReservationState.REJECTED,
                                 })
@@ -254,7 +251,6 @@ export const getColumns = (
                     )
                 ) {
                     deleteReservation.mutate({
-                        groupSlug: reservation.groupSlug,
                         reservationId: reservation.reservationId,
                     });
                 }

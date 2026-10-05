@@ -81,7 +81,6 @@ export default function ItemDialog({
             updateItem(
                 {
                     itemId: item.itemId,
-                    groupSlug: values.groupSlug,
                     data: {
                         name: values.name,
                         description: values.description,

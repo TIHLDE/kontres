@@ -50,7 +50,6 @@ const ItemActions = ({ item }: { item: GetItemsOutput }) => {
     const onDelete = () => {
         deleteItem(
             {
-                groupSlug: item.groupSlug,
                 itemId: item.itemId,
             },
             {

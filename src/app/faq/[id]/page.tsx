@@ -25,7 +25,10 @@ export default async function Page(props: QuestionPageParams) {
         groups.find((g) => g.groupSlug === data.groupSlug)?.groupName ??
         data.groupSlug;
     const session = await auth();
-    const isAdmin = session?.user.role === 'ADMIN';
+    const canEdit =
+        session?.user.role === 'ADMIN' ||
+        (!!data.groupSlug &&
+            (session?.user.leaderOf.includes(data.groupSlug) ?? false));
 
     return (
         <div>
@@ -61,7 +64,7 @@ export default async function Page(props: QuestionPageParams) {
                         </div>
                     </CardContent>
                 </Card>
-                {isAdmin && (
+                {canEdit && (
                     <Link href={`./edit/${id}`} className="w-fit">
                         <Button className="flex gap-2.5 items-center">
                             <PencilIcon size={16} />

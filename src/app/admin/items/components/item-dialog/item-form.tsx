@@ -57,19 +57,20 @@ export default function ItemForm({
     });
 
     const { data: session } = useSession();
-    const membershipGroups = useMemo(() => session?.user.groups, [session]);
     const { data: allGroups } = api.group.getAll.useQuery();
     const pickableGroups = useMemo(() => {
-        return allGroups
-            ?.filter(
-                (g: { groupSlug: string; groupName: string; type: string }) =>
-                    membershipGroups?.includes(g.groupSlug),
-            )
-            .map(
-                (g: { groupSlug: string; groupName: string; type: string }) =>
-                    g.groupName,
-            );
-    }, [allGroups, membershipGroups]);
+        const groups =
+            session?.user.role === 'ADMIN'
+                ? allGroups
+                : allGroups?.filter((g) =>
+                      session?.user.leaderOf.includes(g.groupSlug),
+                  );
+
+        return groups?.map((g) => ({
+            label: g.groupName,
+            value: g.groupSlug,
+        }));
+    }, [allGroups, session]);
 
     return (
         <div>
@@ -115,18 +116,10 @@ export default function ItemForm({
                                 <FormLabel>Gruppe</FormLabel>
                                 <FormControl>
                                     <GroupSelect
-                                        groups={allGroups?.map(
-                                            (g: {
-                                                groupSlug: string;
-                                                groupName: string;
-                                                type: string;
-                                            }) => ({
-                                                label: g.groupName,
-                                                value: g.groupSlug,
-                                            }),
-                                        )}
+                                        groups={pickableGroups}
                                         onChange={onChange}
                                         value={value}
+                                        disabled={formAction === 'edit'}
                                     />
                                 </FormControl>
                                 <FormMessage />

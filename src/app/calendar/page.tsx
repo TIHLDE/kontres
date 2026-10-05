@@ -113,12 +113,7 @@ export default function CalendarPage() {
                 </div>
             </div>
             <div>
-                <Calendar
-                    date={date}
-                    events={events}
-                    mode={mode}
-                    setMode={setMode}
-                />
+                <Calendar date={date} events={events} mode={mode} />
             </div>
         </div>
     );

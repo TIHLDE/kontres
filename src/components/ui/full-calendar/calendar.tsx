@@ -5,7 +5,6 @@ import type { CalendarProps } from './calendar-types';
 export default function Calendar({
     events,
     mode,
-    setMode,
     date,
     calendarIconIsToday = true,
 }: CalendarProps) {
@@ -13,7 +12,6 @@ export default function Calendar({
         <CalendarProvider
             events={events}
             mode={mode}
-            setMode={setMode}
             date={date}
             calendarIconIsToday={calendarIconIsToday}
         >

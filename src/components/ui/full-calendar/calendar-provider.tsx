@@ -9,14 +9,12 @@ const CalendarContext = createContext<CalendarContextType | undefined>(
 export default function CalendarProvider({
     events,
     mode,
-    setMode,
     date,
     calendarIconIsToday = true,
     children,
 }: {
     events: CalendarEvent[];
     mode: Mode;
-    setMode?: (mode: Mode) => void;
     date: Date;
     calendarIconIsToday: boolean;
     children: React.ReactNode;
@@ -26,7 +24,6 @@ export default function CalendarProvider({
             value={{
                 events,
                 mode,
-                setMode,
                 date,
                 calendarIconIsToday,
             }}

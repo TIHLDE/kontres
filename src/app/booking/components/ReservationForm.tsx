@@ -1,5 +1,6 @@
 'use client';
 
+import SoberWatchConfirmation from '@/components/ui/sober-watch-confirmation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DateTimeField } from '@/components/ui/date-time-field';
@@ -27,11 +28,15 @@ const reservationSchema = z.object({
         message: 'Description must be at least 10 characters',
     }),
     servesAlcohol: z.boolean(),
-    soberWatch: z.string().optional(),
+    acceptedSoberWatchChange: z.boolean(),
     acceptedRules: z.boolean().refine((val) => val === true, {
         message: 'You must accept the rules',
     }),
-});
+})
+    .refine((data) => !data.servesAlcohol || data.acceptedSoberWatchChange, {
+        message: 'Du må bekrefte at bytte av edruvakt skal avklares med NTNU i god tid.',
+        path: ['acceptedSoberWatchChange'],
+    });
 
 type ReservationFormData = z.infer<typeof reservationSchema>;
 
@@ -58,6 +63,7 @@ export default function ReservationForm({
         resolver: zodResolver(reservationSchema),
         defaultValues: {
             servesAlcohol: false,
+            acceptedSoberWatchChange: false,
             acceptedRules: false,
         },
     });
@@ -95,7 +101,7 @@ export default function ReservationForm({
             groupSlug,
             description: data.description,
             servesAlcohol: data.servesAlcohol,
-            soberWatch: data.soberWatch ?? '',
+            acceptedSoberWatchChange: data.acceptedSoberWatchChange,
             startTime: data.startTime,
             endTime: data.endTime,
             acceptedRules: data.acceptedRules,
@@ -265,16 +271,19 @@ export default function ReservationForm({
                             </div>
 
                             {servesAlcohol && (
-                                <div className="space-y-2">
-                                    <Label htmlFor="soberWatch">
-                                        Sober Watch Person
-                                    </Label>
-                                    <Input
-                                        id="soberWatch"
-                                        placeholder="Name of sober watch person"
-                                        {...register('soberWatch')}
-                                    />
-                                </div>
+                                <SoberWatchConfirmation
+                                    checked={watch('acceptedSoberWatchChange')}
+                                    onCheckedChange={(checked) =>
+                                        setValue(
+                                            'acceptedSoberWatchChange',
+                                            checked,
+                                            { shouldValidate: true },
+                                        )
+                                    }
+                                    error={
+                                        errors.acceptedSoberWatchChange?.message
+                                    }
+                                />
                             )}
                         </div>
                     )}

@@ -3,8 +3,11 @@
 import { Button, type ButtonProps } from '@/components/ui/button';
 
 import { cn } from '@/lib/utils';
-import { type Reservation } from '@/server/dtos/reservations';
-import type { BookableItem, ReservationState } from '@prisma/client';
+import type {
+    BookableItem,
+    Reservation,
+    ReservationState,
+} from '@prisma/client';
 import { type ColumnDef } from '@tanstack/react-table';
 import { format } from 'date-fns';
 import { nb } from 'date-fns/locale/nb';

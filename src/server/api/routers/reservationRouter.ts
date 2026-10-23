@@ -404,12 +404,7 @@ export const reservationRouter = createTRPCRouter({
             z.object({
                 servesAlcohol: z.boolean(),
                 description: z.string(),
-                soberWatch: z.string(),
-                soberWatchImage: z
-                    .string()
-                    .regex(/^data:image\/(webp|jpeg);base64,/)
-                    .max(1_000_000)
-                    .optional(),
+                acceptedSoberWatchChange: z.boolean(),
                 startTime: z.date(),
                 endTime: z.date(),
                 itemIds: z.array(z.number()).min(1, {
@@ -417,6 +412,9 @@ export const reservationRouter = createTRPCRouter({
                 }),
                 groupSlug: z.string(),
                 acceptedRules: z.boolean(),
+            }).refine((data) => !data.servesAlcohol || data.acceptedSoberWatchChange, {
+                message: 'Du må bekrefte at bytte av edruvakt skal avklares med NTNU i god tid.',
+                path: ['acceptedSoberWatchChange'],
             }),
         )
         .mutation(async ({ input, ctx }) => {
@@ -537,10 +535,6 @@ export const reservationRouter = createTRPCRouter({
                             description: input.description,
                             endTime: input.endTime,
                             startTime: input.startTime,
-                            soberWatch: input.soberWatch,
-                            soberWatchImage: input.servesAlcohol
-                                ? input.soberWatchImage
-                                : undefined,
                             servesAlcohol: input.servesAlcohol,
                         },
                     }),
@@ -552,15 +546,6 @@ export const reservationRouter = createTRPCRouter({
                 count: reservations.length,
             };
         }),
-    getSoberWatchImage: reservationLeaderProcedure.query(
-        async ({ input: { reservationId }, ctx }) => {
-            const reservation = await ctx.db.reservation.findUnique({
-                where: { reservationId },
-                select: { soberWatchImage: true },
-            });
-            return reservation?.soberWatchImage ?? null;
-        },
-    ),
     updateStatus: reservationLeaderProcedure
         .input(
             z.object({
@@ -576,7 +561,6 @@ export const reservationRouter = createTRPCRouter({
                     data: {
                         status: input.status,
                         approvedById: ctx.session.user.id,
-                        soberWatchImage: null,
                     },
                 });
             }
@@ -587,9 +571,6 @@ export const reservationRouter = createTRPCRouter({
                 },
                 data: {
                     status: input.status,
-                    ...(input.status === 'REJECTED' && {
-                        soberWatchImage: null,
-                    }),
                 },
             });
         }),

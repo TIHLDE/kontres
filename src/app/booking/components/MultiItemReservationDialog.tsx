@@ -1,5 +1,6 @@
 'use client';
 
+import SoberWatchConfirmation from '@/components/ui/sober-watch-confirmation';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -12,19 +13,16 @@ import { DateTimeField } from '@/components/ui/date-time-field';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/components/ui/use-toast';
 import { LoadingSpinner } from '@/components/ui/loadingspinner';
 import GroupSelect from '@/components/ui/group-select';
-import SoberWatchImageInput from '@/components/ui/sober-watch-image-input';
-import SoberWatchNotice from '@/components/ui/sober-watch-notice';
 
 import { api } from '@/trpc/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useMemo, useEffect, useState } from 'react';
+import { useMemo, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -42,8 +40,7 @@ const formSchema = z
             .min(10, { message: 'Beskrivelse må være minst 10 tegn' })
             .max(500, { message: 'Beskrivelse kan ikke være mer enn 500 tegn' }),
         servesAlcohol: z.boolean().default(false),
-        soberWatch: z.string().optional(),
-        soberWatchImage: z.string().optional(),
+        acceptedSoberWatchChange: z.boolean(),
         acceptedRules: z.boolean().refine((val) => val === true, {
             message: 'Du må godta vilkårene for å fortsette',
         }),
@@ -51,6 +48,10 @@ const formSchema = z
     .refine((data) => data.to > data.from, {
         message: 'Sluttdato må være etter startdato',
         path: ['to'],
+    })
+    .refine((data) => !data.servesAlcohol || data.acceptedSoberWatchChange, {
+        message: 'Du må bekrefte at bytte av edruvakt skal avklares med NTNU i god tid.',
+        path: ['acceptedSoberWatchChange'],
     });
 
 interface MultiItemReservationDialogProps {
@@ -73,7 +74,6 @@ export default function MultiItemReservationDialog({
     onSuccess,
 }: MultiItemReservationDialogProps) {
     const router = useRouter();
-    const [showNotice, setShowNotice] = useState(false);
 
     // Fetch user's group slugs and all available groups
     const { data: userGroupSlugs } = api.group.getUserGroups.useQuery();
@@ -107,7 +107,7 @@ export default function MultiItemReservationDialog({
             onBehalfOf: '',
             description: '',
             servesAlcohol: false,
-            soberWatch: '',
+            acceptedSoberWatchChange: false,
             acceptedRules: false,
         },
     });
@@ -146,10 +146,7 @@ export default function MultiItemReservationDialog({
             groupSlug: data.onBehalfOf,
             description: data.description,
             servesAlcohol: data.servesAlcohol,
-            soberWatch: data.soberWatch ?? '',
-            soberWatchImage: data.servesAlcohol
-                ? data.soberWatchImage
-                : undefined,
+            acceptedSoberWatchChange: data.acceptedSoberWatchChange,
             startTime: data.from,
             endTime: data.to,
             acceptedRules: data.acceptedRules,
@@ -167,8 +164,7 @@ export default function MultiItemReservationDialog({
                 onBehalfOf: '',
                 description: '',
                 servesAlcohol: false,
-                soberWatch: '',
-                soberWatchImage: undefined,
+                acceptedSoberWatchChange: false,
                 acceptedRules: false,
             });
             // Clear all form errors when dialog closes
@@ -306,14 +302,13 @@ export default function MultiItemReservationDialog({
                                 <Checkbox
                                     id="servesAlcohol"
                                     checked={servesAlcohol}
-                                    onCheckedChange={(checked) => {
+                                    onCheckedChange={(checked) =>
                                         form.setValue('servesAlcohol', Boolean(checked), {
                                             shouldValidate: true,
                                             shouldDirty: true,
                                             shouldTouch: true,
-                                        });
-                                        if (checked) setShowNotice(true);
-                                    }}
+                                        })
+                                    }
                                 />
                                 <div className="space-y-1 leading-none flex-1">
                                     <Label htmlFor="servesAlcohol" className="cursor-pointer">
@@ -342,31 +337,26 @@ export default function MultiItemReservationDialog({
                             </div>
 
                             {servesAlcohol && (
-                                <div className="space-y-2">
-                                    <Label htmlFor="soberWatch">
-                                        Ansvarlig for edruoppsyn
-                                    </Label>
-                                    <Input
-                                        id="soberWatch"
-                                        placeholder="Navn på person med edruoppsyn"
-                                        {...form.register('soberWatch')}
-                                    />
-                                </div>
-                            )}
-
-                            {servesAlcohol && (
-                                <SoberWatchImageInput
-                                    value={form.watch('soberWatchImage')}
-                                    onChange={(value) =>
-                                        form.setValue('soberWatchImage', value)
+                                <SoberWatchConfirmation
+                                    checked={form.watch(
+                                        'acceptedSoberWatchChange',
+                                    )}
+                                    onCheckedChange={(checked) =>
+                                        form.setValue(
+                                            'acceptedSoberWatchChange',
+                                            checked,
+                                            {
+                                                shouldValidate: true,
+                                                shouldDirty: true,
+                                            },
+                                        )
+                                    }
+                                    error={
+                                        form.formState.errors
+                                            .acceptedSoberWatchChange?.message
                                     }
                                 />
                             )}
-
-                            <SoberWatchNotice
-                                open={showNotice}
-                                onClose={() => setShowNotice(false)}
-                            />
                         </div>
                     )}
 

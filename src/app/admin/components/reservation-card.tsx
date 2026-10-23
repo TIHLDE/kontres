@@ -32,7 +32,6 @@ import {
 } from 'lucide-react';
 import { api } from '@/trpc/react';
 import { toast } from '@/components/ui/use-toast';
-import { useState } from 'react';
 
 const StatusConfig = {
     [ReservationState.APPROVED]: {
@@ -67,28 +66,15 @@ export default function ReservationCard({
     onUpdate,
 }: ReservationCardProps) {
     const utils = api.useUtils();
-    const [showSoberWatchImage, setShowSoberWatchImage] = useState(false);
-    const soberWatchImage = api.reservation.getSoberWatchImage.useQuery(
-        { reservationId: reservation.reservationId },
-        { enabled: showSoberWatchImage },
-    );
     const statusConfig = StatusConfig[reservation.status];
     const StatusIcon = statusConfig.icon;
 
     const updateStatus = api.reservation.updateStatus.useMutation({
-        onSuccess: (_data, { status }) => {
+        onSuccess: () => {
             toast({
                 title: 'Status oppdatert',
                 description: 'Reservasjonsstatusen er oppdatert.',
             });
-            // The server deletes the photo on approve/reject.
-            if (status === 'APPROVED' || status === 'REJECTED') {
-                setShowSoberWatchImage(false);
-                utils.reservation.getSoberWatchImage.setData(
-                    { reservationId: reservation.reservationId },
-                    null,
-                );
-            }
             void utils.reservation.getReservations.invalidate();
             onUpdate?.();
         },
@@ -269,55 +255,18 @@ export default function ReservationCard({
                         </div>
 
                         {/* Sober Watch */}
-                        {reservation.servesAlcohol && (
+                        {reservation.servesAlcohol &&
+                            reservation.soberWatch && (
                                 <div className="flex items-center gap-2">
                                     <Shield className="h-4 w-4 text-blue-600" />
                                     <span className="text-sm">
                                         Edru vakt:{' '}
                                         <span className="font-medium">
-                                            {reservation.soberWatch?.trim()
-                                                ? reservation.soberWatch
-                                                : 'Ikke oppgitt'}
+                                            {reservation.soberWatch}
                                         </span>
                                     </span>
-                                    <Button
-                                        variant="link"
-                                        size="sm"
-                                        className="h-auto p-0"
-                                        onClick={() =>
-                                            setShowSoberWatchImage((v) => !v)
-                                        }
-                                    >
-                                        {showSoberWatchImage
-                                            ? 'Skjul bilde'
-                                            : 'Vis bilde'}
-                                    </Button>
                                 </div>
                             )}
-                        {showSoberWatchImage && (
-                            <div className="pl-6">
-                                {soberWatchImage.isLoading ? (
-                                    <span className="text-sm text-muted-foreground">
-                                        Laster bilde...
-                                    </span>
-                                ) : soberWatchImage.isError ? (
-                                    <span className="text-sm text-destructive">
-                                        Kunne ikke laste bilde
-                                    </span>
-                                ) : soberWatchImage.data ? (
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    <img
-                                        src={soberWatchImage.data}
-                                        alt={`Bilde av edruvakt ${reservation.soberWatch ?? ''}`}
-                                        className="max-h-64 rounded-md border"
-                                    />
-                                ) : (
-                                    <span className="text-sm text-muted-foreground">
-                                        Ingen bilde lastet opp
-                                    </span>
-                                )}
-                            </div>
-                        )}
 
                         {/* Rules Accepted */}
                         <div className="flex items-center gap-2">

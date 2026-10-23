@@ -300,6 +300,10 @@ export default function ReservationCard({
                                     <span className="text-sm text-muted-foreground">
                                         Laster bilde...
                                     </span>
+                                ) : soberWatchImage.isError ? (
+                                    <span className="text-sm text-destructive">
+                                        Kunne ikke laste bilde
+                                    </span>
                                 ) : soberWatchImage.data ? (
                                     // eslint-disable-next-line @next/next/no-img-element
                                     <img

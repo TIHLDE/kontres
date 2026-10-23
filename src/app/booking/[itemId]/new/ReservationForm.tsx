@@ -1,5 +1,6 @@
 'use client';
 
+import SoberWatchConfirmation from '@/components/ui/sober-watch-confirmation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -16,8 +17,6 @@ import {
 import GroupSelect from '@/components/ui/group-select';
 import { LoadingSpinner } from '@/components/ui/loadingspinner';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
 
 import { api } from '@/trpc/react';
@@ -43,7 +42,7 @@ const formSchema = z
             .min(10, { message: 'Beskrivelse må være minst 10 tegn' })
             .max(500, { message: 'Beskrivelse kan ikke være mer enn 500 tegn' }),
         servesAlcohol: z.boolean().default(false),
-        soberWatch: z.string().optional(),
+        acceptedSoberWatchChange: z.boolean(),
         acceptedRules: z.boolean().refine((val) => val === true, {
             message: 'Du må godta vilkårene for å fortsette',
         }),
@@ -51,6 +50,10 @@ const formSchema = z
     .refine((data) => data.to > data.from, {
         message: 'Sluttdato må være etter startdato',
         path: ['to'],
+    })
+    .refine((data) => !data.servesAlcohol || data.acceptedSoberWatchChange, {
+        message: 'Du må bekrefte at bytte av edruvakt skal avklares med NTNU i god tid.',
+        path: ['acceptedSoberWatchChange'],
     });
 
 interface ReservationFormProps {
@@ -92,7 +95,7 @@ const ReservationForm = ({
             onBehalfOf: '',
             description: '',
             servesAlcohol: false,
-            soberWatch: '',
+            acceptedSoberWatchChange: false,
             acceptedRules: false,
         },
     });
@@ -124,7 +127,7 @@ const ReservationForm = ({
             startTime: data.from,
             endTime: data.to,
             servesAlcohol: data.servesAlcohol,
-            soberWatch: data.soberWatch ?? '',
+            acceptedSoberWatchChange: data.acceptedSoberWatchChange,
             acceptedRules: data.acceptedRules,
         });
     }
@@ -309,21 +312,25 @@ const ReservationForm = ({
                                     />
 
                                     {servesAlcohol && (
-                                        <FormField
-                                            control={form.control}
-                                            name="soberWatch"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Ansvarlig for edruoppsyn</FormLabel>
-                                                    <FormControl>
-                                                        <Input
-                                                            {...field}
-                                                            placeholder="Navn på person med edruoppsyn"
-                                                        />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
+                                        <SoberWatchConfirmation
+                                            checked={form.watch(
+                                                'acceptedSoberWatchChange',
                                             )}
+                                            onCheckedChange={(checked) =>
+                                                form.setValue(
+                                                    'acceptedSoberWatchChange',
+                                                    checked,
+                                                    {
+                                                        shouldValidate: true,
+                                                        shouldDirty: true,
+                                                    },
+                                                )
+                                            }
+                                            error={
+                                                form.formState.errors
+                                                    .acceptedSoberWatchChange
+                                                    ?.message
+                                            }
                                         />
                                     )}
                                 </div>

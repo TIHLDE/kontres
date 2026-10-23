@@ -404,7 +404,7 @@ export const reservationRouter = createTRPCRouter({
             z.object({
                 servesAlcohol: z.boolean(),
                 description: z.string(),
-                soberWatch: z.string(),
+                acceptedSoberWatchChange: z.boolean(),
                 startTime: z.date(),
                 endTime: z.date(),
                 itemIds: z.array(z.number()).min(1, {
@@ -412,6 +412,9 @@ export const reservationRouter = createTRPCRouter({
                 }),
                 groupSlug: z.string(),
                 acceptedRules: z.boolean(),
+            }).refine((data) => !data.servesAlcohol || data.acceptedSoberWatchChange, {
+                message: 'Du må bekrefte at bytte av edruvakt skal avklares med NTNU i god tid.',
+                path: ['acceptedSoberWatchChange'],
             }),
         )
         .mutation(async ({ input, ctx }) => {
@@ -532,7 +535,6 @@ export const reservationRouter = createTRPCRouter({
                             description: input.description,
                             endTime: input.endTime,
                             startTime: input.startTime,
-                            soberWatch: input.soberWatch,
                             servesAlcohol: input.servesAlcohol,
                         },
                     }),

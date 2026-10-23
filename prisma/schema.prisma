@@ -43,6 +43,7 @@ model Reservation {
     groupSlug       String
     servesAlcohol   Boolean
     soberWatch      String?
+    soberWatchImage String?      @db.Text
     approvedById    String?
 }
 

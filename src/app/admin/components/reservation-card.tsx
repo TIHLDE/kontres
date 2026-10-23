@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import { api } from '@/trpc/react';
 import { toast } from '@/components/ui/use-toast';
+import { useState } from 'react';
 
 const StatusConfig = {
     [ReservationState.APPROVED]: {
@@ -66,6 +67,11 @@ export default function ReservationCard({
     onUpdate,
 }: ReservationCardProps) {
     const utils = api.useUtils();
+    const [showSoberWatchImage, setShowSoberWatchImage] = useState(false);
+    const soberWatchImage = api.reservation.getSoberWatchImage.useQuery(
+        { reservationId: reservation.reservationId },
+        { enabled: showSoberWatchImage },
+    );
     const statusConfig = StatusConfig[reservation.status];
     const StatusIcon = statusConfig.icon;
 
@@ -265,8 +271,40 @@ export default function ReservationCard({
                                             {reservation.soberWatch}
                                         </span>
                                     </span>
+                                    <Button
+                                        variant="link"
+                                        size="sm"
+                                        className="h-auto p-0"
+                                        onClick={() =>
+                                            setShowSoberWatchImage((v) => !v)
+                                        }
+                                    >
+                                        {showSoberWatchImage
+                                            ? 'Skjul bilde'
+                                            : 'Vis bilde'}
+                                    </Button>
                                 </div>
                             )}
+                        {showSoberWatchImage && (
+                            <div className="pl-6">
+                                {soberWatchImage.isLoading ? (
+                                    <span className="text-sm text-muted-foreground">
+                                        Laster bilde...
+                                    </span>
+                                ) : soberWatchImage.data ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img
+                                        src={soberWatchImage.data}
+                                        alt={`Bilde av edruvakt ${reservation.soberWatch ?? ''}`}
+                                        className="max-h-64 rounded-md border"
+                                    />
+                                ) : (
+                                    <span className="text-sm text-muted-foreground">
+                                        Ingen bilde lastet opp
+                                    </span>
+                                )}
+                            </div>
+                        )}
 
                         {/* Rules Accepted */}
                         <div className="flex items-center gap-2">

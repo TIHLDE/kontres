@@ -15,6 +15,8 @@ import {
 } from '@/components/ui/form';
 import GroupSelect from '@/components/ui/group-select';
 import { LoadingSpinner } from '@/components/ui/loadingspinner';
+import SoberWatchImageInput from '@/components/ui/sober-watch-image-input';
+import SoberWatchNotice from '@/components/ui/sober-watch-notice';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,7 +27,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { CalendarIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -44,6 +46,7 @@ const formSchema = z
             .max(500, { message: 'Beskrivelse kan ikke være mer enn 500 tegn' }),
         servesAlcohol: z.boolean().default(false),
         soberWatch: z.string().optional(),
+        soberWatchImage: z.string().optional(),
         acceptedRules: z.boolean().refine((val) => val === true, {
             message: 'Du må godta vilkårene for å fortsette',
         }),
@@ -65,6 +68,7 @@ const ReservationForm = ({
     allowsAlcohol = false,
 }: ReservationFormProps) => {
     const router = useRouter();
+    const [showNotice, setShowNotice] = useState(false);
     
     // Fetch user's group slugs and all available groups
     const { data: userGroupSlugs } = api.group.getUserGroups.useQuery();
@@ -125,6 +129,9 @@ const ReservationForm = ({
             endTime: data.to,
             servesAlcohol: data.servesAlcohol,
             soberWatch: data.soberWatch ?? '',
+            soberWatchImage: data.servesAlcohol
+                ? data.soberWatchImage
+                : undefined,
             acceptedRules: data.acceptedRules,
         });
     }
@@ -268,15 +275,17 @@ const ReservationForm = ({
                                                         {...rest}
                                                         checked={!!value}
                                                         onCheckedChange={(e) => {
+                                                            const checked = Boolean(e.valueOf());
                                                             form.setValue(
                                                                 'servesAlcohol',
-                                                                Boolean(e.valueOf()),
+                                                                checked,
                                                                 {
                                                                     shouldValidate: true,
                                                                     shouldDirty: true,
                                                                     shouldTouch: true,
                                                                 },
                                                             );
+                                                            if (checked) setShowNotice(true);
                                                         }}
                                                     />
                                                 </FormControl>
@@ -326,6 +335,26 @@ const ReservationForm = ({
                                             )}
                                         />
                                     )}
+
+                                    {servesAlcohol && (
+                                        <FormField
+                                            control={form.control}
+                                            name="soberWatchImage"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <SoberWatchImageInput
+                                                        value={field.value}
+                                                        onChange={field.onChange}
+                                                    />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    )}
+
+                                    <SoberWatchNotice
+                                        open={showNotice}
+                                        onClose={() => setShowNotice(false)}
+                                    />
                                 </div>
                             )}
 

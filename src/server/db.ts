@@ -7,6 +7,8 @@ const createPrismaClient = () =>
             env.NODE_ENV === 'development'
                 ? ['query', 'error', 'warn']
                 : ['error'],
+        // Only reservation leaders may read the sober watch photo.
+        omit: { reservation: { soberWatchImage: true } },
     });
 
 const globalForPrisma = globalThis as unknown as {

@@ -76,11 +76,19 @@ export default function ReservationCard({
     const StatusIcon = statusConfig.icon;
 
     const updateStatus = api.reservation.updateStatus.useMutation({
-        onSuccess: () => {
+        onSuccess: (_data, { status }) => {
             toast({
                 title: 'Status oppdatert',
                 description: 'Reservasjonsstatusen er oppdatert.',
             });
+            // The server deletes the photo on approve/reject.
+            if (status === 'APPROVED' || status === 'REJECTED') {
+                setShowSoberWatchImage(false);
+                utils.reservation.getSoberWatchImage.setData(
+                    { reservationId: reservation.reservationId },
+                    null,
+                );
+            }
             void utils.reservation.getReservations.invalidate();
             onUpdate?.();
         },
@@ -261,14 +269,14 @@ export default function ReservationCard({
                         </div>
 
                         {/* Sober Watch */}
-                        {reservation.servesAlcohol &&
-                            reservation.soberWatch && (
+                        {reservation.servesAlcohol && (
                                 <div className="flex items-center gap-2">
                                     <Shield className="h-4 w-4 text-blue-600" />
                                     <span className="text-sm">
                                         Edru vakt:{' '}
                                         <span className="font-medium">
-                                            {reservation.soberWatch}
+                                            {reservation.soberWatch ||
+                                                'Ikke oppgitt'}
                                         </span>
                                     </span>
                                     <Button

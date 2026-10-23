@@ -275,8 +275,9 @@ export default function ReservationCard({
                                     <span className="text-sm">
                                         Edru vakt:{' '}
                                         <span className="font-medium">
-                                            {reservation.soberWatch ||
-                                                'Ikke oppgitt'}
+                                            {reservation.soberWatch?.trim()
+                                                ? reservation.soberWatch
+                                                : 'Ikke oppgitt'}
                                         </span>
                                     </span>
                                     <Button
